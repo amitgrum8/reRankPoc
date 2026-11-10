@@ -1,0 +1,23 @@
+[project]
+name = "rerank-poc"
+version = "0.1.0"
+description = "Rerank PoC: LightGCN candidates + EXP3RT like/dislike personas + a persona reranker"
+requires-python = ">=3.9"
+dependencies = [
+    "torch==2.8.0",
+    "numpy==2.0.2",
+    "openai>=1.60",
+]
+
+[tool.uv]
+package = false            # just install the dependencies; this folder is scripts, not a package
+
+# torch from the CUDA 12.8 wheel index (NVIDIA GPU). On a machine without a GPU: uv pip install torch==2.8.0
+# --index-url https://download.pytorch.org/whl/cpu
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true

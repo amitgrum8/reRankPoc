@@ -1,0 +1,4 @@
+# torch is installed separately (CUDA build), see README.md:
+#   pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
+numpy==2.0.2
+openai>=1.60

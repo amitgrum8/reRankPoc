@@ -1,0 +1,10 @@
+runs/
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.log
+# old Kaggle plumbing, not used: the PoC runs on a GPU desktop
+kaggle/
+data/*
+!data/rr_input/

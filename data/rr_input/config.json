@@ -1,0 +1,18 @@
+{
+ "since": "2014-01-01",
+ "cutoff": "2018-01-01",
+ "min_user": 5,
+ "min_item": 5,
+ "min_history": 10,
+ "n_users": 30,
+ "max_history": 20,
+ "max_targets": 20,
+ "min_median_words": 15,
+ "seed": 42,
+ "n_graph_users": 97028,
+ "n_graph_items": 49312,
+ "n_interactions": 1138215,
+ "n_eligible_test_users": 2939,
+ "n_test_users": 30,
+ "made": "2026-11-07T14:37:37"
+}
