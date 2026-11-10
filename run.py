@@ -118,12 +118,25 @@ class Ollama:
         return model in names or f"{model}:latest" in names
 
     def pull(self, model):
+        """Downloads the model through the server's API, printing progress every 15 s (a stopped download
+        resumes where it was)."""
         say(f"pulling {model} (once; about 13 GB)")
-        p = subprocess.run([self.exe, "pull", model], env=self.env, capture_output=True, text=True,
-                           encoding="utf-8", errors="replace")
-        print(p.stdout[-400:], p.stderr[-400:])
-        if p.returncode != 0:
-            sys.exit("pull failed")
+        req = urllib.request.Request(self.url + "/api/pull", data=json.dumps({"name": model, "stream": True}).encode(),
+                                     headers={"Content-Type": "application/json"})
+        t0, last = time.time(), 0.0
+        with urllib.request.urlopen(req, timeout=600) as r:
+            for raw in r:
+                d = json.loads(raw)
+                if "error" in d:
+                    sys.exit(f"pull failed: {d['error']}")
+                if d.get("total") and time.time() - last >= 15:
+                    done, total = d.get("completed", 0), d["total"]
+                    print(f"  {d.get('status', '')}: {done / 2**30:.2f} / {total / 2**30:.2f} GB "
+                          f"({100 * done / total:.0f}%)  {(time.time() - t0) / 60:.1f} min", flush=True)
+                    last = time.time()
+        print(f"pulled in {(time.time() - t0) / 60:.1f} min", flush=True)
+        if not self.has_model(model):
+            sys.exit("the pull finished but the model is not listed; see the ollama log")
 
     def stop(self):
         if self.proc is None:
