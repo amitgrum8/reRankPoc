@@ -29,6 +29,25 @@ HERE = Path(__file__).resolve().parent
 T_START = time.time()
 
 
+class Tee:
+    """stdout that also appends to a file."""
+    def __init__(self, path):
+        self.console, self.file = sys.__stdout__, open(path, "a", encoding="utf-8")
+
+    def write(self, text):
+        try:
+            self.console.write(text)
+        except UnicodeEncodeError:
+            enc = self.console.encoding or "ascii"
+            self.console.write(text.encode(enc, "replace").decode(enc))
+        self.file.write(text)
+        self.file.flush()
+
+    def flush(self):
+        self.console.flush()
+        self.file.flush()
+
+
 def say(msg):
     print(f"\n=== {msg}  [{(time.time() - T_START) / 60:.1f} min]", flush=True)
 
@@ -217,6 +236,7 @@ def main():
     args.input, args.cache = Path(args.input), Path(args.cache)
     out = Path(args.out) if args.out else HERE / "runs" / time.strftime("%Y-%m-%d_%H%M")
     out.mkdir(parents=True, exist_ok=True)
+    sys.stdout = Tee(out / "run.log")       # everything printed also lands in the run folder
     print(f"run folder {out} | users {args.users} | LightGCN up to {args.lgcn_minutes:g} min | model {args.model} "
           f"| reasoning {args.reasoning}" + (" | MOCK" if args.mock else ""))
     check_env(args)
