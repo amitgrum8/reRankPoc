@@ -79,7 +79,7 @@ def main():
     ap.add_argument("--out", required=True)
     ap.add_argument("--base-url", default="http://127.0.0.1:11434/v1")
     ap.add_argument("--model", default="gpt-oss:20b")
-    ap.add_argument("--reasoning-effort", default="high")
+    ap.add_argument("--reasoning-effort", default="low")
     ap.add_argument("--max-tokens", type=int, default=12000)
     ap.add_argument("--no-json-mode", action="store_true")
     ap.add_argument("--users", default="all", help="'all' or the number of test users to run (first n)")

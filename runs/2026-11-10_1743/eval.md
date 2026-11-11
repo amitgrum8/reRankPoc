@@ -1,15 +1,15 @@
-| metric | lightgcn |
-|---|---|
-| users | 11 |
-| liked_n | 84 |
-| liked_HR@10 | 0.024 |
-| liked_NDCG@10 | 0.010 |
-| liked_mean_rank | 95.250 |
-| disliked_n | 23 |
-| disliked_avoid@10 | 1.000 |
-| disliked_mean_rank | 98.826 |
-| three_n | 10 |
-| three_mean_rank | 92.200 |
-| pair_AUC | 0.478 |
-| pair_users | 11 |
-| retrieved_in_top100 | 0.077 |
+| metric | lightgcn | R1_like | R2_like-dis | R3_soft | R4_rocchio | R5_naive |
+|---|---|---|---|---|---|---|
+| users | 11 | 11 | 11 | 11 | 11 | 11 |
+| liked_n | 84 | 84 | 84 | 84 | 84 | 84 |
+| liked_HR@10 | 0.024 | 0.012 | 0.012 | 0.012 | 0.024 | 0.000 |
+| liked_NDCG@10 | 0.010 | 0.004 | 0.005 | 0.004 | 0.009 | 0.000 |
+| liked_mean_rank | 95.250 | 93.786 | 94.167 | 93.917 | 93.369 | 93.679 |
+| disliked_n | 23 | 23 | 23 | 23 | 23 | 23 |
+| disliked_avoid@10 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 |
+| disliked_mean_rank | 98.826 | 98.696 | 97.261 | 98.652 | 97.087 | 97.739 |
+| three_n | 10 | 10 | 10 | 10 | 10 | 10 |
+| three_mean_rank | 92.200 | 94.000 | 94.200 | 94.000 | 93.000 | 94.400 |
+| pair_AUC | 0.478 | 0.479 | 0.544 | 0.515 | 0.604 | 0.479 |
+| pair_users | 11 | 11 | 11 | 11 | 11 | 11 |
+| retrieved_in_top100 | 0.077 | 0.077 | 0.077 | 0.077 | 0.077 | 0.077 |

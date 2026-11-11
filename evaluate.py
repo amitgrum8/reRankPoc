@@ -14,7 +14,8 @@ among the 100 candidates (other targets don't count). Targets are split by stars
   retrieved       share of targets LightGCN put in its top 100 at all (the same for every reranker)
 
 A reranker is a function rerank(user) -> {item: score} over user["list"] (see RERANKERS at the bottom).
-Only "lightgcn" (keep LightGCN's order) exists now; the persona reranker comes next.
+"lightgcn" keeps LightGCN's order; the persona formulas R1-R5 come from rerank.py (similarity features between
+the persona lines and the item text, written to <run>/features.jsonl) when sentence-transformers is installed.
 """
 import argparse
 import json
@@ -88,15 +89,19 @@ def show_user(user, items, rerank, n=10):
         print("  likes:    " + " | ".join(user["persona"]["like"]))
         print("  dislikes: " + " | ".join(user["persona"]["dislike"]))
     s = rerank(user)
+    feat = user.get("feat")
+    sims = (lambda i: f"  like {feat[i]['like_max']:.2f} dis {feat[i]['dis_max']:.2f}  ") if feat else (lambda i: "  ")
+    if feat:
+        print(f"  tau (dislike threshold) {user['tau']:.2f}; like/dis = closest like/dislike line (cosine)")
     order = sorted(user["candidates"], key=lambda i: -s[i])
     print(f"  top {n} of the list:")
     for r, i in enumerate(order[:n], 1):
-        print(f"    {r:2d}. {title(i)}")
+        print(f"    {r:2d}.{sims(i)}{title(i)}")
     print("  targets (stars, rank among the 100):")
     cand_scores = {i: s[i] for i in user["candidates"]}
     for t in user["targets"]:
         rank = sum(v > s[t["i"]] for i, v in cand_scores.items() if i != t["i"]) + 1
-        print(f"    {t['rating']}* rank {rank:3d}  {title(t['i'])}")
+        print(f"    {t['rating']}* rank {rank:3d}{sims(t['i'])}{title(t['i'])}")
 
 
 # ------------------------------------------------------------------------------------------------- rerankers
@@ -113,13 +118,32 @@ def main():
     ap.add_argument("run")
     ap.add_argument("--input", default=str(HERE / "data" / "rr_input"))
     ap.add_argument("--show", type=int, default=1, help="print this many example users")
+    ap.add_argument("--show-with", default="R3_soft", help="the reranker whose list the examples show")
+    ap.add_argument("--no-rerank", action="store_true", help="LightGCN column only (no encoder needed)")
+    ap.add_argument("--alpha", type=float, default=1.0, help="weight of the like similarity (rerank.py)")
+    ap.add_argument("--beta", type=float, default=1.0, help="weight of the dislike penalty (rerank.py)")
+    ap.add_argument("--gamma", type=float, default=1.0, help="dislike weight inside the Rocchio vector (rerank.py)")
     args = ap.parse_args()
     run, inp = Path(args.run), Path(args.input)
     users = build_users(run, inp)
     items = json.loads((inp / "items.json").read_text(encoding="utf-8"))
     print(f"{len(users)} users" + (" (with a persona)" if users and users[0]["persona"] else ""))
 
-    rows = {name: evaluate(users, f) for name, f in RERANKERS.items()}
+    rerankers = dict(RERANKERS)
+    if users and users[0]["persona"] and not args.no_rerank:
+        try:
+            import rerank as R
+        except ImportError as e:                      # no sentence-transformers here: the LightGCN column only
+            print(f"persona reranker skipped ({e}); pip install sentence-transformers")
+        else:
+            R.PARAMS.update(alpha=args.alpha, beta=args.beta, gamma=args.gamma)
+            R.attach(users, items, R.Encoder())
+            R.write_features(users, run / "features.jsonl")
+            rerankers.update(R.RERANKERS)
+            print(f"features of {sum(len(u['list']) for u in users)} (user, item) rows -> features.jsonl; "
+                  f"alpha {args.alpha} beta {args.beta} gamma {args.gamma}")
+
+    rows = {name: evaluate(users, f) for name, f in rerankers.items()}
     keys = list(next(iter(rows.values())).keys())
     lines = ["| metric | " + " | ".join(rows) + " |", "|---|" + "---|" * len(rows)]
     for key in keys:
@@ -130,7 +154,7 @@ def main():
     print(table)
     (run / "eval.md").write_text(table + "\n", encoding="utf-8")
     for user in users[:args.show]:
-        show_user(user, items, rerank_lightgcn)
+        show_user(user, items, rerankers.get(args.show_with, rerank_lightgcn))
 
 
 if __name__ == "__main__":

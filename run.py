@@ -220,7 +220,7 @@ def main():
     ap.add_argument("--users", default="all", help="'all' or the first n test users")
     ap.add_argument("--lgcn-minutes", type=float, default=None, help="LightGCN time limit (default 30; --smoke 2)")
     ap.add_argument("--model", default="gpt-oss:20b")
-    ap.add_argument("--reasoning", default="high")
+    ap.add_argument("--reasoning", default="low")
     ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--port", type=int, default=11435)
     ap.add_argument("--hours", type=float, default=0, help="stop new LLM calls after this many hours (0 = never)")

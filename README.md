@@ -6,17 +6,21 @@ The plan and its reasons are in `BLUEPRINT.md`. The pipeline:
    before the cutoff (2014–2018, titled movies, 97k users, 49k movies, 1.14M reviews), and test users who wrote
    both a liked (4–5★) and a disliked (1–2★) review after it.
 2. **Base ranker**: LightGCN, trained on the graph; the top 100 unseen movies per test user.
-3. **Personas**: EXP3RT (SIGIR 2025) steps 1–2 with gpt-oss:20b through Ollama, reasoning "high":
+3. **Personas**: EXP3RT (SIGIR 2025) steps 1–2 with gpt-oss:20b through Ollama, reasoning "low" (at "high"
+   the model spends the whole 12k-token budget thinking and returns nothing for about 40% of the calls):
    likes and dislikes from each history review, then one persona per user (about 5 likes, 5 dislikes).
-4. **Evaluation**: where the liked and the disliked targets land in each list. The reranker plugs in here
-   (`RERANKERS` in `evaluate.py`). Only "keep LightGCN's order" exists so far.
+4. **Reranker** (`rerank.py`, no LLM): every persona line and every movie text (title + description) becomes a
+   vector (bge-small, CPU); each movie in the list gets a row of numbers (closest like line, closest dislike line,
+   LightGCN score, ...) and the formulas R1–R5 from the blueprint turn the row into a score. The rows go to
+   `features.jsonl`, the input of the LightGBM model that comes next.
+5. **Evaluation**: where the liked and the disliked targets land in each reranker's list (`evaluate.py`).
 
 ## Setup on the GPU machine (Windows, NVIDIA, uv)
 
 ```powershell
 git clone <repo-url> rerankPoc
 cd rerankPoc
-uv sync                      # makes .venv with torch 2.8 (CUDA 12.8), numpy, openai
+uv sync                      # makes .venv with torch 2.8 (CUDA 12.8), numpy, openai, sentence-transformers, lightgbm
 ```
 
 Install Ollama from https://ollama.com/download (a normal installer, no admin rights needed), then **open a new
@@ -39,7 +43,8 @@ Results land in `runs\<date_time>\`:
 
 | File | What |
 |---|---|
-| `eval.md` | metrics: liked targets (HR@10, NDCG@10, mean rank), disliked targets (avoid@10, mean rank), pair AUC |
+| `eval.md` | metrics per reranker: liked targets (HR@10, NDCG@10, mean rank), disliked targets (avoid@10, mean rank), pair AUC |
+| `features.jsonl` | one row per (user, movie in the list): the reranker's numbers and the label (2 liked, 0 disliked, 1 unseen) |
 | `personas.jsonl` | one line per user: `like`, `dislike` lists |
 | `extractions.jsonl` | the per-review likes/dislikes behind the personas |
 | `candidates.jsonl` | LightGCN's top 100 per user, and every target's score and rank |
@@ -58,6 +63,9 @@ resumed run (`--out runs\<same folder>`) costs no LLM time. `uv run python run.p
 | `prep_data.py` | (already run) `movies.db` + raw reviews → `data/rr_input/` |
 | `lightgcn.py` | trains LightGCN → `candidates.jsonl`, `lightgcn.json`, `embeddings.npz` |
 | `personas.py`, `prompts.py`, `llm.py` | EXP3RT personas → `personas.jsonl`, `extractions.jsonl`, `calls.jsonl`, `summary.json` |
-| `evaluate.py` | metrics per reranker → `eval.md`, plus example users |
+| `rerank.py` | persona reranker without an LLM: similarity features → `features.jsonl`, formulas R1–R5 |
+| `evaluate.py` | metrics per reranker → `eval.md`, plus example users (`--show 2 --show-with R2_like-dis`) |
 
 Plumbing check without a GPU or an LLM (fake answers): `python run.py --mock --cpu --lgcn-minutes 0.5`.
+Re-evaluating a run on any machine (CPU, ~1 min; the first time downloads bge-small, 130 MB):
+`python evaluate.py runs\<date_time>`, with `--alpha`, `--beta`, `--gamma` for the formula weights.

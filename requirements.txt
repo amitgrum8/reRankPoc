@@ -2,3 +2,5 @@
 #   pip install torch==2.8.0 --index-url https://download.pytorch.org/whl/cu128
 numpy==2.0.2
 openai>=1.60
+sentence-transformers>=3.0     # rerank.py: the text encoder for the persona reranker (CPU is fine)
+lightgbm>=4.0                  # level L1 of the reranker, later
