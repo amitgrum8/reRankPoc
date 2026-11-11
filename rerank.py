@@ -56,7 +56,8 @@ def item_text(item):
 
 class Encoder:
     def __init__(self, name=ENCODER, cache_dir=HERE / "data" / "vectors"):
-        self.model = SentenceTransformer(name, device="cpu")
+        import torch
+        self.model = SentenceTransformer(name, device="cuda" if torch.cuda.is_available() else "cpu")
         self.model.max_seq_length = 256
         self.path = Path(cache_dir) / (name.replace("/", "__") + ".npz")
         self.cache = {}

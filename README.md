@@ -3,17 +3,23 @@
 The plan and its reasons are in `BLUEPRINT.md`. The pipeline:
 
 1. **Data** (done, in `data/rr_input/`): Amazon Reviews 2023, Movies & TV. A training graph of the reviews
-   before the cutoff (2014–2018, titled movies, 97k users, 49k movies, 1.14M reviews), and test users who wrote
-   both a liked (4–5★) and a disliked (1–2★) review after it.
-2. **Base ranker**: LightGCN, trained on the graph; the top 100 unseen movies per test user.
+   before the cutoff (2014–2018, titled movies, 97k users, 49k movies, 1.14M reviews); 300 test users and 700
+   training users (for the reranker) who wrote both a liked (4–5★) and a disliked (1–2★) review after the cutoff
+   and at least two 1–2★ reviews before it. A persona is built from a user's 10 most recent reviews before the
+   cutoff, always including two negative ones.
+2. **Base ranker**: LightGCN, trained on the graph; the top 500 unseen movies per user.
 3. **Personas**: EXP3RT (SIGIR 2025) steps 1–2 with gpt-oss:20b through Ollama, reasoning "low" (at "high"
    the model spends the whole 12k-token budget thinking and returns nothing for about 40% of the calls):
    likes and dislikes from each history review, then one persona per user (about 5 likes, 5 dislikes).
-4. **Reranker** (`rerank.py`, no LLM): every persona line and every movie text (title + description) becomes a
-   vector (bge-small, CPU); each movie in the list gets a row of numbers (closest like line, closest dislike line,
-   LightGCN score, ...) and the formulas R1–R5 from the blueprint turn the row into a score. The rows go to
-   `features.jsonl`, the input of the LightGBM model that comes next.
-5. **Evaluation**: where the liked and the disliked targets land in each reranker's list (`evaluate.py`).
+   First the test users, then the training users (about 11 calls per user).
+4. **Reranker** (`rerank.py`, `train.py`, no LLM): every persona line and every movie text (title + description)
+   becomes a vector (bge-small); each movie in the list gets a row of numbers (closest like line, closest dislike
+   line, LightGCN score, ...). The formulas R1–R5 from the blueprint turn the row into a score with fixed
+   weights; R7 is LightGBM (lambdarank) trained on the training users' rows, with the LightGCN score kept out
+   of the model and added back as z(base) + z(model).
+5. **Evaluation** (`evaluate.py`): per reranker, where the liked and the disliked targets land in the list,
+   how far they moved against LightGCN's order, and the within-user pair AUC (liked above disliked) with a
+   bootstrap interval against LightGCN.
 
 ## Setup on the GPU machine (Windows, NVIDIA, uv)
 
@@ -43,13 +49,14 @@ Results land in `runs\<date_time>\`:
 
 | File | What |
 |---|---|
-| `eval.md` | metrics per reranker: liked targets (HR@10, NDCG@10, mean rank), disliked targets (avoid@10, mean rank), pair AUC |
-| `features.jsonl` | one row per (user, movie in the list): the reranker's numbers and the label (2 liked, 0 disliked, 1 unseen) |
-| `personas.jsonl` | one line per user: `like`, `dislike` lists |
-| `extractions.jsonl` | the per-review likes/dislikes behind the personas |
-| `candidates.jsonl` | LightGCN's top 100 per user, and every target's score and rank |
+| `eval.md` | metrics per reranker: liked and disliked targets (ranks, rank changes against LightGCN, HR@10, avoid@10), separation, pair AUC with a bootstrap interval |
+| `personas.jsonl`, `personas_train.jsonl` | one line per user: `like`, `dislike` lists (test users; training users) |
+| `extractions.jsonl`, `extractions_train.jsonl` | the per-review likes/dislikes behind the personas |
+| `candidates.jsonl`, `candidates_train.jsonl` | LightGCN's top 500 per user, and every target's score and rank |
+| `lgbm.txt`, `lgbm.json` | the trained LightGBM reranker; its sizes, validation NDCG@10 and feature importance |
 | `lightgcn.json`, `embeddings.npz` | training curve; the trained LightGCN (user and item vectors) |
-| `summary.json`, `calls.jsonl` | LLM call counts, tokens, timing |
+| `summary.json`, `calls.jsonl` (+ `_train`) | LLM call counts, tokens, timing |
+| `features.jsonl` | only with `evaluate.py --write-features`: one row per (user, movie), the reranker's numbers and the label |
 
 Zip the folder to bring it back. LLM answers are cached in `runs\cache\` and shared by all runs, so a repeated or
 resumed run (`--out runs\<same folder>`) costs no LLM time. `uv run python run.py --help` lists the options
@@ -63,9 +70,15 @@ resumed run (`--out runs\<same folder>`) costs no LLM time. `uv run python run.p
 | `prep_data.py` | (already run) `movies.db` + raw reviews → `data/rr_input/` |
 | `lightgcn.py` | trains LightGCN → `candidates.jsonl`, `lightgcn.json`, `embeddings.npz` |
 | `personas.py`, `prompts.py`, `llm.py` | EXP3RT personas → `personas.jsonl`, `extractions.jsonl`, `calls.jsonl`, `summary.json` |
-| `rerank.py` | persona reranker without an LLM: similarity features → `features.jsonl`, formulas R1–R5 |
+| `rerank.py` | persona reranker without an LLM: similarity features per (persona, movie), formulas R1–R5 |
+| `train.py` | LightGBM reranker R7: training users' lists from `embeddings.npz`, lambdarank over the feature rows |
 | `evaluate.py` | metrics per reranker → `eval.md`, plus example users (`--show 2 --show-with R2_like-dis`) |
 
-Plumbing check without a GPU or an LLM (fake answers): `python run.py --mock --cpu --lgcn-minutes 0.5`.
-Re-evaluating a run on any machine (CPU, ~1 min; the first time downloads bge-small, 130 MB):
-`python evaluate.py runs\<date_time>`, with `--alpha`, `--beta`, `--gamma` for the formula weights.
+Plumbing check without a GPU or an LLM (fake answers): `python run.py --mock --cpu --lgcn-minutes 0.5 --users 5 --train-users 20`.
+Re-evaluating a run on any machine (the first time downloads bge-small, 130 MB, and encodes the movies in the
+lists, minutes on a CPU, cached in `data/vectors/`): `python evaluate.py runs\<date_time>`, with `--alpha`,
+`--beta`, `--gamma` for the formula weights and `--no-train` to skip LightGBM.
+
+Budget of the real run at reasoning "low": about 11 LLM calls per user (10 reviews + 1 profile), roughly a
+minute per user with 4 parallel requests, so 300 test users take about 5 hours and the 700 training users about
+12 more. `--train-users 0` runs the test users only; `--hours N` caps the LLM time (test users first).

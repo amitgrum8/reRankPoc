@@ -1,4 +1,4 @@
-"""Step 2 (Kaggle GPU; a CPU works for a small test): train LightGCN and write each test user's top 100.
+"""Step 2 (Kaggle GPU; a CPU works for a small test): train LightGCN and write each test user's top k (500).
 
   python lightgcn.py --input data/rr_input --out run
   python lightgcn.py --input data/rr_input --out run --max-minutes 20 --dim 64 --layers 3
@@ -15,7 +15,7 @@ lr 1e-3, L2 1e-4, batch 2048).
 
 Outputs:
   run/candidates.jsonl  one line per test user:
-     {"user_id", "u", "candidates": [[item, score], ... top 100],
+     {"user_id", "u", "candidates": [[item, score], ... top k (500)],
       "targets": [{"i", "rating", "ts", "score", "rank"}]}
      rank = the target's place among all items the user had not reviewed before the cutoff (1 = top);
      items reviewed before the cutoff are never candidates.
@@ -99,7 +99,7 @@ def main():
     ap.add_argument("--eval-every", type=int, default=10)
     ap.add_argument("--patience", type=int, default=5)
     ap.add_argument("--n-val", type=int, default=2000)
-    ap.add_argument("--k", type=int, default=100)
+    ap.add_argument("--k", type=int, default=500)
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 

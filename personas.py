@@ -1,6 +1,8 @@
-"""Step 3 (Kaggle, Ollama gpt-oss:20b): EXP3RT personas for the test users.
+"""Step 3 (GPU machine, Ollama gpt-oss:20b): EXP3RT personas for the test users, and for the reranker's
+training users (--set train: reads train_users.json, writes personas_train.jsonl, extractions_train.jsonl, ...).
 
   python personas.py --input data/rr_input --out run --base-url http://127.0.0.1:11434/v1 --model gpt-oss:20b
+  python personas.py --input data/rr_input --out run --set train --base-url ... --model ...
   python personas.py --input data/rr_input --out run_mock --mock          # dry run, no LLM
 
 Per test user: EXP3RT step 1 on each history review (the user's most recent reviews before the cutoff),
@@ -82,7 +84,10 @@ def main():
     ap.add_argument("--reasoning-effort", default="low")
     ap.add_argument("--max-tokens", type=int, default=12000)
     ap.add_argument("--no-json-mode", action="store_true")
-    ap.add_argument("--users", default="all", help="'all' or the number of test users to run (first n)")
+    ap.add_argument("--set", default="test", choices=("test", "train"),
+                    help="test_users.json -> personas.jsonl etc.; train_users.json (the reranker's training users) "
+                         "-> personas_train.jsonl etc.")
+    ap.add_argument("--users", default="all", help="'all' or the number of users of the set to run (first n)")
     ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--deadline-hours", type=float, default=0, help="no new LLM calls after this (0 = none)")
     ap.add_argument("--start-deadline-hours", type=float, default=0, help="no new users after this (0 = none)")
@@ -93,7 +98,8 @@ def main():
     t0 = time.time()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    users = json.loads((Path(args.input) / "test_users.json").read_text(encoding="utf-8"))["users"]
+    users = json.loads((Path(args.input) / f"{args.set}_users.json").read_text(encoding="utf-8"))["users"]
+    sfx = "" if args.set == "test" else "_train"
     if args.users != "all":
         users = users[:int(args.users)]
     llm = LLM(args.base_url, args.model, Path(args.cache) if args.cache else out / "cache", args.reasoning_effort, not args.no_json_mode,
@@ -101,7 +107,7 @@ def main():
               mock=args.mock)
     start_deadline = t0 + args.start_deadline_hours * 3600 if args.start_deadline_hours else None
     n_calls = sum(len(tu["history"]) + 1 for tu in users)
-    print(f"{len(users)} users, about {n_calls} calls | model {args.model} | reasoning {args.reasoning_effort} | "
+    print(f"{len(users)} {args.set} users, about {n_calls} calls | model {args.model} | reasoning {args.reasoning_effort} | "
           f"threads {args.threads}", flush=True)
 
     done, failed, extractions, personas = 0, {}, [], []
@@ -138,9 +144,9 @@ def main():
     personas.sort(key=lambda r: order[r["user_id"]])
     write = lambda name, rows: (out / name).write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in rows),
                                                        encoding="utf-8")
-    write("extractions.jsonl", extractions)
-    write("personas.jsonl", personas)
-    write("calls.jsonl", llm.log_lines)
+    write(f"extractions{sfx}.jsonl", extractions)
+    write(f"personas{sfx}.jsonl", personas)
+    write(f"calls{sfx}.jsonl", llm.log_lines)
     s = llm.stats
     new_calls = [c for c in llm.log_lines if not c["cached"]]
     summary = {"users_done": done, "users_failed": failed, "calls": s["calls"], "new_calls": s["new"],
@@ -151,7 +157,7 @@ def main():
                "invalid_extractions": sum(not r["valid"] for r in extractions),
                "retries": sum(bool(c.get("retry")) for c in llm.log_lines),
                "params": llm.params, "model": args.model}
-    (out / "summary.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
+    (out / f"summary{sfx}.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
     print(json.dumps({k: v for k, v in summary.items() if k != "params"}), flush=True)
     sys.exit(0 if done else 1)
 

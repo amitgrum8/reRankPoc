@@ -11,6 +11,7 @@ Writes data/rr_input/:
   train.npz        LightGCN's training graph: arrays u, i, ts (ms) and the sizes
   test_users.json  the test users: history reviews with text (for the persona), the items they had
                    seen before the cutoff (never recommended), and their targets after the cutoff
+  train_users.json the same for the reranker's training users (--n-train-users more of the eligible users)
   items.json       item index -> asin, title, short description (for the reranker and for reading)
   config.json      the settings and the sizes
 
@@ -18,7 +19,10 @@ Training graph: every review written in [since, cutoff), reduced to a k-core (us
 least --min-user / --min-item reviews, repeated until nothing changes). Every review is one interaction
 whatever its rating, so LightGCN does not know what anyone disliked.
 Test users: in the core, with at least one 4-5 star and one 1-2 star review after the cutoff on items
-in the graph, and history reviews with some text. A random sample of --n-users of them.
+in the graph, at least --min-negatives 1-2 star reviews before it, and history reviews with some text. A random
+sample of --n-users of them; the next --n-train-users are the reranker's training users. The persona sees a
+user's --max-history most recent reviews, always including --min-negatives negative ones (older negatives
+replace the oldest positives when needed), so every persona has something to dislike.
 """
 import argparse
 import gzip
@@ -56,6 +60,24 @@ def first_words(text, n):
 
 def log(msg, t0):
     print(f"[{time.time() - t0:6.0f}s] {msg}", flush=True)
+
+
+def pick_history(reviews, n, min_neg):
+    """The persona's reviews: the n most recent ones, with at least min_neg rated 1-2 stars among them (older
+    negative reviews replace the oldest non-negative ones when the recent ones hold too few). reviews are newest
+    first, as (line_no, asin, rating, ts, n_words, title). Returns them oldest first, or None when the user has
+    fewer than min_neg negative reviews at all."""
+    neg = [r for r in reviews if r[2] <= 2]
+    if len(neg) < min_neg:
+        return None
+    recent = reviews[:n]
+    have = [r for r in recent if r[2] <= 2]
+    missing = min_neg - len(have)
+    if missing > 0:
+        extra = [r for r in neg if r not in have][:missing]            # the newest negatives outside the window
+        pos = [r for r in recent if r[2] > 2]
+        recent = have + extra + pos[:max(0, n - len(have) - len(extra))]   # the oldest non-negatives make room
+    return sorted(recent, key=lambda r: (r[3], r[0]))
 
 
 def read_people(meta_gz, wanted, per_field=5):
@@ -96,8 +118,12 @@ def main():
     ap.add_argument("--min-user", type=int, default=5)
     ap.add_argument("--min-item", type=int, default=5)
     ap.add_argument("--min-history", type=int, default=10, help="test users need this many reviews before the cutoff")
-    ap.add_argument("--n-users", type=int, default=30, help="test users to sample")
-    ap.add_argument("--max-history", type=int, default=20, help="most recent reviews before the cutoff used for the persona")
+    ap.add_argument("--n-users", type=int, default=300, help="test users to sample")
+    ap.add_argument("--n-train-users", type=int, default=700,
+                    help="users for training the reranker (same criteria, sampled after the test users)")
+    ap.add_argument("--max-history", type=int, default=10, help="most recent reviews before the cutoff used for the persona")
+    ap.add_argument("--min-negatives", type=int, default=2,
+                    help="1-2 star reviews a user needs before the cutoff; this many are always among the persona's reviews")
     ap.add_argument("--max-targets", type=int, default=20, help="first reviews after the cutoff kept as targets")
     ap.add_argument("--min-median-words", type=int, default=15)
     ap.add_argument("--desc-words", type=int, default=80)
@@ -161,25 +187,35 @@ def main():
     log(f"after the cutoff: {n_post:,} reviews of core items by {len(stats):,} core users; "
         f"{len(eligible):,} of them have a liked and a disliked one", t0)
 
+    # the first --n-users that pass the history check are the test users, the next --n-train-users the training
+    # users of the reranker (same criteria, same shuffle: adding training users never changes the test users)
     rng = random.Random(args.seed)
     rng.shuffle(eligible)
-    chosen, skipped_text = [], 0
+    chosen, chosen_train, skipped = [], [], {"history": 0, "negatives": 0, "text": 0}
     for uid in eligible:
-        hist = q("""select r.line_no, r.parent_asin, r.rating, r.ts, r.n_words, i.title from m.rd r
-                    left join m.items i using(parent_asin)
-                    where r.user_id = ? and r.ts < ? order by r.ts desc, r.line_no desc limit ?""",
-                 (uid, cutoff, args.max_history)).fetchall()
-        if len(hist) < args.min_history or statistics.median(h[4] or 0 for h in hist) < args.min_median_words:
-            skipped_text += 1
-            continue
-        chosen.append((uid, hist[::-1]))   # oldest first
-        if len(chosen) == args.n_users:
+        if len(chosen) == args.n_users and len(chosen_train) == args.n_train_users:
             break
-    log(f"chose {len(chosen)} test users (skipped {skipped_text} with under {args.min_history} history reviews "
-        f"or too little review text)", t0)
+        full = q("""select r.line_no, r.parent_asin, r.rating, r.ts, r.n_words, i.title from m.rd r
+                    left join m.items i using(parent_asin)
+                    where r.user_id = ? and r.ts < ? order by r.ts desc, r.line_no desc""", (uid, cutoff)).fetchall()
+        if len(full) < args.min_history:
+            skipped["history"] += 1
+            continue
+        hist = pick_history(full, args.max_history, args.min_negatives)
+        if hist is None:
+            skipped["negatives"] += 1
+            continue
+        if statistics.median(h[4] or 0 for h in hist) < args.min_median_words:
+            skipped["text"] += 1
+            continue
+        (chosen if len(chosen) < args.n_users else chosen_train).append((uid, hist))
+    log(f"chose {len(chosen)} test users and {len(chosen_train)} training users (skipped {skipped['history']} with "
+        f"under {args.min_history} history reviews, {skipped['negatives']} with under {args.min_negatives} negative "
+        f"ones, {skipped['text']} with too little review text)", t0)
 
-    test_users, wanted = [], {}
-    for uid, hist in chosen:
+    wanted = {}
+
+    def make_user(uid, hist):
         seen = [iidx[r[0]] for r in q("select distinct parent_asin from m.rd where user_id = ? and ts < ?", (uid, cutoff))
                 if r[0] in iidx]
         tg = q("""select p.parent_asin, p.rating, p.ts, i.title from post p left join m.items i using(parent_asin)
@@ -190,21 +226,22 @@ def main():
                    "ts": t, "n_words": n_words}
             wanted[line_no] = rec
             history.append(rec)
-        test_users.append({
-            "user_id": uid, "u": uidx[uid], "history": history, "seen_items": sorted(set(seen)),
-            "targets": [{"i": iidx[a], "asin": a, "title": tt or "", "rating": r, "ts": t} for a, r, t, tt in tg],
-        })
+        return {"user_id": uid, "u": uidx[uid], "history": history, "seen_items": sorted(set(seen)),
+                "targets": [{"i": iidx[a], "asin": a, "title": tt or "", "rating": r, "ts": t} for a, r, t, tt in tg]}
+
+    test_users = [make_user(uid, hist) for uid, hist in chosen]
+    train_users = [make_user(uid, hist) for uid, hist in chosen_train]
 
     # ---------------------------------------------------------------- review texts (one pass over the raw file)
     last_line = max(wanted) if wanted else -1
     log(f"reading {len(wanted)} review texts from {Path(args.reviews_gz).name} (up to line {last_line:,}) ...", t0)
-    found, test_ids = 0, {tu["user_id"] for tu in test_users}
+    found, chosen_ids = 0, {tu["user_id"] for tu in test_users + train_users}
     with gzip.open(args.reviews_gz, "rt", encoding="utf-8") as f:
         for line_no, line in enumerate(f):    # same numbering as poc/step1_data.py stream()
             if line_no in wanted:
                 x = json.loads(line)
                 rec = wanted[line_no]
-                assert x["user_id"] in test_ids, f"line {line_no} is not a test user's review"
+                assert x["user_id"] in chosen_ids, f"line {line_no} is not a chosen user's review"
                 rec["review_title"] = clean(x.get("title", ""))
                 rec["text"] = clean(x.get("text", ""))
                 found += 1
@@ -224,21 +261,27 @@ def main():
                   "people": people.get(a, [])} for k, a in enumerate(items)]
 
     # ---------------------------------------------------------------- write
-    config = {k: getattr(args, k) for k in ("since", "cutoff", "min_user", "min_item", "min_history", "n_users",
-                                            "max_history", "max_targets", "min_median_words", "seed")}
+    config = {k: getattr(args, k) for k in ("since", "cutoff", "min_user", "min_item", "min_history", "min_negatives",
+                                            "n_users", "n_train_users", "max_history", "max_targets", "min_median_words",
+                                            "seed")}
     config.update({"n_graph_users": len(users), "n_graph_items": len(items), "n_interactions": int(len(u)),
                    "n_eligible_test_users": len(eligible), "n_test_users": len(test_users),
-                   "made": datetime.now().isoformat(timespec="seconds")})
+                   "n_train_users": len(train_users), "made": datetime.now().isoformat(timespec="seconds")})
     np.savez_compressed(out / "train.npz", u=u, i=i, ts=ts, n_users=len(users), n_items=len(items))
     (out / "test_users.json").write_text(json.dumps({"config": config, "users": test_users}, ensure_ascii=False),
                                          encoding="utf-8")
+    (out / "train_users.json").write_text(json.dumps({"config": config, "users": train_users}, ensure_ascii=False),
+                                          encoding="utf-8")
     (out / "items.json").write_text(json.dumps(items_out, ensure_ascii=False), encoding="utf-8")
     (out / "config.json").write_text(json.dumps(config, indent=1), encoding="utf-8")
 
-    n_t = [len(tu["targets"]) for tu in test_users]
-    rat = [t["rating"] for tu in test_users for t in tu["targets"]]
-    log(f"targets per user: mean {statistics.mean(n_t):.1f}, min {min(n_t)}, max {max(n_t)} | "
-        f"liked {sum(r >= 4 for r in rat)}, 3-star {sum(r == 3 for r in rat)}, disliked {sum(r <= 2 for r in rat)}", t0)
+    for name, us in (("test", test_users), ("training", train_users)):
+        if not us:
+            continue
+        n_t = [len(tu["targets"]) for tu in us]
+        rat = [t["rating"] for tu in us for t in tu["targets"]]
+        log(f"{name} users: targets per user mean {statistics.mean(n_t):.1f}, min {min(n_t)}, max {max(n_t)} | "
+            f"liked {sum(r >= 4 for r in rat)}, 3-star {sum(r == 3 for r in rat)}, disliked {sum(r <= 2 for r in rat)}", t0)
     for f in sorted(out.iterdir()):
         print(f"  {f.name:18s} {f.stat().st_size:>12,} bytes")
 

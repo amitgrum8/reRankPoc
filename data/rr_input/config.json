@@ -4,8 +4,10 @@
  "min_user": 5,
  "min_item": 5,
  "min_history": 10,
- "n_users": 30,
- "max_history": 20,
+ "min_negatives": 2,
+ "n_users": 300,
+ "n_train_users": 700,
+ "max_history": 10,
  "max_targets": 20,
  "min_median_words": 15,
  "seed": 42,
@@ -13,6 +15,6 @@
  "n_graph_items": 49312,
  "n_interactions": 1138215,
  "n_eligible_test_users": 2939,
- "n_test_users": 30,
- "made": "2026-11-07T14:37:37"
+ "n_test_users": 300,
+ "made": "2026-11-11T21:37:56"
 }

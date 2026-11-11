@@ -6,9 +6,11 @@
   python run.py --mock           # no GPU, no LLM: fake answers; checks the plumbing only
   python run.py --out runs/x     # run again into the same folder: finished stages are skipped
 
-Stages: environment check -> LightGCN (top 100 per test user) -> Ollama server + model -> reasoning check
-and timed calls -> EXP3RT personas -> evaluation. Everything lands in runs/<name>/. Every LLM answer is cached
-in runs/cache/, shared by all runs, so repeating a run costs no LLM time.
+Stages: environment check -> LightGCN (top 500 per test user) -> Ollama server + model -> reasoning check
+and timed calls -> EXP3RT personas for the test users, then for the reranker's training users (train_users.json;
+--train-users 0 skips them) -> evaluation (formulas R1-R5, and LightGBM R7 trained on the training users).
+Everything lands in runs/<name>/. Every LLM answer is cached in runs/cache/, shared by all runs, so repeating
+a run costs no LLM time.
 
 Ollama is started by this script on its own port (11435) with the settings the prompts need (16k context,
 4 parallel requests), so the Ollama tray app, if any, does not matter.
@@ -52,8 +54,8 @@ def say(msg):
     print(f"\n=== {msg}  [{(time.time() - T_START) / 60:.1f} min]", flush=True)
 
 
-def run(cmd, env=None):
-    """Runs a command, streaming its output; stops the script if it fails."""
+def run(cmd, env=None, must=True):
+    """Runs a command, streaming its output; stops the script if it fails (must), or just says so."""
     print("$ " + " ".join(str(c) for c in cmd), flush=True)
     env = dict(env or os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
     p = subprocess.Popen([str(c) for c in cmd], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True,
@@ -62,7 +64,10 @@ def run(cmd, env=None):
         print(line, end="", flush=True)
     p.wait()
     if p.returncode != 0:
-        sys.exit(f"'{cmd[0]}' failed with exit code {p.returncode}")
+        if must:
+            sys.exit(f"'{cmd[0]}' failed with exit code {p.returncode}")
+        print(f"'{cmd[-1] if len(cmd) < 3 else cmd[2]}' failed with exit code {p.returncode}; going on", flush=True)
+    return p.returncode
 
 
 # ------------------------------------------------------------------ environment
@@ -218,6 +223,8 @@ def main():
     ap.add_argument("--input", default=str(HERE / "data" / "rr_input"))
     ap.add_argument("--cache", default=str(HERE / "runs" / "cache"), help="LLM cache shared by all runs")
     ap.add_argument("--users", default="all", help="'all' or the first n test users")
+    ap.add_argument("--train-users", default="all",
+                    help="'all', the first n, or 0: the reranker's training users (train_users.json) to run personas for")
     ap.add_argument("--lgcn-minutes", type=float, default=None, help="LightGCN time limit (default 30; --smoke 2)")
     ap.add_argument("--model", default="gpt-oss:20b")
     ap.add_argument("--reasoning", default="low")
@@ -225,12 +232,12 @@ def main():
     ap.add_argument("--port", type=int, default=11435)
     ap.add_argument("--hours", type=float, default=0, help="stop new LLM calls after this many hours (0 = never)")
     ap.add_argument("--no-json-mode", action="store_true")
-    ap.add_argument("--smoke", action="store_true", help="1 user, LightGCN 2 min")
+    ap.add_argument("--smoke", action="store_true", help="1 test user, 3 training users, LightGCN 2 min")
     ap.add_argument("--mock", action="store_true", help="fake LLM answers, no Ollama, CPU allowed")
     ap.add_argument("--cpu", action="store_true", help="allow LightGCN on the CPU")
     args = ap.parse_args()
     if args.smoke:
-        args.users = "1"
+        args.users, args.train_users = "1", "3"
         args.lgcn_minutes = args.lgcn_minutes or 2
     args.lgcn_minutes = args.lgcn_minutes or 30
     args.input, args.cache = Path(args.input), Path(args.cache)
@@ -249,12 +256,21 @@ def main():
         run([sys.executable, "-u", HERE / "lightgcn.py", "--input", args.input, "--out", out,
              "--max-minutes", args.lgcn_minutes])
 
-    # 2-4. personas
-    n_users = len(json.loads((args.input / "test_users.json").read_text(encoding="utf-8"))["users"]) \
-        if args.users == "all" else int(args.users)
-    if (out / "personas.jsonl").exists():
-        say("personas: skipped, personas.jsonl exists")
-    else:
+    # 2-4. personas: the test users, then the reranker's training users (train_users.json), on the same server
+    def count(name, want):
+        n = len(json.loads((args.input / name).read_text(encoding="utf-8"))["users"])
+        return n if want == "all" else min(n, int(want))
+
+    n_users = count("test_users.json", args.users)
+    n_train = count("train_users.json", args.train_users) if (args.input / "train_users.json").exists() else 0
+    stages = [("test", args.users, n_users, "personas.jsonl")]
+    if n_train:
+        stages.append(("train", args.train_users, n_train, "personas_train.jsonl"))
+    todo = [s for s in stages if not (out / s[3]).exists()]
+    for s in stages:
+        if s not in todo:
+            say(f"personas ({s[0]}): skipped, {s[3]} exists")
+    if todo:
         server, flags, base_url = None, [], "http://127.0.0.1:1/v1"
         if not args.mock:
             server = Ollama(find_ollama(), args.port, out / "ollama.log")
@@ -262,15 +278,18 @@ def main():
             if not server.has_model(args.model):
                 server.pull(args.model)
             flags = llm_check(args, base_url, out, n_users)
-        say(f"personas for {n_users} user(s)")
-        cmd = [sys.executable, "-u", HERE / "personas.py", "--input", args.input, "--out", out, "--cache", args.cache,
-               "--base-url", base_url, "--model", args.model, "--reasoning-effort", args.reasoning,
-               "--users", args.users, "--threads", args.threads] + flags
-        if args.hours:
-            cmd += ["--deadline-hours", args.hours, "--start-deadline-hours", max(args.hours - 1, 0.1)]
-        if args.mock:
-            cmd += ["--mock"]
-        run(cmd)
+        t_llm = time.time()
+        for set_, want, n, _ in todo:
+            say(f"personas for {n} {set_} user(s)")
+            cmd = [sys.executable, "-u", HERE / "personas.py", "--input", args.input, "--out", out, "--cache", args.cache,
+                   "--base-url", base_url, "--model", args.model, "--reasoning-effort", args.reasoning,
+                   "--set", set_, "--users", want, "--threads", args.threads] + flags
+            if args.hours:                           # one time budget for both sets; the test users come first
+                left = max(args.hours - (time.time() - t_llm) / 3600, 0.1)
+                cmd += ["--deadline-hours", left, "--start-deadline-hours", max(left - 0.5, 0.1)]
+            if args.mock:
+                cmd += ["--mock"]
+            run(cmd, must=set_ == "test")             # no training personas: the evaluation still runs, without R7
         if server:
             server.stop()
 
