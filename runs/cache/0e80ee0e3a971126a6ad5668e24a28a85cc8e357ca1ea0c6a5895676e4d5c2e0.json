@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"great 3D effect\", \"tons of fun to watch\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 225, "completion_tokens": 607, "reasoning_tokens": 0, "seconds": 161.67, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "high", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

@@ -1,0 +1,1 @@
+{"content": "", "finish_reason": "length", "prompt_tokens": 948, "completion_tokens": 12000, "reasoning_tokens": 0, "seconds": 337.96, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "high", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

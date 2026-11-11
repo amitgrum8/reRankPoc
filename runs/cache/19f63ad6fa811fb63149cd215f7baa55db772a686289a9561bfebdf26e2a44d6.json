@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"humor\", \"outfits\", \"wedding\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 236, "completion_tokens": 645, "reasoning_tokens": 0, "seconds": 141.96, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "high", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

@@ -1,0 +1,1 @@
+{"content": "{\"like\": [], \"dislike\": [\"None of the guys are shirtless.\"]}", "finish_reason": "stop", "prompt_tokens": 242, "completion_tokens": 444, "reasoning_tokens": 0, "seconds": 170.28, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "high", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

@@ -1,0 +1,147 @@
+{
+ "settings": {
+  "input": "C:\\Users\\amitgrumet\\Desktop\\thies\\thesis_venv\\reRankPoc\\data\\rr_input",
+  "out": "C:\\Users\\amitgrumet\\Desktop\\thies\\thesis_venv\\reRankPoc\\runs\\2026-11-10_1655",
+  "dim": 64,
+  "layers": 3,
+  "lr": 0.001,
+  "reg": 0.0001,
+  "batch": 2048,
+  "max_epochs": 1000,
+  "max_minutes": 2.0,
+  "eval_every": 10,
+  "patience": 5,
+  "n_val": 2000,
+  "k": 100,
+  "seed": 42
+ },
+ "device": "cuda",
+ "graph": {
+  "users": 97028,
+  "items": 49312,
+  "edges_train": 1136215,
+  "val_users": 2000
+ },
+ "best_val_recall@100": 0.1625,
+ "curve": [
+  {
+   "epoch": 1,
+   "loss": 0.6257,
+   "minutes": 0.14,
+   "batches": 555
+  },
+  {
+   "epoch": 2,
+   "loss": 0.43233,
+   "minutes": 0.26,
+   "batches": 555
+  },
+  {
+   "epoch": 3,
+   "loss": 0.358,
+   "minutes": 0.39,
+   "batches": 555
+  },
+  {
+   "epoch": 4,
+   "loss": 0.311,
+   "minutes": 0.51,
+   "batches": 555
+  },
+  {
+   "epoch": 5,
+   "loss": 0.2753,
+   "minutes": 0.64,
+   "batches": 555
+  },
+  {
+   "epoch": 6,
+   "loss": 0.24777,
+   "minutes": 0.77,
+   "batches": 555
+  },
+  {
+   "epoch": 7,
+   "loss": 0.22409,
+   "minutes": 0.89,
+   "batches": 555
+  },
+  {
+   "epoch": 8,
+   "loss": 0.20561,
+   "minutes": 1.02,
+   "batches": 555
+  },
+  {
+   "epoch": 9,
+   "loss": 0.19071,
+   "minutes": 1.15,
+   "batches": 555
+  },
+  {
+   "epoch": 10,
+   "loss": 0.17825,
+   "minutes": 1.27,
+   "batches": 555,
+   "val_recall@100": 0.142
+  },
+  {
+   "epoch": 11,
+   "loss": 0.16539,
+   "minutes": 1.41,
+   "batches": 555
+  },
+  {
+   "epoch": 12,
+   "loss": 0.1559,
+   "minutes": 1.54,
+   "batches": 555
+  },
+  {
+   "epoch": 13,
+   "loss": 0.14722,
+   "minutes": 1.66,
+   "batches": 555
+  },
+  {
+   "epoch": 14,
+   "loss": 0.1394,
+   "minutes": 1.79,
+   "batches": 555
+  },
+  {
+   "epoch": 15,
+   "loss": 0.13205,
+   "minutes": 1.92,
+   "batches": 555
+  },
+  {
+   "epoch": 16,
+   "loss": 0.12587,
+   "minutes": 2.0,
+   "batches": 363,
+   "val_recall@100": 0.1625
+  }
+ ],
+ "targets": {
+  "liked": {
+   "n": 145,
+   "in_top100": 0.069,
+   "in_top10": 0.007,
+   "median_rank": 2228.0
+  },
+  "three": {
+   "n": 19,
+   "in_top100": 0.053,
+   "in_top10": 0.0,
+   "median_rank": 2126.0
+  },
+  "disliked": {
+   "n": 53,
+   "in_top100": 0.0,
+   "in_top10": 0.0,
+   "median_rank": 2153.0
+  }
+ },
+ "seconds": 129.0
+}

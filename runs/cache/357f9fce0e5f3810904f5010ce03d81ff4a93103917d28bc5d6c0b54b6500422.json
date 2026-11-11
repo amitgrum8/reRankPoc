@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"Inspiring documentary\", \"Shareable with family\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 241, "completion_tokens": 588, "reasoning_tokens": 0, "seconds": 82.27, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "high", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

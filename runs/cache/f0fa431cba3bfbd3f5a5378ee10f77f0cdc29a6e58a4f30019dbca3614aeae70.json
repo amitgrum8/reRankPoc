@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"solid movies\", \"great price\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 228, "completion_tokens": 421, "reasoning_tokens": 0, "seconds": 37.08, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "high", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

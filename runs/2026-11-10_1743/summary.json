@@ -1,0 +1,45 @@
+{
+ "users_done": 11,
+ "users_failed": {
+  "AHMIAKIG5UGCJF3PITPQFVCODS7A": "ValueError: profile answer not valid JSON after a retry",
+  "AGXB2JZWSQFUDSLTPNM726F5A5BQ": "ValueError: profile answer not valid JSON after a retry",
+  "AGPCVSSO2HPXSK3PUXK3D77PSQPQ": "ValueError: profile answer not valid JSON after a retry",
+  "AHPFCU7BJLEXYIRLIG7PMYUHDO7Q": "ValueError: profile answer not valid JSON after a retry",
+  "AFMVDBHLL4WJY62VIONRJLPC34BQ": "ValueError: profile answer not valid JSON after a retry",
+  "AHJZ4C3W4RXJNDP57SE4Q5EOEU6A": "ValueError: profile answer not valid JSON after a retry",
+  "AGIEO5COI7CU7MVMOAH2DWZYW5XA": "ValueError: profile answer not valid JSON after a retry",
+  "AGL6KBSZAZE5JBN73DDQUEJHYMDA": "ValueError: profile answer not valid JSON after a retry",
+  "AEWAGA36IBRJSPGU22XPXNWQ5IKA": "ValueError: profile answer not valid JSON after a retry",
+  "AHFTUNTAMNM2OCLYZ354IMQRNFXA": "ValueError: profile answer not valid JSON after a retry",
+  "AFUY6LGXVHX4ROUHDKLSJOJNEIBA": "ValueError: profile answer not valid JSON after a retry",
+  "AH3XBNCNQOKEIEJXE6HPE25FUWOA": "ValueError: profile answer not valid JSON after a retry",
+  "AEBKF72N5RQHVZK3I36ZG5ARWLLA": "ValueError: profile answer not valid JSON after a retry",
+  "AELG2L3OKJB53YLFYGDPFAMC6RZA": "ValueError: profile answer not valid JSON after a retry",
+  "AGQ2R6QQMRFS7WIBZLDOQ23BWQQA": "ValueError: profile answer not valid JSON after a retry",
+  "AGNS3HUYNW3VRL4HDBCRCDZSQTHA": "ValueError: profile answer not valid JSON after a retry",
+  "AGZKN5FSAJFP4RHNLB7FGUCCCM6A": "ValueError: profile answer not valid JSON after a retry",
+  "AGIGNJR4CXF3IDQQMB4UDLXCTRDQ": "ValueError: profile answer not valid JSON after a retry",
+  "AHVRWKPXG2QLZV36W437PN7CXZXA": "RuntimeError: LLM call failed after retries"
+ },
+ "calls": 765,
+ "new_calls": 738,
+ "cached_calls": 27,
+ "prompt_tokens": 348679,
+ "completion_tokens": 4793717,
+ "reasoning_tokens": 0,
+ "llm_seconds": 144104.9,
+ "wall_minutes": 339.5,
+ "finish_length": 319,
+ "invalid_extractions": 41,
+ "retries": 202,
+ "params": {
+  "temperature": 0,
+  "seed": 42,
+  "reasoning_effort": "high",
+  "max_tokens": 12000,
+  "response_format": {
+   "type": "json_object"
+  }
+ },
+ "model": "gpt-oss:20b"
+}

@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"old time classic war movies\", \"old classics\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 236, "completion_tokens": 971, "reasoning_tokens": 0, "seconds": 38.1, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "high", "max_tokens": 12000, "response_format": {"type": "json_object"}}}
