@@ -8,3 +8,4 @@ venv/
 kaggle/
 data/*
 !data/rr_input/
+!data/item_profiles/

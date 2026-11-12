@@ -3,9 +3,9 @@ similarity rows of rerank.py. evaluate.py calls this when the run holds personas
 (personas_train.jsonl, from personas.py --set train) and adds the column R7_lgbm to eval.md.
 
 Training queries: one per training user = LightGCN's top-k list for that user, scored with the embeddings the
-run saved (no training again), with the user's targets put in, exactly like the test lists. Labels: liked
-target (4-5 stars) 2, disliked target (1-2 stars) 0, everything else 1 (unseen candidates, 3-star targets).
-LightGBM's lambdarank objective with the gains 0/1/3 then rewards liked > unseen > disliked.
+run saved (no training again), with the user's targets put in, exactly like the test lists. Labels: every
+target (an item the user went on to review, any rating) 1, unseen candidates 0. LightGBM's lambdarank objective
+then learns to lift the user's interacted items; early stopping watches their mean rank on validation users.
 
 The model never sees the LightGCN score or rank. Targets enter a list with their own base score, usually below
 every candidate, so a model that saw the score would learn "low score = target" and lift disliked targets as
@@ -13,8 +13,8 @@ much as liked ones. The base score is added back outside the model: R7 = z(base)
 shape as the formulas, so R7 against R2/R3 compares a learned reading of the persona with a hand-written one.
 (The blueprint's rank-matched sampling is the way to let a model learn the fusion as well; not done here.)
 
-Outputs in <run>/: candidates_train.jsonl, lgbm.txt (the model), lgbm.json (sizes, validation NDCG@10,
-feature importance by gain).
+Outputs in <run>/: candidates_train.jsonl, lgbm.txt (the model), lgbm.json (sizes, validation mean target
+rank, feature importance by gain).
 """
 import json
 
@@ -23,10 +23,10 @@ import numpy as np
 import rerank as R
 
 FEATURES = ["like_max", "like_mean", "like_top3", "dis_max", "dis_mean", "dis_top3", "n_like", "n_dis",
-            "rocchio", "naive", "tau", "dis_over_tau", "z_like_max", "z_dis_max", "z_rocchio", "z_naive"]
+            "rocchio", "naive", "tau", "dis_over_tau", "z_like_max", "z_dis_max", "z_rocchio", "z_naive",
+            "like_praised", "dis_crit", "like_crit", "dis_praised", "n_crit", "z_like_praised", "z_dis_crit"]
 PARAMS = dict(objective="lambdarank", n_estimators=2000, learning_rate=0.03, num_leaves=15, min_child_samples=50,
-              subsample=0.8, subsample_freq=1, colsample_bytree=0.8, label_gain=[0, 1, 3], random_state=42,
-              verbose=-1)
+              subsample=0.8, subsample_freq=1, colsample_bytree=0.8, metric="None", random_state=42, verbose=-1)
 
 
 def write_candidates(run, inp, k, set_="train"):
@@ -53,22 +53,34 @@ def write_candidates(run, inp, k, set_="train"):
 def matrix(user):
     """The feature rows of user["list"], in that order (needs user["feat"] from rerank.attach)."""
     f, tau = user["feat"], user["tau"]
-    z = {c: R._z(user, c) for c in ("like_max", "dis_max", "rocchio", "naive")}
+    z = {c: R._z(user, c) for c in ("like_max", "dis_max", "rocchio", "naive", "like_praised", "dis_crit")}
     rows = [[r["like_max"], r["like_mean"], r["like_top3"], r["dis_max"], r["dis_mean"], r["dis_top3"],
              r["n_like"], r["n_dis"], r["rocchio"], r["naive"], tau, max(0.0, r["dis_max"] - tau),
-             z["like_max"](r["like_max"]), z["dis_max"](r["dis_max"]), z["rocchio"](r["rocchio"]), z["naive"](r["naive"])]
+             z["like_max"](r["like_max"]), z["dis_max"](r["dis_max"]), z["rocchio"](r["rocchio"]), z["naive"](r["naive"]),
+             r["like_praised"], r["dis_crit"], r["like_crit"], r["dis_praised"], r["n_crit"],
+             z["like_praised"](r["like_praised"]), z["dis_crit"](r["dis_crit"])]
             for r in (f[i] for i in user["list"])]
     return np.array(rows, dtype=np.float32)
 
 
 def labels(user):
-    t = {x["i"]: x["rating"] for x in user["targets"]}
-    return np.array([1 if t.get(i) is None or t[i] == 3 else 2 if t[i] >= 4 else 0 for i in user["list"]], dtype=np.int32)
+    t = {x["i"] for x in user["targets"]}
+    return np.array([1 if i in t else 0 for i in user["list"]], dtype=np.int32)
+
+
+def target_rank(y_true, y_pred, weight, group):
+    """Validation metric: mean rank of the targets inside their list under the model score; lower is better."""
+    ranks, start = [], 0
+    for g in group:
+        p, y = y_pred[start:start + g], y_true[start:start + g]
+        ranks += [int((p > p[j]).sum()) + 1 for j in np.flatnonzero(y == 1)]
+        start += g
+    return "target_rank", float(np.mean(ranks)), False
 
 
 def fit(users, run, val_share=0.15, seed=42):
     """LightGBM over the training users' rows; the last val_share of a shuffled user order is held out for early
-    stopping on NDCG@10. Writes lgbm.txt and lgbm.json; returns (model, info)."""
+    stopping on the mean target rank. Writes lgbm.txt and lgbm.json; returns (model, info)."""
     import lightgbm as lgb
     idx = np.random.default_rng(seed).permutation(len(users))
     n_val = int(len(users) * val_share) if len(users) >= 10 else 0
@@ -83,13 +95,14 @@ def fit(users, run, val_share=0.15, seed=42):
     kw = {}
     if val:
         Xv, yv, gv = stack(val)
-        kw = dict(eval_set=[(Xv, yv)], eval_group=[gv], eval_at=[10], callbacks=[lgb.early_stopping(100, verbose=False)])
+        kw = dict(eval_set=[(Xv, yv)], eval_group=[gv], eval_metric=target_rank,
+                  callbacks=[lgb.early_stopping(100, verbose=False)])
     model.fit(Xt, yt, group=gt, **kw)
     model.booster_.save_model(str(run / "lgbm.txt"))
     best = model.best_score_.get("valid_0", {}) if val else {}
-    info = {"train_users": len(tr), "val_users": len(val), "rows": int(len(yt)), "liked_rows": int((yt == 2).sum()),
-            "disliked_rows": int((yt == 0).sum()), "trees": int(model.best_iteration_ or model.n_estimators_),
-            "val_ndcg@10": round(float(best["ndcg@10"]), 4) if "ndcg@10" in best else None,
+    info = {"train_users": len(tr), "val_users": len(val), "rows": int(len(yt)), "target_rows": int((yt == 1).sum()),
+            "trees": int(model.best_iteration_ or model.n_estimators_),
+            "val_target_rank": round(float(best["target_rank"]), 1) if "target_rank" in best else None,
             "importance_gain": dict(zip(FEATURES, [round(float(x), 1) for x in model.booster_.feature_importance("gain")])),
             "params": PARAMS}
     (run / "lgbm.json").write_text(json.dumps(info, indent=1), encoding="utf-8")

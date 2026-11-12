@@ -2,12 +2,17 @@
 
   Table 7  step 1, preference extraction: one call per review -> what the user liked and disliked
   Table 8  step 2, user profile construction: one call on all step-1 outputs -> the persona
+  (ours)   item profile: one call on an item's reviews -> what reviewers praised and criticized
 
 The wording is the paper's. Every change is marked CHANGE:
   - JSON output instead of the paper's [Like]/[Dislike] bullet text, so the code can read it;
     "None." -> an empty list.
   - Table 8 output example has two placeholder items and "one bullet per list item". In the earlier PoC
     a one-item example made the model pack all bullets into one long string.
+  - Table 8 (2026-11-12): the model often left the "dislike" tag out entirely (a quarter of the personas had
+    no dislikes although every user had low-rated reviews with dislike bullets) and sometimes packed several
+    preferences into one long bullet. The prompt now asks for both tags with 5 short bullets each, about the
+    content, and tells it to leave out shipping / packaging / price / disc remarks.
 The star rating is not shown to the LLM (as in EXP3RT); the code keeps it next to every extraction.
 """
 REVIEW_MAX_WORDS = 3000   # context-window safety cap; real reviews are almost never this long
@@ -66,14 +71,15 @@ def extract(review_title, text):
 #   Each personalities should be about 5.
 # {preferences} = the step-1 outputs of the user's history reviews, oldest first, in the paper's own
 # [Like]/[Dislike] format.
+# CHANGE (2026-11-12): both tags required, 5 short bullets each, content only; see the module docstring.
 PROFILE = """These are the user's preferences about items: {preferences}
 
-Based on this preferences, point out the personality of the user under "like" and "dislike" in bullet point, respectively. If there is nothing to mention about like/dislike, simply write an empty list for the corresponding tag. List only about the preferences. DO NOT mention "Based on ".
+Based on this preferences, point out the personality of the user under "like" and "dislike" in bullet point, respectively. Write about the content the user likes and dislikes: genres, themes, tone, story, characters, acting, humor, pacing, visuals, music. Leave out preferences about shipping, packaging, price, disc or streaming quality. List only about the preferences. DO NOT mention "Based on ".
 
-### Output Format (JSON only, one bullet per list item):
-{{"like": ["<Summarize the \\"preferences\\" of the user in bullet points.>", "<...>"], "dislike": ["<Summarize the \\"preferences\\" of the user in bullet points.>", "<...>"]}}
+### Output Format (JSON only, with both tags; one preference per list item, each a short sentence of at most 12 words):
+{{"like": ["<Summarize the \\"preferences\\" of the user in bullet points.>", "<...>", "<...>", "<...>", "<...>"], "dislike": ["<Summarize the \\"preferences\\" of the user in bullet points.>", "<...>", "<...>", "<...>", "<...>"]}}
 
-Each personalities should be about 5."""
+Write 5 bullets under "like" and 5 bullets under "dislike". Write fewer under a tag only if the preferences do not contain 5 distinct ones; never invent a preference that is not in the list above."""
 
 
 def render_preferences(extractions):
@@ -92,4 +98,34 @@ def profile(extractions):
     return _user(PROFILE.format(preferences="\n" + render_preferences(extractions)))
 
 
-RETRY_NOTE = "\n\nReturn only valid JSON in exactly the format above."
+RETRY_NOTE = "\n\nReturn only valid JSON in exactly the format above, with both the \"like\" and the \"dislike\" tags."
+
+
+# ---------------------------------------------------------------------------
+# Item profile (ours, in the style of the two above): what reviewers praised and criticized about an item
+# ---------------------------------------------------------------------------
+# Input: up to a few of the item's lowest-rated and highest-rated reviews before the cutoff (prep_items.py),
+# each with its star rating, so the model can tell praise from criticism. Output lines are short, about the
+# content, in the same style as the persona lines, so one encoder can compare them line against line.
+ITEM_PROFILE = """These are reviews of the movie or show "{title}", each with the reviewer's star rating (1 to 5):
+{reviews}
+
+Based on these reviews, summarize what viewers praised and what they criticized about the movie or show itself, under "praised" and "criticized" in bullet points, respectively. Write about the content: story, genre, themes, tone, characters, acting, humor, pacing, visuals, music. Leave out remarks about shipping, packaging, price, disc or streaming quality. If nothing is praised or criticized, write an empty list for that tag. DO NOT write anything the reviews do not say.
+
+### Output Format (JSON only, with both tags; one point per list item, each a short sentence of at most 12 words):
+{{"praised": ["<What viewers praised about the movie or show.>", "<...>"], "criticized": ["<What viewers criticized about the movie or show.>", "<...>"]}}
+
+Write up to 5 bullets under each tag."""
+
+
+def item_profile(title, reviews):
+    """reviews: [{"rating": 1-5, "title": ..., "text": ...}] (already cleaned and cut by prep_items.py)."""
+    lines = []
+    for r in reviews:
+        head = (r.get("title") or "").strip()
+        body = (r.get("text") or "").strip()
+        lines.append(f"- ({r['rating']} stars) " + (f"{head}: {body}" if head and body else head or body))
+    return _user(ITEM_PROFILE.format(title=(title or "").strip() or "untitled", reviews="\n".join(lines)))
+
+
+RETRY_NOTE_ITEM = "\n\nReturn only valid JSON in exactly the format above, with both the \"praised\" and the \"criticized\" tags."

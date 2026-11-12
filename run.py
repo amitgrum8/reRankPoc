@@ -8,7 +8,10 @@
 
 Stages: environment check -> LightGCN (top 500 per test user) -> Ollama server + model -> reasoning check
 and timed calls -> EXP3RT personas for the test users, then for the reranker's training users (train_users.json;
---train-users 0 skips them) -> evaluation (formulas R1-R5, and LightGBM R7 trained on the training users).
+--train-users 0 skips them) -> item profiles (what reviewers praised and criticized, for the items in this run's
+lists; needs data/rr_input/item_reviews.jsonl.gz from prep_items.py; shared by all runs in data/item_profiles/;
+--item-profiles all|lists|skip, --smoke skips) -> evaluation (formulas R1-R5, R8-R9 with the item profiles,
+LightGBM R7 trained on the training users, and the swapped-persona control).
 Everything lands in runs/<name>/. Every LLM answer is cached in runs/cache/, shared by all runs, so repeating
 a run costs no LLM time.
 
@@ -232,6 +235,8 @@ def main():
     ap.add_argument("--port", type=int, default=11435)
     ap.add_argument("--hours", type=float, default=0, help="stop new LLM calls after this many hours (0 = never)")
     ap.add_argument("--no-json-mode", action="store_true")
+    ap.add_argument("--item-profiles", default=None, choices=("lists", "all", "skip"),
+                    help="LLM item profiles for the items in this run's lists (default), every item, or none (--smoke default)")
     ap.add_argument("--smoke", action="store_true", help="1 test user, 3 training users, LightGCN 2 min")
     ap.add_argument("--mock", action="store_true", help="fake LLM answers, no Ollama, CPU allowed")
     ap.add_argument("--cpu", action="store_true", help="allow LightGCN on the CPU")
@@ -240,6 +245,7 @@ def main():
         args.users, args.train_users = "1", "3"
         args.lgcn_minutes = args.lgcn_minutes or 2
     args.lgcn_minutes = args.lgcn_minutes or 30
+    args.item_profiles = args.item_profiles or ("skip" if args.smoke else "lists")
     args.input, args.cache = Path(args.input), Path(args.cache)
     out = Path(args.out) if args.out else HERE / "runs" / time.strftime("%Y-%m-%d_%H%M")
     out.mkdir(parents=True, exist_ok=True)
@@ -270,7 +276,11 @@ def main():
     for s in stages:
         if s not in todo:
             say(f"personas ({s[0]}): skipped, {s[3]} exists")
-    if todo:
+    reviews = args.input / "item_reviews.jsonl.gz"
+    want_profiles = args.item_profiles != "skip" and reviews.exists()
+    if args.item_profiles != "skip" and not reviews.exists():
+        say(f"item profiles: skipped, {reviews} is missing (run prep_items.py and push it)")
+    if todo or want_profiles:
         server, flags, base_url = None, [], "http://127.0.0.1:1/v1"
         if not args.mock:
             server = Ollama(find_ollama(), args.port, out / "ollama.log")
@@ -290,6 +300,17 @@ def main():
             if args.mock:
                 cmd += ["--mock"]
             run(cmd, must=set_ == "test")             # no training personas: the evaluation still runs, without R7
+        if want_profiles:                                 # 4b. item profiles, for the items in this run's lists
+            say(f"item profiles ({'every item' if args.item_profiles == 'all' else 'the items in this run'})")
+            cmd = [sys.executable, "-u", HERE / "item_profiles.py", "--input", args.input,
+                   "--out", HERE / "data" / "item_profiles", "--cache", args.cache, "--base-url", base_url,
+                   "--model", args.model, "--reasoning-effort", args.reasoning, "--threads", args.threads,
+                   "--items", args.item_profiles, "--run", out] + flags
+            if args.hours:
+                cmd += ["--deadline-hours", max(args.hours - (time.time() - t_llm) / 3600, 0.1)]
+            if args.mock:
+                cmd += ["--mock"]
+            run(cmd, must=False)                          # without profiles the evaluation runs without R8-R9
         if server:
             server.stop()
 

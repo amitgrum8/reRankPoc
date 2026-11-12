@@ -132,6 +132,9 @@ def _mock_answer(messages, meta):
     elif meta["role"] == "profile":
         content = json.dumps({"like": [f"likes theme {h % 9 + k}" for k in range(5)],
                               "dislike": [f"dislikes theme {h % 4 + k}" for k in range(5)]})
+    elif meta["role"] == "item":
+        content = json.dumps({"praised": [f"praised theme {h % 9 + k}" for k in range(3)],
+                              "criticized": [f"criticized theme {h % 4 + k}" for k in range(2)] if h % 5 else []})
     else:
         content = "{}"
     return {"content": content, "finish_reason": "stop", "prompt_tokens": 0, "completion_tokens": 0,

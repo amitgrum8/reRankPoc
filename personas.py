@@ -41,8 +41,12 @@ def as_list(x):
     return out
 
 
-def check(obj):
+def check(obj, both_tags=False):
+    """both_tags: the answer must contain "like" and "dislike" (the profile step; the model used to leave the
+    dislike tag out for a quarter of the users, which read as a persona with no dislikes)."""
     if not isinstance(obj, dict):
+        return None
+    if both_tags and not ("like" in obj and "dislike" in obj):
         return None
     like, dislike = as_list(obj.get("like", [])), as_list(obj.get("dislike", []))
     if like is None or dislike is None:
@@ -50,13 +54,18 @@ def check(obj):
     return {"like": like, "dislike": dislike}
 
 
-def ask(llm, messages, meta):
-    """One call, validated; one retry with a note. Returns (result or None, n_attempts)."""
-    res = check(parse_json(llm.call(messages, meta)))
+def ask(llm, messages, meta, both_tags=False):
+    """One call, validated; one retry with a note. Returns (result or None, missing_tag): after the retry an
+    answer with a missing tag is accepted and flagged (both_tags), so a user is not lost over it."""
+    res = check(parse_json(llm.call(messages, meta)), both_tags)
     if res is not None:
-        return res, 1
+        return res, False
     retry = [{"role": "user", "content": messages[-1]["content"] + P.RETRY_NOTE}]
-    return check(parse_json(llm.call(retry, {**meta, "retry": True}))), 2
+    ans = parse_json(llm.call(retry, {**meta, "retry": True}))
+    res = check(ans, both_tags)
+    if res is None and both_tags:
+        return check(ans), True
+    return res, False
 
 
 def run_user(llm, tu):
@@ -68,11 +77,12 @@ def run_user(llm, tu):
                         "title": h["title"], "rating": h["rating"], "ts": h["ts"],
                         "like": res["like"] if res else [], "dislike": res["dislike"] if res else [],
                         "valid": res is not None})
-    persona, _ = ask(llm, P.profile(ex_rows), {"role": "profile", "user": tu["user_id"]})
+    persona, missing = ask(llm, P.profile(ex_rows), {"role": "profile", "user": tu["user_id"]}, both_tags=True)
     if persona is None:
         raise ValueError("profile answer not valid JSON after a retry")
     return ex_rows, {"user_id": tu["user_id"], "u": tu["u"], "like": persona["like"], "dislike": persona["dislike"],
-                     "n_reviews": len(ex_rows), "n_invalid_extractions": sum(not r["valid"] for r in ex_rows)}
+                     "n_reviews": len(ex_rows), "n_invalid_extractions": sum(not r["valid"] for r in ex_rows),
+                     "missing_tag": missing}
 
 
 def main():
@@ -155,6 +165,8 @@ def main():
                "llm_seconds": round(s["seconds"], 1), "wall_minutes": round((time.time() - t0) / 60, 1),
                "finish_length": sum(c.get("finish_reason") == "length" for c in new_calls),
                "invalid_extractions": sum(not r["valid"] for r in extractions),
+               "profiles_missing_tag": sum(bool(p.get("missing_tag")) for p in personas),
+               "profiles_no_dislikes": sum(not p["dislike"] for p in personas),
                "retries": sum(bool(c.get("retry")) for c in llm.log_lines),
                "params": llm.params, "model": args.model}
     (out / f"summary{sfx}.json").write_text(json.dumps(summary, indent=1), encoding="utf-8")
