@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"My wife enjoys the show and laughs at it.\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 225, "completion_tokens": 109, "reasoning_tokens": 0, "seconds": 4.38, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

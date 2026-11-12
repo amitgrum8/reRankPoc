@@ -1,0 +1,1 @@
+{"content": "{\"like\": [], \"dislike\": [\"Horrible acting, not humorous, and not as good as the original\"]}", "finish_reason": "stop", "prompt_tokens": 257, "completion_tokens": 76, "reasoning_tokens": 0, "seconds": 3.12, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

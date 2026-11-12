@@ -1,0 +1,44 @@
+{
+ "train_users": 595,
+ "val_users": 105,
+ "rows": 301556,
+ "liked_rows": 2940,
+ "disliked_rows": 1305,
+ "trees": 22,
+ "val_ndcg@10": 0.5228,
+ "importance_gain": {
+  "like_max": 213.9,
+  "like_mean": 439.4,
+  "like_top3": 271.2,
+  "dis_max": 203.3,
+  "dis_mean": 322.2,
+  "dis_top3": 197.1,
+  "n_like": 0.0,
+  "n_dis": 0.0,
+  "rocchio": 346.9,
+  "naive": 479.8,
+  "tau": 179.7,
+  "dis_over_tau": 9.7,
+  "z_like_max": 252.3,
+  "z_dis_max": 179.1,
+  "z_rocchio": 670.8,
+  "z_naive": 435.9
+ },
+ "params": {
+  "objective": "lambdarank",
+  "n_estimators": 2000,
+  "learning_rate": 0.03,
+  "num_leaves": 15,
+  "min_child_samples": 50,
+  "subsample": 0.8,
+  "subsample_freq": 1,
+  "colsample_bytree": 0.8,
+  "label_gain": [
+   0,
+   1,
+   3
+  ],
+  "random_state": 42,
+  "verbose": -1
+ }
+}

@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"Good view on a Friday night\"], \"dislike\": [\"Limited options for activities\"]}", "finish_reason": "stop", "prompt_tokens": 223, "completion_tokens": 54, "reasoning_tokens": 0, "seconds": 3.47, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

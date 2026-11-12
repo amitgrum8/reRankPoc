@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"beautiful movie\", \"brings you to a classic noble time\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 227, "completion_tokens": 64, "reasoning_tokens": 0, "seconds": 2.51, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

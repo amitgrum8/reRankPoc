@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"Robert Horton\"], \"dislike\": [\"lack of 50's feel\", \"disc didn't play right\"]}", "finish_reason": "stop", "prompt_tokens": 246, "completion_tokens": 63, "reasoning_tokens": 0, "seconds": 2.34, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

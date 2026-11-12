@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"They love the series and buy every single season.\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 222, "completion_tokens": 42, "reasoning_tokens": 0, "seconds": 1.87, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

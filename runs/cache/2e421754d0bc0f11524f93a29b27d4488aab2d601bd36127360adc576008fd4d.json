@@ -1,0 +1,1 @@
+{"content": "{\"like\": [], \"dislike\": [\"scatterbrained\", \"slow\", \"poorly done\"]}", "finish_reason": "stop", "prompt_tokens": 229, "completion_tokens": 67, "reasoning_tokens": 0, "seconds": 2.89, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

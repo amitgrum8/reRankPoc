@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"very good show\", \"better than wagon train\"], \"dislike\": [\"not continuous\"]}", "finish_reason": "stop", "prompt_tokens": 235, "completion_tokens": 56, "reasoning_tokens": 0, "seconds": 2.43, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"Better than the 1979 version\", \"Closer to the book version\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 256, "completion_tokens": 58, "reasoning_tokens": 0, "seconds": 2.38, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

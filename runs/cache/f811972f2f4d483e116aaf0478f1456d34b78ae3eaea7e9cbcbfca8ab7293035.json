@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"engrossing film about St. Augustine's life\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 252, "completion_tokens": 69, "reasoning_tokens": 0, "seconds": 3.35, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"better Jack Nicholson movies\", \"werewolf\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 223, "completion_tokens": 43, "reasoning_tokens": 0, "seconds": 1.93, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

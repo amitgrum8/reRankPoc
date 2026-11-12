@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"Hugh O' Brien is great.\"], \"dislike\": [\"found it way too expensive.\"]}", "finish_reason": "stop", "prompt_tokens": 235, "completion_tokens": 53, "reasoning_tokens": 0, "seconds": 2.69, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

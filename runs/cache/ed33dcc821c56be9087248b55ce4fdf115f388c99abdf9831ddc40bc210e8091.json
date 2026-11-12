@@ -1,0 +1,1 @@
+{"content": "{\"like\": [\"Golden age of cartoons\"], \"dislike\": []}", "finish_reason": "stop", "prompt_tokens": 221, "completion_tokens": 73, "reasoning_tokens": 0, "seconds": 2.45, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

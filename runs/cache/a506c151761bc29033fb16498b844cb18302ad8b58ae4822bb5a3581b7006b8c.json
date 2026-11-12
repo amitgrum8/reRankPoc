@@ -1,0 +1,1 @@
+{"content": "{\"like\": [], \"dislike\": [\"The lack of language information before clicking on the film\"]}", "finish_reason": "stop", "prompt_tokens": 288, "completion_tokens": 45, "reasoning_tokens": 0, "seconds": 2.55, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}
