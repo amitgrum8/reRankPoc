@@ -13,6 +13,11 @@ The wording is the paper's. Every change is marked CHANGE:
     no dislikes although every user had low-rated reviews with dislike bullets) and sometimes packed several
     preferences into one long bullet. The prompt now asks for both tags with 5 short bullets each, about the
     content, and tells it to leave out shipping / packaging / price / disc remarks.
+  - Table 8 (2026-11-13): each block of step-1 bullets now starts with the movie's title, and the prompt asks
+    for specific bullets (the kind of movie or show: genre, setting, era, theme, series, people) instead of
+    lines that fit any movie. In run 2026-11-12_2152, 69% of the users with dislikes had only generic dislike
+    lines ("weak plot", "boring", "bad acting"), which a movie description can never match; without the
+    titles the model could not know what kind of movie a bullet was about.
 The star rating is not shown to the LLM (as in EXP3RT); the code keeps it next to every extraction.
 """
 REVIEW_MAX_WORDS = 3000   # context-window safety cap; real reviews are almost never this long
@@ -72,23 +77,26 @@ def extract(review_title, text):
 # {preferences} = the step-1 outputs of the user's history reviews, oldest first, in the paper's own
 # [Like]/[Dislike] format.
 # CHANGE (2026-11-12): both tags required, 5 short bullets each, content only; see the module docstring.
-PROFILE = """These are the user's preferences about items: {preferences}
+# CHANGE (2026-11-13): a [Title] line per block and specific bullets; see the module docstring.
+PROFILE = """These are the user's preferences about movies and shows, one block per title the user reviewed: {preferences}
 
-Based on this preferences, point out the personality of the user under "like" and "dislike" in bullet point, respectively. Write about the content the user likes and dislikes: genres, themes, tone, story, characters, acting, humor, pacing, visuals, music. Leave out preferences about shipping, packaging, price, disc or streaming quality. List only about the preferences. DO NOT mention "Based on ".
+Based on this preferences, point out the personality of the user under "like" and "dislike" in bullet point, respectively. Make every bullet specific to the kind of movie or show it is about: genre, setting, era, theme, series, actor or director, as the titles above show. A bullet that fits almost any movie, such as "good acting", "a well-written story" or "boring plots", says nothing about this user: tie it to the kind of movie or show where the user liked or disliked it (for example "practical effects in 1980s monster movies" rather than "great effects"). Leave out preferences about shipping, packaging, price, disc or streaming quality. List only about the preferences. DO NOT mention "Based on ".
 
-### Output Format (JSON only, with both tags; one preference per list item, each a short sentence of at most 12 words):
+### Output Format (JSON only, with both tags; one preference per list item, each a short sentence of at most 15 words):
 {{"like": ["<Summarize the \\"preferences\\" of the user in bullet points.>", "<...>", "<...>", "<...>", "<...>"], "dislike": ["<Summarize the \\"preferences\\" of the user in bullet points.>", "<...>", "<...>", "<...>", "<...>"]}}
 
 Write 5 bullets under "like" and 5 bullets under "dislike". Write fewer under a tag only if the preferences do not contain 5 distinct ones; never invent a preference that is not in the list above."""
 
 
 def render_preferences(extractions):
-    """Step-1 outputs in the paper's [Like]/[Dislike] format, one block per review."""
+    """Step-1 outputs in the paper's [Like]/[Dislike] format, one block per review, headed by the movie's title
+    (CHANGE 2026-11-13; no title line when the item has none)."""
     blocks = []
     for ex in extractions:
         if not ex["like"] and not ex["dislike"]:
             continue
-        lines = ["[Like]"] + ([f"- {x}" for x in ex["like"]] or ["- None."])
+        title = (ex.get("title") or "").strip()
+        lines = ([f"[Title] {title}"] if title else []) + ["[Like]"] + ([f"- {x}" for x in ex["like"]] or ["- None."])
         lines += ["[Dislike]"] + ([f"- {x}" for x in ex["dislike"]] or ["- None."])
         blocks.append("\n".join(lines))
     return "\n\n".join(blocks) if blocks else "None."

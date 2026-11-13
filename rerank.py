@@ -9,11 +9,16 @@ Every item in a user's list becomes one row of numbers, the same row LightGBM (l
   n_like, n_dis              number of persona lines
   rocchio                    cosine to one merged vector mean(likes) - gamma * mean(dislikes)
   naive                      cosine to the whole persona as one string ("Likes: ... Dislikes: ...")
+  like_s1..s5, dis_s1..s5    every like / dislike line's cosine to the item text, sorted per item (s1 = the closest
+                             line = like_max, s2 the 2nd closest, ...), so position k means the same for every
+                             user; a persona with fewer lines repeats its farthest one, none -> 0 (mix.py, R10)
 With item profiles (item_profiles.py: what reviewers praised and criticized about the item, a few short lines
 each), persona line against item line, the closest pair:
   like_praised, dis_crit     like lines x praised lines; dislike lines x criticized lines
   like_crit, dis_praised     the cross pairs: the user likes what the item is criticized for, and the reverse
   n_crit                     number of criticized lines (0 also when the item has no profile)
+  dis_crit_s1..s5            per dislike line its closest criticized line, sorted over the dislike lines (s1 =
+                             dis_crit); 0 when the persona has no dislikes or the item no criticized lines (mix.py, R11)
 Likes and dislikes stay in separate columns, so a formula (or a model) can give them opposite signs.
 
 Encoder: BAAI/bge-small-en-v1.5, frozen. Item text = title + description (first 120 words). Cached in
@@ -147,6 +152,18 @@ def pooled(sim):
     return s[0], sim.mean(0), s[:3].mean(0)
 
 
+K_SORTED = 5
+
+
+def sorted_sims(sim, k=K_SORTED):
+    """sim: (lines, items) -> (k, items): each item's cosine to its closest line, 2nd closest, ...; fewer than k
+    lines repeat the farthest one; no lines -> zeros."""
+    if sim.shape[0] == 0:
+        return np.zeros((k, sim.shape[1]), np.float32)
+    s = -np.sort(-sim, axis=0)
+    return s[np.minimum(np.arange(k), len(s) - 1)]
+
+
 def _mx(A, B):
     """Closest pair between the rows of A and the rows of B (cosine; the rows are unit vectors), 0 if either is empty."""
     return float((A @ B.T).max()) if len(A) and len(B) else 0.0
@@ -175,8 +192,10 @@ def attach(users, items, enc, profiles=None, seed=42):
         u = u / (np.linalg.norm(u) or 1.0)
         ids = user["list"]
         M = enc.items(ids, items)
-        lmax, lmean, ltop3 = pooled(L @ M.T)
-        dmax, dmean, dtop3 = pooled(D @ M.T)
+        SL, SD = L @ M.T, D @ M.T
+        lmax, lmean, ltop3 = pooled(SL)
+        dmax, dmean, dtop3 = pooled(SD)
+        ls, ds = sorted_sims(SL), sorted_sims(SD)
         tau = float(np.percentile(pooled(D @ R.T)[0], 95)) if len(D) else 0.0
         cand = np.array([user["base"][i] for i in user["candidates"]])
         feat = {}
@@ -189,6 +208,10 @@ def attach(users, items, enc, profiles=None, seed=42):
                        "rocchio": float(M[k] @ u), "naive": float(M[k] @ q),
                        "like_praised": _mx(L, P), "dis_crit": _mx(D, C), "like_crit": _mx(L, C),
                        "dis_praised": _mx(D, P), "n_crit": len(C)}
+            dc = sorted_sims((D @ C.T).max(1, keepdims=True)) if len(D) and len(C) else np.zeros((K_SORTED, 1))
+            for j in range(K_SORTED):
+                feat[i][f"like_s{j + 1}"], feat[i][f"dis_s{j + 1}"] = float(ls[j, k]), float(ds[j, k])
+                feat[i][f"dis_crit_s{j + 1}"] = float(dc[j, 0])
         user["feat"], user["tau"] = feat, tau
 
 

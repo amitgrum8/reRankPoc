@@ -23,8 +23,9 @@ it still moves is the lift any text gives, not personalization.
 A reranker is a function rerank(user) -> {item: score} over user["list"] (see RERANKERS at the bottom).
 "lightgcn" keeps LightGCN's order; the formulas R1-R5 come from rerank.py (similarity features between the
 persona lines and the item text) when sentence-transformers is installed, R8-R9 when item profiles exist
-(data/item_profiles/item_profiles.jsonl from item_profiles.py); R7_lgbm from train.py when the run holds
-personas for the training users (personas_train.jsonl).
+(data/item_profiles/item_profiles.jsonl from item_profiles.py); R7_lgbm from train.py and R10_mix (a learned
+linear mix of LightGCN and the sorted persona similarities) from mix.py when the run holds personas for the
+training users (personas_train.jsonl). R10_mix's fitted weights go below the tables.
 """
 import argparse
 import json
@@ -175,7 +176,8 @@ def main():
     ap.add_argument("--show", type=int, default=1, help="print this many example users")
     ap.add_argument("--show-with", default="R1_like", help="the reranker whose list the examples show")
     ap.add_argument("--no-rerank", action="store_true", help="LightGCN column only (no encoder needed)")
-    ap.add_argument("--no-train", action="store_true", help="skip the LightGBM reranker even if personas_train.jsonl exists")
+    ap.add_argument("--no-train", action="store_true",
+                    help="skip the trained rerankers (R7_lgbm, R10_mix) even if personas_train.jsonl exists")
     ap.add_argument("--write-features", action="store_true", help="write the test users' feature rows to features.jsonl")
     ap.add_argument("--alpha", type=float, default=1.0, help="weight of the like similarity / model score (rerank.py)")
     ap.add_argument("--beta", type=float, default=1.0, help="weight of the dislike penalty (rerank.py)")
@@ -187,7 +189,7 @@ def main():
     print(f"{len(users)} test users" + (" (with a persona)" if users and users[0]["persona"] else "")
           + (f", lists of {len(users[0]['candidates'])}" if users else ""))
 
-    rerankers, swapped = dict(RERANKERS), {}
+    rerankers, swapped, mix_info = dict(RERANKERS), {}, {}
     if users and users[0]["persona"] and not args.no_rerank:
         try:
             import rerank as R
@@ -225,6 +227,18 @@ def main():
                       f"{info['val_users']} users -> lgbm.txt, lgbm.json")
                 top = sorted(info["importance_gain"].items(), key=lambda kv: -kv[1])[:5]
                 print("  most used features (gain): " + ", ".join(f"{k} {v:.0f}" for k, v in top))
+                import mix as MX
+                for name, inputs in MX.MIXES.items():
+                    if name in MX.PROFILE_MIXES and not profiles:
+                        continue
+                    weights, mix_info[name] = MX.fit(users_train, inputs)
+                    rerankers[name] = MX.reranker(weights)
+                    fit_check = evaluate(users_train, rerankers[name])
+                    m = mix_info[name]
+                    print(f"{name} on {m['users']} training users with an in-list target ({m['targets']} targets, "
+                          f"{m['iterations']} Newton steps, converged {m['converged']}): in-list rank change on the "
+                          f"training users {fit_check['in_list_rank_change']:+.1f} (in-sample)")
+                (run / "mix.json").write_text(json.dumps(mix_info, indent=1), encoding="utf-8")
             if not args.no_swap and len(users) > 1:        # the control: every user gets another user's persona
                 users_swap = swap_personas(users)
                 R.attach(users_swap, items, enc, profiles)
@@ -248,6 +262,8 @@ def main():
         lines += ["", "| reranker | in-list rank change, own persona | another user's persona |", "|---|---|---|"]
         for name in swapped:
             lines.append(f"| {name} | {rows[name]['in_list_rank_change']:+.1f} | {rows_swap[name]['in_list_rank_change']:+.1f} |")
+    for name, m in mix_info.items():
+        lines += MX.weight_lines(name, m)
     out = "\n".join(lines)
     print(out)
     (run / "eval.md").write_text(out + "\n", encoding="utf-8")
