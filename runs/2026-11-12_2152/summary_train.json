@@ -1,0 +1,30 @@
+{
+ "users_done": 698,
+ "users_failed": {
+  "AGGABN224YER3QKCLXHNZYNG545A": "RuntimeError: LLM call failed after retries",
+  "AHJ3S3V3XBCJZFF7EE4RALKBJPPQ": "RuntimeError: LLM call failed after retries"
+ },
+ "calls": 7964,
+ "new_calls": 964,
+ "cached_calls": 7000,
+ "prompt_tokens": 762211,
+ "completion_tokens": 129148,
+ "reasoning_tokens": 0,
+ "llm_seconds": 4162.5,
+ "wall_minutes": 26.7,
+ "finish_length": 1,
+ "invalid_extractions": 0,
+ "profiles_missing_tag": 90,
+ "profiles_no_dislikes": 92,
+ "retries": 266,
+ "params": {
+  "temperature": 0,
+  "seed": 42,
+  "reasoning_effort": "low",
+  "max_tokens": 12000,
+  "response_format": {
+   "type": "json_object"
+  }
+ },
+ "model": "gpt-oss:20b"
+}

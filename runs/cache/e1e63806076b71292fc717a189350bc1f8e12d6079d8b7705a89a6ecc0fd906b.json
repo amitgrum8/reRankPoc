@@ -1,0 +1,1 @@
+{"content": "{\"praised\": [\"Depicts social chaos and counterculture of the 1970s.\"], \"criticized\": []}", "finish_reason": "stop", "prompt_tokens": 796, "completion_tokens": 248, "reasoning_tokens": 0, "seconds": 8.24, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

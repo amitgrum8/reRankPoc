@@ -1,0 +1,24 @@
+{
+ "items_done": 49312,
+ "items_failed": 0,
+ "errors": {},
+ "already_done": 0,
+ "calls": 65964,
+ "new_calls": 65964,
+ "cached_calls": 0,
+ "prompt_tokens": 55034795,
+ "completion_tokens": 12307258,
+ "llm_seconds": 419925.6,
+ "wall_minutes": 876.9,
+ "invalid": 7303,
+ "params": {
+  "temperature": 0,
+  "seed": 42,
+  "reasoning_effort": "low",
+  "max_tokens": 12000,
+  "response_format": {
+   "type": "json_object"
+  }
+ },
+ "model": "gpt-oss:20b"
+}

@@ -1,0 +1,1 @@
+{"content": "{\"praised\": [\"Beautiful film, music, and actors\"], \"criticized\": []}", "finish_reason": "stop", "prompt_tokens": 747, "completion_tokens": 1178, "reasoning_tokens": 0, "seconds": 20.47, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}

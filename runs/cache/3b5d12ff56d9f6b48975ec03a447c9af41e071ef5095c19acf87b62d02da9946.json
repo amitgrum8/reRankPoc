@@ -1,0 +1,1 @@
+{"content": "{\"praised\": [\"Enjoyed J. Edgar unexpectedly\", \"Liked Gran Torino\"], \"criticized\": []}", "finish_reason": "stop", "prompt_tokens": 386, "completion_tokens": 112, "reasoning_tokens": 0, "seconds": 4.0, "model": "gpt-oss:20b", "params": {"temperature": 0, "seed": 42, "reasoning_effort": "low", "max_tokens": 12000, "response_format": {"type": "json_object"}}}
