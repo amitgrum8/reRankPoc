@@ -23,9 +23,12 @@ it still moves is the lift any text gives, not personalization.
 A reranker is a function rerank(user) -> {item: score} over user["list"] (see RERANKERS at the bottom).
 "lightgcn" keeps LightGCN's order; the formulas R1-R5 come from rerank.py (similarity features between the
 persona lines and the item text) when sentence-transformers is installed, R8-R9 when item profiles exist
-(data/item_profiles/item_profiles.jsonl from item_profiles.py); R7_lgbm from train.py and R10_mix (a learned
-linear mix of LightGCN and the sorted persona similarities) from mix.py when the run holds personas for the
-training users (personas_train.jsonl). R10_mix's fitted weights go below the tables.
+(data/item_profiles/item_profiles.jsonl from item_profiles.py); R7_lgbm from train.py and the learned linear
+mixes R10-R12 from mix.py when the run holds personas for the training users (personas_train.jsonl); their fitted
+weights go below the tables. R12 compares the like lines with each movie's good review sentences and the dislike
+lines with its bad ones (data/rr_input/item_reviews.jsonl.gz). --encoder picks the text encoder for everything
+(default bge-small); --tag NAME writes eval_NAME.md and mix_NAME.json, so runs with different encoders sit side by
+side. The first line of eval.md records the run, encoder and weights.
 """
 import argparse
 import json
@@ -177,13 +180,20 @@ def main():
     ap.add_argument("--show-with", default="R1_like", help="the reranker whose list the examples show")
     ap.add_argument("--no-rerank", action="store_true", help="LightGCN column only (no encoder needed)")
     ap.add_argument("--no-train", action="store_true",
-                    help="skip the trained rerankers (R7_lgbm, R10_mix) even if personas_train.jsonl exists")
+                    help="skip the trained rerankers (R7_lgbm, R10-R12 mixes) even if personas_train.jsonl exists")
+    ap.add_argument("--encoder", default="BAAI/bge-small-en-v1.5",
+                    help="sentence-transformers model for every text; rerank.ENCODERS lists the known ones "
+                         "(e.g. BAAI/bge-large-en-v1.5, Qwen/Qwen3-Embedding-4B)")
+    ap.add_argument("--no-reviews", action="store_true",
+                    help="skip the items' own review sentences (R12) even if item_reviews.jsonl.gz exists")
+    ap.add_argument("--tag", default="", help="write eval_<tag>.md and mix_<tag>.json instead of eval.md and mix.json")
     ap.add_argument("--write-features", action="store_true", help="write the test users' feature rows to features.jsonl")
     ap.add_argument("--alpha", type=float, default=1.0, help="weight of the like similarity / model score (rerank.py)")
     ap.add_argument("--beta", type=float, default=1.0, help="weight of the dislike penalty (rerank.py)")
     ap.add_argument("--gamma", type=float, default=1.0, help="dislike weight inside the Rocchio vector (rerank.py)")
     args = ap.parse_args()
     run, inp = Path(args.run), Path(args.input)
+    sfx = f"_{args.tag}" if args.tag else ""
     users = build_users(run, inp)
     items = json.loads((inp / "items.json").read_text(encoding="utf-8"))
     print(f"{len(users)} test users" + (" (with a persona)" if users and users[0]["persona"] else "")
@@ -197,7 +207,7 @@ def main():
             print(f"persona reranker skipped ({e}); pip install sentence-transformers")
         else:
             R.PARAMS.update(alpha=args.alpha, beta=args.beta, gamma=args.gamma)
-            enc = R.Encoder()
+            enc = R.Encoder(args.encoder)
             ppath = Path(args.profiles) if args.profiles else R.PROFILES_PATH
             profiles = None
             if ppath.exists() and not args.no_profiles:
@@ -205,7 +215,13 @@ def main():
                 print(f"item profiles: {len(profiles.lines)} items in {ppath}")
             else:
                 print(f"no item profiles ({ppath} missing): R8-R9 skipped; run prep_items.py and item_profiles.py")
-            R.attach(users, items, enc, profiles)
+            rpath, reviews = inp / "item_reviews.jsonl.gz", None
+            if rpath.exists() and not args.no_reviews:
+                reviews = R.Reviews(enc, rpath)
+                print(f"item reviews: {len(reviews.units)} items in {rpath}")
+            else:
+                print(f"no item reviews ({rpath} missing or --no-reviews): R12 skipped")
+            R.attach(users, items, enc, profiles, reviews)
             if args.write_features:
                 R.write_features(users, run / "features.jsonl")
             rerankers.update(R.RERANKERS)
@@ -219,7 +235,7 @@ def main():
                     n = T.write_candidates(run, inp, k=len(users[0]["candidates"]))
                     print(f"candidates_train.jsonl: lists for {n} training users from embeddings.npz")
                 users_train = build_users(run, inp, "train")
-                R.attach(users_train, items, enc, profiles)
+                R.attach(users_train, items, enc, profiles, reviews)
                 model, info = T.fit(users_train, run)
                 rerankers["R7_lgbm"] = T.reranker(model, alpha=args.alpha)
                 print(f"LightGBM on {info['train_users']} training users ({info['rows']} rows, {info['target_rows']} targets): "
@@ -229,7 +245,8 @@ def main():
                 print("  most used features (gain): " + ", ".join(f"{k} {v:.0f}" for k, v in top))
                 import mix as MX
                 for name, inputs in MX.MIXES.items():
-                    if name in MX.PROFILE_MIXES and not profiles:
+                    need = MX.NEEDS.get(name)
+                    if (need == "profiles" and not profiles) or (need == "reviews" and not reviews):
                         continue
                     weights, mix_info[name] = MX.fit(users_train, inputs)
                     rerankers[name] = MX.reranker(weights)
@@ -238,16 +255,17 @@ def main():
                     print(f"{name} on {m['users']} training users with an in-list target ({m['targets']} targets, "
                           f"{m['iterations']} Newton steps, converged {m['converged']}): in-list rank change on the "
                           f"training users {fit_check['in_list_rank_change']:+.1f} (in-sample)")
-                (run / "mix.json").write_text(json.dumps(mix_info, indent=1), encoding="utf-8")
+                (run / f"mix{sfx}.json").write_text(json.dumps(mix_info, indent=1), encoding="utf-8")
             if not args.no_swap and len(users) > 1:        # the control: every user gets another user's persona
                 users_swap = swap_personas(users)
-                R.attach(users_swap, items, enc, profiles)
+                R.attach(users_swap, items, enc, profiles, reviews)
                 by_id = {u["user_id"]: u for u in users_swap}
                 swapped = {name: (lambda user, f=f: f(by_id[user["user_id"]]))
                            for name, f in rerankers.items() if name != "lightgcn"}
 
     rows = {name: evaluate(users, f) for name, f in rerankers.items()}
-    lines = table(rows)
+    lines = [f"run {run.name} | encoder {args.encoder if len(rerankers) > 1 else 'none'} | alpha {args.alpha} "
+             f"beta {args.beta} gamma {args.gamma}", ""] + table(rows)
     if len(rerankers) > 1:
         lines += ["", "mean rank change of the in-list targets per user, bootstrap over users (95% interval):", "",
                   "| reranker | mean change | 2.5% | 97.5% |", "|---|---|---|---|"]
@@ -266,7 +284,7 @@ def main():
         lines += MX.weight_lines(name, m)
     out = "\n".join(lines)
     print(out)
-    (run / "eval.md").write_text(out + "\n", encoding="utf-8")
+    (run / f"eval{sfx}.md").write_text(out + "\n", encoding="utf-8")
     for user in users[:args.show]:
         show_user(user, items, rerankers.get(args.show_with, rerank_lightgcn))
 

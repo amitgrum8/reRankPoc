@@ -22,9 +22,12 @@ The plan and its reasons are in `BLUEPRINT.md`. The pipeline:
    like line, closest dislike line, closest praised line, closest criticized line, LightGCN score, ...). The
    formulas R1–R5 (movie description) and R8–R9 (movie reviews) turn the row into a score with fixed weights;
    R7 is LightGBM (lambdarank, label = the user interacted with the item) trained on the training users' rows,
-   with the LightGCN score kept out of the model and added back as z(base) + z(model). R10 is a learned linear
-   mix: logistic regression on the training users' lists over z(LightGCN) and every like / dislike line's
-   cosine to the movie, sorted per movie (11 weights, `mix.py`); its weights replace alpha and beta.
+   with the LightGCN score kept out of the model and added back as z(base) + z(model). R10–R12 are learned
+   linear mixes (`mix.py`): logistic regression on the training users' lists over z(LightGCN) and each like /
+   dislike line's best cosine, sorted per movie; their weights replace alpha and beta. R10 compares the persona
+   with the movie description, R11 the dislikes with what reviewers criticized (item profiles), and R12 the likes
+   with the sentences of the movie's good reviews (4–5 stars) and the dislikes with those of its bad reviews
+   (1–2 stars), from `data/rr_input/item_reviews.jsonl.gz`.
 5. **Evaluation** (`evaluate.py`): per reranker, how much the user's interacted items (the targets, any rating)
    moved inside LightGCN's list: mean rank change, moved up / stayed / moved down, pulled into the list; a
    bootstrap interval over users; and a control where every user gets another user's persona.
@@ -84,13 +87,16 @@ resumed run (`--out runs\<same folder>`) costs no LLM time. `uv run python run.p
 | `personas.py`, `prompts.py`, `llm.py` | EXP3RT personas → `personas.jsonl`, `extractions.jsonl`, `calls.jsonl`, `summary.json` |
 | `rerank.py` | persona reranker without an LLM: similarity features per (persona, movie), formulas R1–R5 and R8–R9 |
 | `train.py` | LightGBM reranker R7: training users' lists from `embeddings.npz`, lambdarank over the feature rows |
-| `mix.py` | learned linear mix R10: logistic regression over LightGCN + sorted persona similarities → `mix.json` |
+| `mix.py` | learned linear mixes R10–R12: logistic regression over LightGCN + sorted persona similarities → `mix.json` |
 | `evaluate.py` | metrics per reranker → `eval.md`, plus example users (`--show 2 --show-with R1_like`) |
 
 Plumbing check without a GPU or an LLM (fake answers): `python run.py --mock --cpu --lgcn-minutes 0.5 --users 5 --train-users 20`.
 Re-evaluating a run on any machine (the first time downloads bge-small, 130 MB, and encodes the movies in the
 lists, minutes on a CPU, cached in `data/vectors/`): `python evaluate.py runs\<date_time>`, with `--alpha`,
-`--beta`, `--gamma` for the formula weights and `--no-train` to skip LightGBM and the mix.
+`--beta`, `--gamma` for the formula weights and `--no-train` to skip LightGBM and the mixes. `--encoder NAME`
+switches the text encoder for everything (known names and their query prefixes: `ENCODERS` in `rerank.py`;
+vectors are cached per encoder in `data/vectors/`), and `--tag NAME` writes `eval_NAME.md` / `mix_NAME.json`, so
+runs with different encoders sit side by side.
 
 Budget of the real run at reasoning "low": about 11 LLM calls per user (10 reviews + 1 profile), roughly a
 minute per user with 4 parallel requests, so 300 test users take about 5 hours and the 700 training users about
