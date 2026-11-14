@@ -3,4 +3,6 @@
 numpy==2.0.2
 openai>=1.60
 sentence-transformers>=3.0     # rerank.py: the text encoder for the persona reranker (CPU is fine)
-lightgbm>=4.0                  # level L1 of the reranker, later
+transformers>=4.51             # Qwen3-Embedding (rerank.py --encoder Qwen/Qwen3-Embedding-*)
+lightgbm>=4.0                  # LightGBM reranker R7 (train.py)
+scikit-learn>=1.3              # LightGBM's LGBMRanker needs it

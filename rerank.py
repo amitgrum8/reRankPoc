@@ -104,7 +104,9 @@ class Encoder:
         cuda = torch.cuda.is_available()
         kw = {}
         if cfg.get("bf16") and cuda:
-            kw["model_kwargs"] = {"torch_dtype": torch.bfloat16}
+            import transformers                        # transformers 4.56 renamed torch_dtype to dtype
+            major, minor = (int(x) for x in transformers.__version__.split(".")[:2])
+            kw["model_kwargs"] = {"dtype" if (major, minor) >= (4, 56) else "torch_dtype": torch.bfloat16}
         if cfg.get("dim"):
             kw["truncate_dim"] = cfg["dim"]
         self.model = SentenceTransformer(name, device="cuda" if cuda else "cpu", **kw)
