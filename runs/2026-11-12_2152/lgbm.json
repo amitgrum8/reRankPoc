@@ -4,7 +4,7 @@
  "rows": 301084,
  "target_rows": 4865,
  "trees": 1,
- "val_target_rank": 172.4,
+ "val_target_rank": 172.9,
  "importance_gain": {
   "like_max": 0.0,
   "like_mean": 0.0,
@@ -23,7 +23,7 @@
   "z_rocchio": 24.4,
   "z_naive": 7.4,
   "like_praised": 0.0,
-  "dis_crit": 15.4,
+  "dis_crit": 15.0,
   "like_crit": 5.9,
   "dis_praised": 14.3,
   "n_crit": 44.9,

@@ -1,0 +1,289 @@
+{
+ "model": "sasrec",
+ "settings": {
+  "model": "sasrec",
+  "input": "D:\\thies\\reRankPoc\\data\\rr_input",
+  "out": "runs\\2026-11-14_sasrec",
+  "k": 500,
+  "seed": 42,
+  "pop_days": 365,
+  "dim": 64,
+  "blocks": 2,
+  "heads": 2,
+  "dropout": 0.2,
+  "max_len": 50,
+  "lr": 0.001,
+  "batch": 256,
+  "max_epochs": 400,
+  "max_minutes": 30,
+  "eval_every": 5,
+  "patience": 5,
+  "n_val": 2000
+ },
+ "device": "cuda",
+ "training_sequences": 97028,
+ "val_users": 2000,
+ "best_val_recall@100": 0.2765,
+ "curve": [
+  {
+   "epoch": 1,
+   "loss": 10.22965,
+   "minutes": 0.17,
+   "batches": 380
+  },
+  {
+   "epoch": 2,
+   "loss": 9.54423,
+   "minutes": 0.34,
+   "batches": 380
+  },
+  {
+   "epoch": 3,
+   "loss": 8.85564,
+   "minutes": 0.5,
+   "batches": 380
+  },
+  {
+   "epoch": 4,
+   "loss": 8.45005,
+   "minutes": 0.67,
+   "batches": 380
+  },
+  {
+   "epoch": 5,
+   "loss": 8.18461,
+   "minutes": 0.83,
+   "batches": 380,
+   "val_recall@100": 0.266
+  },
+  {
+   "epoch": 6,
+   "loss": 8.00135,
+   "minutes": 1.01,
+   "batches": 380
+  },
+  {
+   "epoch": 7,
+   "loss": 7.86513,
+   "minutes": 1.18,
+   "batches": 380
+  },
+  {
+   "epoch": 8,
+   "loss": 7.76226,
+   "minutes": 1.34,
+   "batches": 380
+  },
+  {
+   "epoch": 9,
+   "loss": 7.68588,
+   "minutes": 1.51,
+   "batches": 380
+  },
+  {
+   "epoch": 10,
+   "loss": 7.62788,
+   "minutes": 1.67,
+   "batches": 380,
+   "val_recall@100": 0.2765
+  },
+  {
+   "epoch": 11,
+   "loss": 7.57827,
+   "minutes": 1.86,
+   "batches": 380
+  },
+  {
+   "epoch": 12,
+   "loss": 7.54052,
+   "minutes": 2.02,
+   "batches": 380
+  },
+  {
+   "epoch": 13,
+   "loss": 7.50661,
+   "minutes": 2.18,
+   "batches": 380
+  },
+  {
+   "epoch": 14,
+   "loss": 7.48164,
+   "minutes": 2.35,
+   "batches": 380
+  },
+  {
+   "epoch": 15,
+   "loss": 7.45357,
+   "minutes": 2.52,
+   "batches": 380,
+   "val_recall@100": 0.273
+  },
+  {
+   "epoch": 16,
+   "loss": 7.42829,
+   "minutes": 2.7,
+   "batches": 380
+  },
+  {
+   "epoch": 17,
+   "loss": 7.4097,
+   "minutes": 2.86,
+   "batches": 380
+  },
+  {
+   "epoch": 18,
+   "loss": 7.38921,
+   "minutes": 3.03,
+   "batches": 380
+  },
+  {
+   "epoch": 19,
+   "loss": 7.37619,
+   "minutes": 3.19,
+   "batches": 380
+  },
+  {
+   "epoch": 20,
+   "loss": 7.36209,
+   "minutes": 3.36,
+   "batches": 380,
+   "val_recall@100": 0.2715
+  },
+  {
+   "epoch": 21,
+   "loss": 7.3464,
+   "minutes": 3.54,
+   "batches": 380
+  },
+  {
+   "epoch": 22,
+   "loss": 7.33121,
+   "minutes": 3.7,
+   "batches": 380
+  },
+  {
+   "epoch": 23,
+   "loss": 7.31844,
+   "minutes": 3.87,
+   "batches": 380
+  },
+  {
+   "epoch": 24,
+   "loss": 7.3028,
+   "minutes": 4.03,
+   "batches": 380
+  },
+  {
+   "epoch": 25,
+   "loss": 7.29892,
+   "minutes": 4.19,
+   "batches": 380,
+   "val_recall@100": 0.2705
+  },
+  {
+   "epoch": 26,
+   "loss": 7.28542,
+   "minutes": 4.38,
+   "batches": 380
+  },
+  {
+   "epoch": 27,
+   "loss": 7.27528,
+   "minutes": 4.54,
+   "batches": 380
+  },
+  {
+   "epoch": 28,
+   "loss": 7.26568,
+   "minutes": 4.71,
+   "batches": 380
+  },
+  {
+   "epoch": 29,
+   "loss": 7.25864,
+   "minutes": 4.87,
+   "batches": 380
+  },
+  {
+   "epoch": 30,
+   "loss": 7.24501,
+   "minutes": 5.04,
+   "batches": 380,
+   "val_recall@100": 0.269
+  },
+  {
+   "epoch": 31,
+   "loss": 7.23983,
+   "minutes": 5.21,
+   "batches": 380
+  },
+  {
+   "epoch": 32,
+   "loss": 7.23008,
+   "minutes": 5.38,
+   "batches": 380
+  },
+  {
+   "epoch": 33,
+   "loss": 7.21978,
+   "minutes": 5.54,
+   "batches": 380
+  },
+  {
+   "epoch": 34,
+   "loss": 7.21294,
+   "minutes": 5.71,
+   "batches": 380
+  },
+  {
+   "epoch": 35,
+   "loss": 7.20476,
+   "minutes": 5.87,
+   "batches": 380,
+   "val_recall@100": 0.2705
+  }
+ ],
+ "targets": {
+  "test": {
+   "liked": {
+    "n": 1588,
+    "in_top500": 0.213,
+    "in_top10": 0.015,
+    "median_rank": 3164.0
+   },
+   "three": {
+    "n": 301,
+    "in_top500": 0.219,
+    "in_top10": 0.017,
+    "median_rank": 3447.0
+   },
+   "disliked": {
+    "n": 629,
+    "in_top500": 0.221,
+    "in_top10": 0.019,
+    "median_rank": 3624.0
+   }
+  },
+  "train": {
+   "liked": {
+    "n": 3510,
+    "in_top500": 0.18,
+    "in_top10": 0.017,
+    "median_rank": 4042.5
+   },
+   "three": {
+    "n": 723,
+    "in_top500": 0.163,
+    "in_top10": 0.015,
+    "median_rank": 5007.0
+   },
+   "disliked": {
+    "n": 1524,
+    "in_top500": 0.176,
+    "in_top10": 0.016,
+    "median_rank": 5248.5
+   }
+  }
+ },
+ "seconds": 360.9
+}

@@ -1,0 +1,70 @@
+{
+ "model": "pop",
+ "settings": {
+  "model": "pop",
+  "input": "D:\\thies\\reRankPoc\\data\\rr_input",
+  "out": "runs\\2026-11-14_pop",
+  "k": 500,
+  "seed": 42,
+  "pop_days": 365,
+  "dim": 64,
+  "blocks": 2,
+  "heads": 2,
+  "dropout": 0.2,
+  "max_len": 50,
+  "lr": 0.001,
+  "batch": 256,
+  "max_epochs": 400,
+  "max_minutes": 30,
+  "eval_every": 5,
+  "patience": 5,
+  "n_val": 2000
+ },
+ "window_days": 365,
+ "reviews_in_window": 186945,
+ "items_with_a_review_in_window": 37925,
+ "top_count_in_window": 287,
+ "targets": {
+  "test": {
+   "liked": {
+    "n": 1588,
+    "in_top500": 0.077,
+    "in_top10": 0.003,
+    "median_rank": 8611.0
+   },
+   "three": {
+    "n": 301,
+    "in_top500": 0.066,
+    "in_top10": 0.003,
+    "median_rank": 11900.0
+   },
+   "disliked": {
+    "n": 629,
+    "in_top500": 0.073,
+    "in_top10": 0.0,
+    "median_rank": 9957.0
+   }
+  },
+  "train": {
+   "liked": {
+    "n": 3510,
+    "in_top500": 0.085,
+    "in_top10": 0.006,
+    "median_rank": 8996.5
+   },
+   "three": {
+    "n": 723,
+    "in_top500": 0.061,
+    "in_top10": 0.001,
+    "median_rank": 10725.0
+   },
+   "disliked": {
+    "n": 1524,
+    "in_top500": 0.089,
+    "in_top10": 0.004,
+    "median_rank": 9498.0
+   }
+  }
+ },
+ "seconds": 1.8
+}
