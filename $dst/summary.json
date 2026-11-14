@@ -1,0 +1,27 @@
+{
+ "users_done": 300,
+ "users_failed": {},
+ "calls": 3370,
+ "new_calls": 370,
+ "cached_calls": 3000,
+ "prompt_tokens": 365948,
+ "completion_tokens": 79757,
+ "reasoning_tokens": 0,
+ "llm_seconds": 2469.4,
+ "wall_minutes": 5.3,
+ "finish_length": 1,
+ "invalid_extractions": 0,
+ "profiles_missing_tag": 20,
+ "profiles_no_dislikes": 22,
+ "retries": 70,
+ "params": {
+  "temperature": 0,
+  "seed": 42,
+  "reasoning_effort": "low",
+  "max_tokens": 12000,
+  "response_format": {
+   "type": "json_object"
+  }
+ },
+ "model": "gpt-oss:20b"
+}

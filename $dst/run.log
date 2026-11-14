@@ -1,0 +1,1281 @@
+run folder $dst | users all | LightGCN up to 30 min | model gpt-oss:20b | reasoning low
+
+=== environment  [0.0 min]
+python 3.12.16 | Windows-2022Server-10.0.20348-SP0
+torch 2.8.0+cu128 | numpy 2.0.2 | openai 3.49.0
+gpu 0: NVIDIA RTX 6000 Ada Generation, 48 GB
+gpu 1: NVIDIA RTX 6000 Ada Generation, 48 GB
+
+=== LightGCN  [0.1 min]
+$ D:\thies\reRankPoc\.venv\Scripts\python.exe -u D:\thies\reRankPoc\lightgcn.py --input D:\thies\reRankPoc\data\rr_input --out $dst --max-minutes 30
+device cuda | graph 97,028 users, 49,312 items, 1,138,215 interactions | 300 test users
+training edges 1,136,215 | 555 batches per epoch | 2000 validation users | setup 7s
+epoch 1 took 8s -> at most 214 epochs fit in 30 min
+epoch  10 loss 0.1782 val Recall@100 0.3090 (best 0.3090) 1.3 min
+epoch  20 loss 0.1033 val Recall@100 0.3530 (best 0.3530) 2.7 min
+epoch  30 loss 0.0680 val Recall@100 0.3720 (best 0.3720) 4.0 min
+epoch  40 loss 0.0480 val Recall@100 0.3835 (best 0.3835) 5.3 min
+epoch  50 loss 0.0357 val Recall@100 0.3880 (best 0.3880) 6.7 min
+epoch  60 loss 0.0281 val Recall@100 0.3895 (best 0.3895) 8.0 min
+epoch  70 loss 0.0225 val Recall@100 0.3905 (best 0.3905) 9.4 min
+epoch  80 loss 0.0188 val Recall@100 0.3840 (best 0.3905) 10.7 min
+epoch  90 loss 0.0157 val Recall@100 0.3875 (best 0.3905) 12.0 min
+epoch 100 loss 0.0140 val Recall@100 0.3870 (best 0.3905) 13.4 min
+epoch 110 loss 0.0122 val Recall@100 0.3845 (best 0.3905) 14.7 min
+epoch 120 loss 0.0110 val Recall@100 0.3865 (best 0.3905) 16.1 min
+early stop
+targets (rank among all unseen items): {"liked": {"n": 1588, "in_top500": 0.205, "in_top10": 0.009, "median_rank": 3077.5}, "three": {"n": 301, "in_top500": 0.216, "in_top10": 0.007, "median_rank": 3767.0}, "disliked": {"n": 629, "in_top500": 0.196, "in_top10": 0.016, "median_rank": 3782.0}}
+wrote $dst\candidates.jsonl | total 971s
+ollama {"version":"0.40.16"} on 127.0.0.1:11435
+
+=== reasoning check  [16.7 min]
+reasoning low : 338 output tokens, 16s (cached: False)
+reasoning high: 12000 output tokens, 85s (cached: False)
+
+=== timed calls: 8 extractions, 4 in parallel  [18.4 min]
+8/8 valid | all cached, no timing
+
+=== personas for 300 test user(s)  [18.4 min]
+$ D:\thies\reRankPoc\.venv\Scripts\python.exe -u D:\thies\reRankPoc\personas.py --input D:\thies\reRankPoc\data\rr_input --out $dst --cache D:\thies\reRankPoc\runs\cache --base-url http://127.0.0.1:11435/v1 --model gpt-oss:20b --reasoning-effort low --set test --users all --threads 8
+300 test users, about 3300 calls | model gpt-oss:20b | reasoning low | threads 8
+user AGLVDETB3WUWS5I5NBC5C3H4OISA done (1/300) | 5 likes, 5 dislikes | calls 81 (new 1) | 0.1 min
+user AHJZ4C3W4RXJNDP57SE4Q5EOEU6A done (2/300) | 5 likes, 5 dislikes | calls 92 (new 2) | 0.1 min
+user AHP2MDQKXUBNC3PXTDBXTM7NP36Q done (3/300) | 5 likes, 5 dislikes | calls 104 (new 4) | 0.1 min
+user AGXB2JZWSQFUDSLTPNM726F5A5BQ done (4/300) | 5 likes, 5 dislikes | calls 115 (new 5) | 0.1 min
+user AGZXRG4NA5QE5CV2KQ5WSEY52TMQ done (5/300) | 5 likes, 5 dislikes | calls 126 (new 6) | 0.1 min
+user AGIEO5COI7CU7MVMOAH2DWZYW5XA done (6/300) | 1 likes, 1 dislikes | calls 140 (new 10) | 0.2 min
+user AGL6KBSZAZE5JBN73DDQUEJHYMDA done (7/300) | 5 likes, 0 dislikes | calls 142 (new 11) | 0.2 min
+user AEWAGA36IBRJSPGU22XPXNWQ5IKA done (8/300) | 5 likes, 5 dislikes | calls 162 (new 12) | 0.2 min
+user AHAYJKWKLVYRRFOQNBDDZT6RMASQ done (9/300) | 5 likes, 5 dislikes | calls 174 (new 14) | 0.2 min
+user AGU67X24BHCIQRGHMVK56U2AYODA done (10/300) | 5 likes, 5 dislikes | calls 185 (new 15) | 0.2 min
+user AGPCVSSO2HPXSK3PUXK3D77PSQPQ done (11/300) | 5 likes, 0 dislikes | calls 197 (new 17) | 0.3 min
+user AFMVDBHLL4WJY62VIONRJLPC34BQ done (12/300) | 5 likes, 5 dislikes | calls 208 (new 18) | 0.3 min
+user AH4WWRBE6DPKT325XD4OFCH4DUAQ done (13/300) | 5 likes, 5 dislikes | calls 219 (new 19) | 0.3 min
+user AGSJJT3NE4Z3K4U67SDHWPXWYIBQ done (14/300) | 5 likes, 5 dislikes | calls 230 (new 20) | 0.3 min
+user AEBKF72N5RQHVZK3I36ZG5ARWLLA done (15/300) | 5 likes, 1 dislikes | calls 241 (new 21) | 0.3 min
+user AFUY6LGXVHX4ROUHDKLSJOJNEIBA done (16/300) | 5 likes, 5 dislikes | calls 252 (new 22) | 0.3 min
+user AH3XBNCNQOKEIEJXE6HPE25FUWOA done (17/300) | 5 likes, 5 dislikes | calls 263 (new 23) | 0.3 min
+user AGXG4N7EFINRTA7QLA3WLBZE4XOQ done (18/300) | 5 likes, 5 dislikes | calls 274 (new 24) | 0.4 min
+user AGGUNCVH7TKI7RDG6CXSWLMP4DZQ done (19/300) | 5 likes, 5 dislikes | calls 285 (new 25) | 0.4 min
+user AEMJ72T6SV7MHKPUQ22QGJQELFLA done (20/300) | 5 likes, 5 dislikes | calls 298 (new 28) | 0.4 min
+user AHVRWKPXG2QLZV36W437PN7CXZXA done (21/300) | 5 likes, 5 dislikes | calls 309 (new 29) | 0.4 min
+user AHRLGUR5XJD5J5ACSYLZ562ESQPQ done (22/300) | 3 likes, 5 dislikes | calls 321 (new 31) | 0.4 min
+user AE4KUYGH7L7QMIE2BN7XKZLNUKXA done (23/300) | 5 likes, 0 dislikes | calls 332 (new 32) | 0.5 min
+user AG3YAHSRISSCPWRSV7E557NMH2QA done (24/300) | 5 likes, 5 dislikes | calls 343 (new 33) | 0.5 min
+user AFAGSTWU73WZFAGFPX3OQPE4HYLQ done (25/300) | 5 likes, 5 dislikes | calls 354 (new 34) | 0.5 min
+user AELG2L3OKJB53YLFYGDPFAMC6RZA done (26/300) | 5 likes, 5 dislikes | calls 365 (new 35) | 0.5 min
+user AHBFQ5Q627JKKQUCREQCIQQRBVAA done (27/300) | 5 likes, 5 dislikes | calls 376 (new 36) | 0.5 min
+user AFWNWUWADCRTXDZGWMG7BHXZIFNA done (28/300) | 5 likes, 5 dislikes | calls 387 (new 37) | 0.5 min
+user AFTJG3PGT6R5UYNU67CGM2HHEP7Q done (29/300) | 5 likes, 5 dislikes | calls 400 (new 40) | 0.5 min
+user AGCCJNAGSOGU5J4VECU57373WOMQ done (30/300) | 5 likes, 5 dislikes | calls 411 (new 41) | 0.5 min
+user AE2KBPAEVEN3HF5J6FT5JINPCF7A done (31/300) | 5 likes, 5 dislikes | calls 422 (new 42) | 0.6 min
+user AEEUBSYFVHCZWH7FVDIQAOWXZO6A done (32/300) | 5 likes, 5 dislikes | calls 434 (new 44) | 0.6 min
+user AESFXKMDPIBFRV6W5ZWFIRZPDBKA done (33/300) | 3 likes, 5 dislikes | calls 437 (new 45) | 0.6 min
+user AEG6W6RNDNBTT5ITHNFID4W6KMFQ done (34/300) | 5 likes, 0 dislikes | calls 456 (new 46) | 0.6 min
+user AH2Z7XL5XNEXYGBUUPC3YNC7YUCQ done (35/300) | 5 likes, 5 dislikes | calls 468 (new 48) | 0.6 min
+user AG4DP6VB7C4PEAWZD2RER7MD7LJA done (36/300) | 5 likes, 5 dislikes | calls 479 (new 49) | 0.6 min
+user AHHXHTQ5CESCXIN7ESJJYUFNLLFQ done (37/300) | 5 likes, 5 dislikes | calls 491 (new 51) | 0.6 min
+user AF5UOHT3K36JCK5YSBW62QJYXY4A done (38/300) | 5 likes, 5 dislikes | calls 502 (new 52) | 0.7 min
+user AFIWAMLMGV7JDVGIEEND7HETWE3Q done (39/300) | 5 likes, 5 dislikes | calls 513 (new 53) | 0.7 min
+user AH36SKICKLET4KJI2I42C7IA6DQA done (40/300) | 5 likes, 5 dislikes | calls 524 (new 54) | 0.7 min
+user AEINYQ55LF2IORLBKUUOSXJSOTXQ done (41/300) | 5 likes, 5 dislikes | calls 535 (new 55) | 0.7 min
+user AFYK2ERXQYEZB2V5EC4ICWFTMCNQ done (42/300) | 5 likes, 0 dislikes | calls 547 (new 57) | 0.7 min
+user AF4BALPDIKGHWMGVB3X23HK62PTQ done (43/300) | 5 likes, 5 dislikes | calls 559 (new 59) | 0.7 min
+user AHCK74B3ZRH5EOKFC6R5UO24CDIA done (44/300) | 5 likes, 5 dislikes | calls 570 (new 60) | 0.7 min
+user AETGNAMLE3WV64STHXC7XL4JERWQ done (45/300) | 5 likes, 5 dislikes | calls 581 (new 61) | 0.8 min
+user AEHRKAD2ZBG6SDEYO474T55VFUPQ done (46/300) | 5 likes, 5 dislikes | calls 592 (new 62) | 0.8 min
+user AF64HBCGNEH5SJ4OP2NSZNO4ZB3A done (47/300) | 4 likes, 5 dislikes | calls 603 (new 63) | 0.8 min
+user AG4ODVB67RZSHM6O2HA6ZXZAFENQ done (48/300) | 5 likes, 5 dislikes | calls 614 (new 64) | 0.8 min
+user AHK4SUNNHY6J3MRRBIXOD6UIUIRA done (49/300) | 5 likes, 5 dislikes | calls 625 (new 65) | 0.8 min
+user AFF2F4QHGIWGPBE77F7XZSHPGZDA done (50/300) | 5 likes, 5 dislikes | calls 636 (new 66) | 0.9 min
+user AEL5BC6YOS3EAZ6WCDCH2NFI6RCQ done (51/300) | 5 likes, 5 dislikes | calls 647 (new 67) | 0.9 min
+user AFTJ6RFWHYFEW4AFF7T57J6KDLCQ done (52/300) | 5 likes, 5 dislikes | calls 658 (new 68) | 0.9 min
+user AG6RH3RXBUU253HE62XKGBQ3DD6Q done (53/300) | 5 likes, 5 dislikes | calls 669 (new 69) | 1.0 min
+user AEXC63C6S7DTQ7SBMIKNRCRGDZNQ done (54/300) | 5 likes, 5 dislikes | calls 680 (new 70) | 1.0 min
+user AEDCCF7URUVOWYUUCURCFJD4C6XA done (55/300) | 5 likes, 5 dislikes | calls 691 (new 71) | 1.0 min
+user AH3NLMKXLSLRSRYP2PAF5BZ3DRMA done (56/300) | 5 likes, 5 dislikes | calls 702 (new 72) | 1.0 min
+user AGQA7PGT72HZOF4232AMLHTUOFMQ done (57/300) | 5 likes, 5 dislikes | calls 713 (new 73) | 1.0 min
+user AE4SX2IMZGVQSS5SFWP6NEE2HQ4Q done (58/300) | 5 likes, 5 dislikes | calls 724 (new 74) | 1.0 min
+user AGOQRGG3Q35MOFPHB36E6W7GNHNA done (59/300) | 5 likes, 5 dislikes | calls 736 (new 76) | 1.1 min
+user AHMT2OKP574BDRERI6NLORVMJ3GQ done (60/300) | 5 likes, 5 dislikes | calls 747 (new 77) | 1.1 min
+user AG75755DW2LMVXRICTZTCT22UBEQ done (61/300) | 5 likes, 5 dislikes | calls 758 (new 78) | 1.1 min
+user AG23RRXBYK3EAYXEHN7NEMUP3YHA done (62/300) | 5 likes, 5 dislikes | calls 769 (new 79) | 1.1 min
+user AGL5MMFF7QNBNLGYPDDPGPY2TC6A done (63/300) | 5 likes, 5 dislikes | calls 780 (new 80) | 1.1 min
+user AHVLYN6U5BZJEPL2XRVSK5EZHEOQ done (64/300) | 5 likes, 5 dislikes | calls 791 (new 81) | 1.1 min
+user AER42TXVYU7RHZENECZCPHDWVUYA done (65/300) | 5 likes, 5 dislikes | calls 802 (new 82) | 1.2 min
+user AGYDARCUZUAX7ENAUJIUDUGDOJAA done (66/300) | 5 likes, 5 dislikes | calls 814 (new 84) | 1.2 min
+user AF6K64A7PHTANSHVDH3MXKBOBWFA done (67/300) | 5 likes, 5 dislikes | calls 825 (new 85) | 1.2 min
+user AGEYZ6QEPQ6F5FSFLWONS6VPBKEA done (68/300) | 5 likes, 5 dislikes | calls 836 (new 86) | 1.2 min
+user AGXCO7FXMBP3CEZXBQTVFRCHJZAQ done (69/300) | 5 likes, 5 dislikes | calls 849 (new 89) | 1.3 min
+user AHO6F25VLGWTVIAWTDMDYISCB3XA done (70/300) | 5 likes, 5 dislikes | calls 860 (new 90) | 1.3 min
+user AHNX76JFSGNWW467PZAGFIAWLYHQ done (71/300) | 5 likes, 5 dislikes | calls 871 (new 91) | 1.3 min
+user AFLQR5RCNMENTW7CLQ2O2RADNWUQ done (72/300) | 5 likes, 5 dislikes | calls 882 (new 92) | 1.3 min
+user AFKLL7F7LMHXGVVPW757LNUOHMTQ done (73/300) | 5 likes, 5 dislikes | calls 893 (new 93) | 1.3 min
+user AHVQ34ZZOFKXWZU7PE3Q5MNSMAOQ done (74/300) | 5 likes, 0 dislikes | calls 904 (new 94) | 1.3 min
+user AGZ7TMY2VLTKLTUR2JNZE7C7ZFAQ done (75/300) | 5 likes, 5 dislikes | calls 915 (new 95) | 1.3 min
+user AEPGVJRFKY5RT4OEK55MU2B5NKHA done (76/300) | 5 likes, 5 dislikes | calls 926 (new 96) | 1.4 min
+user AHX4EN4XSNWKMCFFSCSALH6ADQTQ done (77/300) | 5 likes, 5 dislikes | calls 937 (new 97) | 1.4 min
+user AHG6XSCHD2HD37DPRKV5V7ISS66A done (78/300) | 5 likes, 5 dislikes | calls 949 (new 99) | 1.4 min
+user AG4HVJGUQJA6IGD247KS6ZGDYK5A done (79/300) | 5 likes, 5 dislikes | calls 962 (new 102) | 1.4 min
+user AEXXUEIRUKXITCZSEOHDS35QOWQA done (80/300) | 5 likes, 0 dislikes | calls 973 (new 103) | 1.4 min
+user AFLAIH3KZKIKNG6BVOMKAOA4MFQA done (81/300) | 5 likes, 1 dislikes | calls 984 (new 104) | 1.5 min
+user AHRMYBS2KQ3VZYQSCLMVCISAXULA done (82/300) | 5 likes, 4 dislikes | calls 995 (new 105) | 1.5 min
+user AH64MFSCPAUVWZFWIGX55QTI3DVA done (83/300) | 5 likes, 0 dislikes | calls 1007 (new 107) | 1.5 min
+user AFJE7TYEZJXTEJW6P2ILLTXRIZUA done (84/300) | 5 likes, 5 dislikes | calls 1018 (new 108) | 1.5 min
+user AGZIY3SB2L44CNUTQUIXGJBZLGMA done (85/300) | 5 likes, 5 dislikes | calls 1031 (new 111) | 1.6 min
+user AGNJCKG23GSKKDGCZW3ZBVDWVX6A done (86/300) | 5 likes, 5 dislikes | calls 1042 (new 112) | 1.6 min
+user AF67L57GFTVOYHIYUVKHTMKZ5KSQ done (87/300) | 5 likes, 1 dislikes | calls 1054 (new 114) | 1.6 min
+user AFOIM7HD5DC7UVRPWBVMGQNQK7GA done (88/300) | 5 likes, 5 dislikes | calls 1065 (new 115) | 1.6 min
+user AEAOKJJKTR54TSOT7M63JA2LYUBA done (89/300) | 5 likes, 0 dislikes | calls 1076 (new 116) | 1.6 min
+user AGQCZMPTWSAYQX4RY43LDMTIAHZA done (90/300) | 5 likes, 5 dislikes | calls 1087 (new 117) | 1.6 min
+user AFELVTKF7MWPDA65USQ4KUWV3BLA done (91/300) | 5 likes, 5 dislikes | calls 1099 (new 119) | 1.7 min
+user AERCBM4ZH7EDGBJFRXMOUYN6VUSA done (92/300) | 5 likes, 5 dislikes | calls 1110 (new 120) | 1.7 min
+user AH56ZYBVYL2ROMZVHEFMM5JDL34A done (93/300) | 5 likes, 5 dislikes | calls 1121 (new 121) | 1.7 min
+user AE5CLVSQ7TIUSNFDY66DEPZDXURA done (94/300) | 5 likes, 5 dislikes | calls 1133 (new 123) | 1.7 min
+user AE3NF7XVJNWIKXJZ2RZBYHPLJJZQ done (95/300) | 5 likes, 0 dislikes | calls 1145 (new 125) | 1.7 min
+user AEO3NJQ4IVAODM2NMYJ2CQA4RRSQ done (96/300) | 5 likes, 5 dislikes | calls 1156 (new 126) | 1.8 min
+user AGUF4JINKYNJE7GVMKYOMTY5CUYQ done (97/300) | 5 likes, 5 dislikes | calls 1167 (new 127) | 1.8 min
+user AHXLG2C5IFNJLLVXVPP7W4QV7ZIA done (98/300) | 5 likes, 5 dislikes | calls 1178 (new 128) | 1.8 min
+user AGPNGDNIQ36L46FUERXQG3UDUT7Q done (99/300) | 5 likes, 5 dislikes | calls 1189 (new 129) | 1.8 min
+user AEEDIYGFRPEPAHAYLHVDC327POIQ done (100/300) | 5 likes, 5 dislikes | calls 1200 (new 130) | 1.8 min
+user AEKVTNZH4KYRMOGAG65AG5YIVH6Q done (101/300) | 5 likes, 5 dislikes | calls 1211 (new 131) | 1.9 min
+user AGMDDSTY6USHT25HAUSSHLS6QPBQ done (102/300) | 5 likes, 5 dislikes | calls 1222 (new 132) | 1.9 min
+user AGGSGHYTSZMZFZURNJU7FZSYN2KA done (103/300) | 5 likes, 5 dislikes | calls 1233 (new 133) | 1.9 min
+user AHDT7CIER5VYSD5OF4FHL5QNMDOA done (104/300) | 5 likes, 5 dislikes | calls 1246 (new 136) | 1.9 min
+user AGFC2DMKGTYAJQKUXKNBOVAH6M7A done (105/300) | 5 likes, 5 dislikes | calls 1257 (new 137) | 2.0 min
+user AFT56PNKTT27VVC2W2WDZY6CHTKQ done (106/300) | 5 likes, 5 dislikes | calls 1268 (new 138) | 2.0 min
+user AE3IGW7HVKVSXG6FUJFATQWHCGVQ done (107/300) | 5 likes, 5 dislikes | calls 1279 (new 139) | 2.0 min
+user AFXQI732WG32Y3R4ECBDWCGPCY7Q done (108/300) | 5 likes, 0 dislikes | calls 1290 (new 140) | 2.0 min
+user AHKNG6B4TDTKZEH7AWTOO4CIGIJA done (109/300) | 5 likes, 5 dislikes | calls 1301 (new 141) | 2.0 min
+user AER2B3RSPERXDNTPU2N6AJXGB7SA done (110/300) | 5 likes, 5 dislikes | calls 1312 (new 142) | 2.1 min
+user AGBNHNFNJBGKUHJBXCNN5BUKKBHQ done (111/300) | 5 likes, 5 dislikes | calls 1323 (new 143) | 2.1 min
+user AECY63WJIFJW5LBGR4S7RQQU3GQA done (112/300) | 5 likes, 3 dislikes | calls 1334 (new 144) | 2.1 min
+user AFNYUUKSOO3UMKAJNNJBJ7SX6WPA done (113/300) | 5 likes, 5 dislikes | calls 1346 (new 146) | 2.1 min
+user AHFBV32UJSRYYUMGHRD7F45IRAYA done (114/300) | 5 likes, 5 dislikes | calls 1358 (new 148) | 2.2 min
+user AGTSF2QQ4BSCYU6K2JDAUHKRD2BA done (115/300) | 5 likes, 5 dislikes | calls 1369 (new 149) | 2.2 min
+user AGTDH7TB22DVIDTQ34HLBHEVPQKA done (116/300) | 5 likes, 5 dislikes | calls 1380 (new 150) | 2.2 min
+user AH46KHPXBFHCXB2XOHBZ35ZV6PKQ done (117/300) | 5 likes, 5 dislikes | calls 1393 (new 153) | 2.2 min
+user AHAYGL2HBTQWLT2YRWNTPMD7CF7A done (118/300) | 5 likes, 5 dislikes | calls 1406 (new 156) | 2.3 min
+user AF5RM3LKQU6GIZULDIWPQTGQLJCA done (119/300) | 5 likes, 0 dislikes | calls 1417 (new 157) | 2.3 min
+user AFOP24Z445QDBFRCJWVRTM4D7WMA done (120/300) | 5 likes, 5 dislikes | calls 1428 (new 158) | 2.3 min
+user AF4G5KWC4QVMHGTKTV3MOMC3MU5Q done (121/300) | 5 likes, 5 dislikes | calls 1440 (new 160) | 2.3 min
+user AGFPU37NZ3XVGR2FF7WLQ6MWYTTQ done (122/300) | 5 likes, 2 dislikes | calls 1451 (new 161) | 2.3 min
+user AHUPD5MWKTTTNJ3QPXYO3ZHZQRZA done (123/300) | 5 likes, 0 dislikes | calls 1462 (new 162) | 2.3 min
+user AECSYZV6W4MIT2YC76L675Q7ZXXQ done (124/300) | 5 likes, 5 dislikes | calls 1473 (new 163) | 2.4 min
+user AEUBGQHA2CS4O6Z46RKBHKTJIIAQ done (125/300) | 5 likes, 5 dislikes | calls 1484 (new 164) | 2.4 min
+user AGIHL5Y7FXFIZKCVBUCPLWCJE5QA done (126/300) | 5 likes, 5 dislikes | calls 1495 (new 165) | 2.4 min
+user AFQKVGLGR37TMZASELPPBKRGPLPA done (127/300) | 5 likes, 5 dislikes | calls 1506 (new 166) | 2.4 min
+user AFG2RQCUUHSVZVNB5QYQCDSNH4CA done (128/300) | 5 likes, 5 dislikes | calls 1517 (new 167) | 2.5 min
+user AFFK6LYNIXHEGKS5JJGK6QRK6PSA done (129/300) | 5 likes, 5 dislikes | calls 1528 (new 168) | 2.5 min
+user AFFYFO6ZXFI74UNJCWAVIU5NLZKA done (130/300) | 2 likes, 5 dislikes | calls 1539 (new 169) | 2.5 min
+user AFSVFXZJFXCQZYT453UQXO4IBNMA done (131/300) | 5 likes, 5 dislikes | calls 1550 (new 170) | 2.5 min
+user AF7ZW2NP6Y6RPC4EN6XKTMPIQMOQ done (132/300) | 5 likes, 5 dislikes | calls 1562 (new 172) | 2.5 min
+user AGE74T5F2YKEQOO7JP7IVFXGRAFA done (133/300) | 5 likes, 5 dislikes | calls 1574 (new 174) | 2.6 min
+user AGHIINQLWOXSEEKOUIVM4SVU35ZQ done (134/300) | 5 likes, 5 dislikes | calls 1585 (new 175) | 2.6 min
+user AEUJ7PHSXTNAO4AENLM6TOMIPPIQ done (135/300) | 5 likes, 5 dislikes | calls 1596 (new 176) | 2.6 min
+user AH5CBOGGLHBKRR4TFNZQLK55UO7Q done (136/300) | 5 likes, 5 dislikes | calls 1607 (new 177) | 2.6 min
+user AGWTMHVGCMESNGXPL6RZTMSQEATA done (137/300) | 5 likes, 4 dislikes | calls 1618 (new 178) | 2.7 min
+user AFYNWV3N4RWPSHXHBF3QB7AKNFJA done (138/300) | 5 likes, 5 dislikes | calls 1629 (new 179) | 2.7 min
+user AH7T2FSGRKSBBTP4AXA52UCLYRSQ done (139/300) | 5 likes, 0 dislikes | calls 1640 (new 180) | 2.7 min
+user AGBHWDH2NOTF64HIVUGEI266PSAA done (140/300) | 5 likes, 5 dislikes | calls 1652 (new 182) | 2.7 min
+user AHUB6OLOQYYATMXLCJ5T5MDBK2RQ done (141/300) | 5 likes, 5 dislikes | calls 1664 (new 184) | 2.8 min
+user AHWZFONMCXWWOP3NJD3O7IHNYHDA done (142/300) | 5 likes, 5 dislikes | calls 1675 (new 185) | 2.8 min
+user AES7BSZ5JYQGVCVI2XKJNQWYMOAA done (143/300) | 5 likes, 5 dislikes | calls 1686 (new 186) | 2.8 min
+user AHXOP2EW7TQHNF6O2MOTTAGKGEUQ done (144/300) | 5 likes, 5 dislikes | calls 1697 (new 187) | 2.8 min
+user AERHREJSE3XES7OIADCQZ5XPVTNQ done (145/300) | 5 likes, 5 dislikes | calls 1708 (new 188) | 2.8 min
+user AG6PM6SD5XWGIGKX63KSPYV6RKGA done (146/300) | 5 likes, 5 dislikes | calls 1719 (new 189) | 2.9 min
+user AFEHQ4BNQV3PFLED3UKS4PHBYGMA done (147/300) | 5 likes, 5 dislikes | calls 1730 (new 190) | 2.9 min
+user AGRKVMYQL6HXZ7HOLAVXXSNPVYXQ done (148/300) | 5 likes, 5 dislikes | calls 1742 (new 192) | 2.9 min
+user AGLKS7VMMPLSNP2NANAUOBZBHGJQ done (149/300) | 5 likes, 5 dislikes | calls 1753 (new 193) | 2.9 min
+user AFHD5YJQ36WRFDW6V6V2VWTO2QQA done (150/300) | 5 likes, 5 dislikes | calls 1764 (new 194) | 2.9 min
+user AF7Y5RM6WARABXY2NRYH2OSSF5JQ done (151/300) | 5 likes, 5 dislikes | calls 1775 (new 195) | 2.9 min
+user AGKZYKEM6YZQEBK5DEIVVR6DL76A done (152/300) | 1 likes, 1 dislikes | calls 1787 (new 197) | 3.0 min
+user AHJRH6DAZRXMHZ2XZ5S3HU5I6BZA done (153/300) | 5 likes, 5 dislikes | calls 1799 (new 199) | 3.0 min
+user AHERKR4TDKY2SKYGJZ3SLK52EFHA done (154/300) | 5 likes, 5 dislikes | calls 1811 (new 201) | 3.1 min
+user AET5BF22GX3DIJAIPTJMXMK4T2GA done (155/300) | 5 likes, 5 dislikes | calls 1815 (new 202) | 3.1 min
+user AH6D7XVJRVX2I7NNPAXCYPKRZT3Q done (156/300) | 5 likes, 5 dislikes | calls 1833 (new 203) | 3.1 min
+user AH3GNI7N4D4LL2SYID4GQB6TLIWA done (157/300) | 5 likes, 0 dislikes | calls 1845 (new 205) | 3.1 min
+user AEL326EYKFEGIZMHRJQMHKH45CJQ done (158/300) | 5 likes, 5 dislikes | calls 1856 (new 206) | 3.1 min
+user AHOSDYSZWR53AZAC5DKP4OWKYCPQ done (159/300) | 5 likes, 5 dislikes | calls 1867 (new 207) | 3.1 min
+user AEJMZFH6VYNTOSCMRL6QU4PFOTOA done (160/300) | 5 likes, 5 dislikes | calls 1878 (new 208) | 3.2 min
+user AHT7WDHEUTLIE6E35CBCHJU2IRYA done (161/300) | 5 likes, 5 dislikes | calls 1889 (new 209) | 3.2 min
+user AEL6LHHM5XOECBA3MAPB32W4DLOQ done (162/300) | 5 likes, 5 dislikes | calls 1900 (new 210) | 3.2 min
+user AGJJQRJWWQYSLK2X52JZT4IU4YQA done (163/300) | 5 likes, 5 dislikes | calls 1911 (new 211) | 3.2 min
+user AHH6ZX557OOFIDMLIE2G2QT4LRRA done (164/300) | 5 likes, 5 dislikes | calls 1922 (new 212) | 3.2 min
+user AFRCWE444UJWH3HGHUY5YNKN6IMQ done (165/300) | 5 likes, 5 dislikes | calls 1933 (new 213) | 3.2 min
+user AE7PAN7FYYBQ5GSVRFBKMBQZ6MFA done (166/300) | 5 likes, 5 dislikes | calls 1944 (new 214) | 3.3 min
+user AGVYWUEBBLRHCI44IG6FBUA2R6IA done (167/300) | 5 likes, 5 dislikes | calls 1955 (new 215) | 3.3 min
+user AESHZFSC6HKLOF4JLWVAPTKLSO6Q done (168/300) | 5 likes, 5 dislikes | calls 1967 (new 217) | 3.3 min
+user AH5RKO5JF332LQMJY2PQXMNHGXYQ done (169/300) | 5 likes, 5 dislikes | calls 1978 (new 218) | 3.3 min
+user AFIOTV6ZKA523SUZBAEVMJI5Q4AQ done (170/300) | 5 likes, 5 dislikes | calls 1989 (new 219) | 3.4 min
+user AFILJLESSOZHCAKZZCLIXUGGOUEA done (171/300) | 5 likes, 5 dislikes | calls 2000 (new 220) | 3.4 min
+user AGZBWBXWPHO4GT4CPGS7F6YOYIVA done (172/300) | 5 likes, 5 dislikes | calls 2011 (new 221) | 3.4 min
+user AES5TDX7O47SEHBIJ3NKXJD6RUNA done (173/300) | 5 likes, 0 dislikes | calls 2022 (new 222) | 3.4 min
+user AGOQK52TLVMA5QDOSB75MFIGNXOQ done (174/300) | 5 likes, 5 dislikes | calls 2033 (new 223) | 3.4 min
+user AEIWJOHIFSOL6PNKRMASJLMX7TKQ done (175/300) | 5 likes, 5 dislikes | calls 2044 (new 224) | 3.4 min
+user AFGLL274NXHVF7YMJQJR2L56UD4Q done (176/300) | 5 likes, 5 dislikes | calls 2055 (new 225) | 3.5 min
+user AH4HCQLXK72IFJESRHIP5MOGJG4Q done (177/300) | 5 likes, 5 dislikes | calls 2066 (new 226) | 3.5 min
+user AG2RWMJO764GBUZF5GU6554ZN27Q done (178/300) | 5 likes, 5 dislikes | calls 2077 (new 227) | 3.5 min
+user AFMQPSZGJ4ZPPZAEB7NTTNMXV6KQ done (179/300) | 5 likes, 5 dislikes | calls 2088 (new 228) | 3.5 min
+user AEMTDARIFN25TJZCOORPNWE7K5YQ done (180/300) | 5 likes, 5 dislikes | calls 2099 (new 229) | 3.5 min
+user AEQTRYSJCTXYIXREV2OCKWBPQZXA done (181/300) | 5 likes, 1 dislikes | calls 2110 (new 230) | 3.5 min
+user AGOTZG773QFPZXGCAOWM42XO4QQA done (182/300) | 5 likes, 5 dislikes | calls 2121 (new 231) | 3.5 min
+user AFPKUAB7OHI5IGOIUFPX5KEH5MUQ done (183/300) | 5 likes, 5 dislikes | calls 2133 (new 233) | 3.6 min
+user AHLUKD3BGZS2OW5DN5TRKHYB3NAQ done (184/300) | 5 likes, 5 dislikes | calls 2145 (new 235) | 3.6 min
+user AGSX4P3APC5QQ4TIWMEVUDLIUY2Q done (185/300) | 5 likes, 5 dislikes | calls 2156 (new 236) | 3.6 min
+user AE643ZF5EEXQIDPDJUQPAL7GZI4A done (186/300) | 5 likes, 5 dislikes | calls 2167 (new 237) | 3.6 min
+user AE2GWLG5VOMOFAO6XIEMJ2QRCVKA done (187/300) | 5 likes, 5 dislikes | calls 2179 (new 239) | 3.7 min
+user AFNNACJLJML2U36X6KVEFDEL3LBQ done (188/300) | 5 likes, 5 dislikes | calls 2190 (new 240) | 3.7 min
+user AGFHJLACJ3OJHTRZHE36WT4JOTIQ done (189/300) | 5 likes, 5 dislikes | calls 2201 (new 241) | 3.7 min
+user AFIARBM2VUROL736XTKLK2J54AQA done (190/300) | 5 likes, 5 dislikes | calls 2214 (new 244) | 3.7 min
+user AHNRBXOY5KG7TCYHBSWQBFCHUANA done (191/300) | 5 likes, 5 dislikes | calls 2225 (new 245) | 3.7 min
+user AE2B4BTSI2YBXLBPWDPIRBDAXASA done (192/300) | 5 likes, 5 dislikes | calls 2236 (new 246) | 3.8 min
+user AEULD6UDDD7XSH2HXR2L6TNRHSNQ done (193/300) | 5 likes, 5 dislikes | calls 2247 (new 247) | 3.8 min
+user AHKJS2OOR7IUMEC4WLP3DKFGAUCQ done (194/300) | 5 likes, 5 dislikes | calls 2258 (new 248) | 3.8 min
+user AHPII6FAXI3NJNSQBNEF533DWCWA done (195/300) | 5 likes, 5 dislikes | calls 2270 (new 250) | 3.8 min
+user AEABDRFTSNHAEOPQDLEJENW6ACDQ done (196/300) | 5 likes, 5 dislikes | calls 2281 (new 251) | 3.8 min
+user AF4CNTM43WO7STQERU6JXZ7A24WA done (197/300) | 5 likes, 5 dislikes | calls 2292 (new 252) | 3.8 min
+user AHGCRIH26JZZN67FQVXH5C7EC7WA done (198/300) | 5 likes, 5 dislikes | calls 2303 (new 253) | 3.9 min
+user AEV4OUU3C4H5JFEU6WER2HPKUC5A done (199/300) | 5 likes, 5 dislikes | calls 2314 (new 254) | 3.9 min
+user AH6V2RXXTE5XSVXDOPOOWGZISDEQ done (200/300) | 5 likes, 5 dislikes | calls 2325 (new 255) | 3.9 min
+user AG6D3UWSE34CJAGSOP4UORPWPHXQ done (201/300) | 5 likes, 5 dislikes | calls 2336 (new 256) | 3.9 min
+user AGU6ADEXPDXTVIZTD4UVMUSZHSGA done (202/300) | 5 likes, 5 dislikes | calls 2347 (new 257) | 3.9 min
+user AHJUENZI2C7FDWDFVIR7GWDRUE3Q done (203/300) | 5 likes, 5 dislikes | calls 2358 (new 258) | 3.9 min
+user AEYJ4BWSPRCLEJQIMDL7BH53TYGQ done (204/300) | 5 likes, 5 dislikes | calls 2369 (new 259) | 3.9 min
+user AFME6CJCKV27PC5H2YV7XPWBGW5A done (205/300) | 5 likes, 5 dislikes | calls 2380 (new 260) | 4.0 min
+user AEKUC5BJIH55WEIGO5NWP3OD4LKQ done (206/300) | 5 likes, 5 dislikes | calls 2391 (new 261) | 4.0 min
+user AHUYSQJN7BXXEOPTNNGMLY5WR2AA done (207/300) | 5 likes, 5 dislikes | calls 2402 (new 262) | 4.0 min
+user AGGI4W2YI5I7SJQT6SVNPWT4T5LA done (208/300) | 5 likes, 5 dislikes | calls 2413 (new 263) | 4.0 min
+user AERSDBLWTBE7HQWZUQME6E7VQEYQ done (209/300) | 5 likes, 5 dislikes | calls 2425 (new 265) | 4.0 min
+user AF4AYJLHRP7DLPI66AXKRPYHF6SQ done (210/300) | 5 likes, 5 dislikes | calls 2436 (new 266) | 4.0 min
+user AGLPZLH6WWIKDQ5MRHNWHSDBSDXQ done (211/300) | 5 likes, 5 dislikes | calls 2447 (new 267) | 4.1 min
+user AEK327AIT5LVYJFUAU4VVH3MQ5WA done (212/300) | 5 likes, 5 dislikes | calls 2458 (new 268) | 4.1 min
+user AEM3OVK4EKZQS4LLOCCHV3DODVHQ done (213/300) | 1 likes, 5 dislikes | calls 2469 (new 269) | 4.1 min
+user AFYDPZPN2GQNECLWYYVECGMXL2TA done (214/300) | 5 likes, 5 dislikes | calls 2480 (new 270) | 4.1 min
+user AH3ICCTF4GUQ75BASLIXFJLPXLQA done (215/300) | 5 likes, 0 dislikes | calls 2491 (new 271) | 4.1 min
+user AEDLYZWSPO55VGO6HHSFBXVM5LVQ done (216/300) | 5 likes, 5 dislikes | calls 2503 (new 273) | 4.1 min
+user AH2TELJT6OSNRGWCJBQVWRPPFW7A done (217/300) | 5 likes, 5 dislikes | calls 2514 (new 274) | 4.1 min
+user AHT7TOX3TVRZP4BPMP7VPNKLMXSA done (218/300) | 5 likes, 5 dislikes | calls 2525 (new 275) | 4.1 min
+user AENC5LLIGOKKAAUITYGQ6SPICHMA done (219/300) | 5 likes, 5 dislikes | calls 2536 (new 276) | 4.2 min
+user AHIRII225GA6DSWCSEAYZAKM4LAA done (220/300) | 5 likes, 5 dislikes | calls 2547 (new 277) | 4.2 min
+user AH43BJO2KMQSBR6BI3634HXTXNOQ done (221/300) | 5 likes, 5 dislikes | calls 2558 (new 278) | 4.2 min
+user AFURDPX5NJYXCMLLE23BR6BFCRHA done (222/300) | 5 likes, 5 dislikes | calls 2569 (new 279) | 4.2 min
+user AF5CUBPILOHHTW2M5GK5UCKR7CWA done (223/300) | 5 likes, 5 dislikes | calls 2580 (new 280) | 4.2 min
+user AGAYMETPYSHPCI7EQDK76HHWTU6Q done (224/300) | 5 likes, 5 dislikes | calls 2592 (new 282) | 4.2 min
+user AHJ5R423FBTOWOYPHJO72X2WPVWA done (225/300) | 5 likes, 5 dislikes | calls 2603 (new 283) | 4.2 min
+user AGK66JLI3IYOX3VRSHEIMWR7SH7Q done (226/300) | 5 likes, 5 dislikes | calls 2615 (new 285) | 4.3 min
+user AHXMKLMWQVVRA6IAKL63EK7U6YHA done (227/300) | 2 likes, 5 dislikes | calls 2626 (new 286) | 4.3 min
+user AGAZ3UJXL2JGJEHEKJAZKF5EATQA done (228/300) | 5 likes, 0 dislikes | calls 2637 (new 287) | 4.3 min
+user AHNUHOC7HPUZYUXNXUMY3Z3M5BWQ done (229/300) | 5 likes, 5 dislikes | calls 2648 (new 288) | 4.3 min
+user AHWFMGEBOUDHRHRWTJTSM45N4NEA done (230/300) | 5 likes, 5 dislikes | calls 2659 (new 289) | 4.3 min
+user AEEDYZE7SWKKVMVWYZD35VYCMAWQ done (231/300) | 5 likes, 5 dislikes | calls 2670 (new 290) | 4.3 min
+user AG7UVDIMIHHVGAYONGQC7BOQPSMQ done (232/300) | 5 likes, 5 dislikes | calls 2681 (new 291) | 4.3 min
+user AHJTUPETKBPWWYZOT4AGBUGPNISA done (233/300) | 5 likes, 5 dislikes | calls 2692 (new 292) | 4.3 min
+user AHEHDBWNTD44PTES43VGHKZQC6BQ done (234/300) | 5 likes, 5 dislikes | calls 2703 (new 293) | 4.4 min
+user AFZLF3GPBTHFOCO3O53CL4GNADSA done (235/300) | 5 likes, 5 dislikes | calls 2714 (new 294) | 4.4 min
+user AGJRACCF5VCIAFJ3PXHEX23KLFSA done (236/300) | 5 likes, 5 dislikes | calls 2725 (new 295) | 4.4 min
+user AHXSNAUUMIWO4PYNSDXHRKXBKNRQ done (237/300) | 5 likes, 5 dislikes | calls 2736 (new 296) | 4.4 min
+user AHQFSLGSXD2J5TZHM3QRF4LIOVLA done (238/300) | 5 likes, 5 dislikes | calls 2747 (new 297) | 4.4 min
+user AGXSG3NYUSQEVM6M35KG5MSKWAIA done (239/300) | 5 likes, 5 dislikes | calls 2758 (new 298) | 4.4 min
+user AGHFH63XIHTWPTCS7K57Z2DDZOEA done (240/300) | 5 likes, 5 dislikes | calls 2769 (new 299) | 4.4 min
+user AGZPKLS7EM5GKLQZQW2CPTVTIUMQ done (241/300) | 5 likes, 5 dislikes | calls 2780 (new 300) | 4.4 min
+user AEAJJTYNMR64RK4DY4YUWQKRHJVQ done (242/300) | 5 likes, 2 dislikes | calls 2791 (new 301) | 4.5 min
+user AGG75AABVYBT27HUGAKMGZRUV3AQ done (243/300) | 1 likes, 1 dislikes | calls 2804 (new 304) | 4.5 min
+user AGHCDSDMCEB23LYKRPOEUOR6DQWA done (244/300) | 5 likes, 5 dislikes | calls 2815 (new 305) | 4.5 min
+user AHVWXJT7U7PRSM5WZ6MHYPHGRQ7A done (245/300) | 5 likes, 5 dislikes | calls 2826 (new 306) | 4.5 min
+user AFH6SNHRXB3P6TR746X6N7UXAESA done (246/300) | 5 likes, 5 dislikes | calls 2837 (new 307) | 4.5 min
+user AEU24YDL7MXW4ROFP32BRC5MTZ2A done (247/300) | 1 likes, 1 dislikes | calls 2848 (new 308) | 4.5 min
+user AGTFGWRFXGNDJBCOWVAW2ZOIAK2Q done (248/300) | 5 likes, 0 dislikes | calls 2859 (new 309) | 4.5 min
+user AH4BNQ5Z4N7VWSUMSIHV7CSLQ5IA done (249/300) | 5 likes, 5 dislikes | calls 2870 (new 310) | 4.6 min
+user AEPIIGVLVIZRLPFU4XPJESBHRCBQ done (250/300) | 5 likes, 5 dislikes | calls 2883 (new 313) | 4.6 min
+user AFJ3Y7C2ZM2NN3XDDNCPVEWUWDGA done (251/300) | 5 likes, 5 dislikes | calls 2894 (new 314) | 4.6 min
+user AHG75AR2OLFKIY5WMC47LAZNBJMA done (252/300) | 5 likes, 5 dislikes | calls 2905 (new 315) | 4.6 min
+user AHVRYFXWLTP55YLCUSY7ANKWFRSQ done (253/300) | 5 likes, 5 dislikes | calls 2916 (new 316) | 4.6 min
+user AETAT3RJ5XU6NHOSGOSSJUNFYYKQ done (254/300) | 5 likes, 0 dislikes | calls 2927 (new 317) | 4.6 min
+user AEXEMFDAWWQ4IQJR7FXTEZG7DM2A done (255/300) | 5 likes, 5 dislikes | calls 2938 (new 318) | 4.7 min
+user AGJYEDMCJ7RN2WEUZPZ4GUL6QI4A done (256/300) | 5 likes, 5 dislikes | calls 2949 (new 319) | 4.7 min
+user AG3VW5TWEC5EVKQEHHLL2SXIGX2Q done (257/300) | 5 likes, 5 dislikes | calls 2960 (new 320) | 4.7 min
+user AE7346NQUC2IYOAQSETIEMI4IFRA done (258/300) | 5 likes, 5 dislikes | calls 2971 (new 321) | 4.7 min
+user AG3NAQPUUFYXPGNKIMMNQYSENJXQ done (259/300) | 5 likes, 5 dislikes | calls 2982 (new 322) | 4.7 min
+user AEIW3FPJYRTL2ABJQNZRVELSDIHA done (260/300) | 5 likes, 5 dislikes | calls 2993 (new 323) | 4.7 min
+user AHHFHXYH6LZ23SOZM44JOTF3SH5A done (261/300) | 5 likes, 1 dislikes | calls 3004 (new 324) | 4.7 min
+user AGXA24ILKGDC3YLD6UEO644WO5TQ done (262/300) | 5 likes, 5 dislikes | calls 3016 (new 326) | 4.8 min
+user AGDGOUPRBFPFZT3UIMAJZGOXFYKQ done (263/300) | 5 likes, 5 dislikes | calls 3027 (new 327) | 4.8 min
+user AENOGH4D5G372TVSARZAAW2RRD6Q done (264/300) | 5 likes, 5 dislikes | calls 3038 (new 328) | 4.8 min
+user AH2ICZLUOQDUJUCTMYDD476RYS5A done (265/300) | 5 likes, 5 dislikes | calls 3050 (new 330) | 4.8 min
+user AHFVMLEA35MDXAAWV4CPURMCSAEQ done (266/300) | 5 likes, 5 dislikes | calls 3061 (new 331) | 4.8 min
+user AG74KDQCED5IKTZUGDGIE2X2R4JA done (267/300) | 5 likes, 5 dislikes | calls 3072 (new 332) | 4.8 min
+user AGTQYOEMSJ4HZ75SAFG35Q5IOHDA done (268/300) | 5 likes, 5 dislikes | calls 3083 (new 333) | 4.8 min
+user AHWXRGS6L6NN724T7VV5RKXKVM4A done (269/300) | 5 likes, 5 dislikes | calls 3094 (new 334) | 4.9 min
+user AHDJZW2B3HJ4NUAORZH6PIRZOJXA done (270/300) | 5 likes, 5 dislikes | calls 3105 (new 335) | 4.9 min
+user AHBIFBF6QZMROSQFJAM2KFPVV36A done (271/300) | 5 likes, 5 dislikes | calls 3116 (new 336) | 4.9 min
+user AH7XUV3RVG5M5H7RIIF34Q7M6BHA done (272/300) | 5 likes, 5 dislikes | calls 3127 (new 337) | 4.9 min
+user AES3K3H6FNI2GNNUEFT4YESTCTAA done (273/300) | 5 likes, 5 dislikes | calls 3139 (new 339) | 4.9 min
+user AGF4PNKDTHMQ6YF5S4RCW2VIFMVQ done (274/300) | 5 likes, 5 dislikes | calls 3150 (new 340) | 4.9 min
+user AFTBKKRXCR5Z4AK65HT75FO5IJ6A done (275/300) | 5 likes, 5 dislikes | calls 3161 (new 341) | 5.0 min
+user AEOFWNK5KRWV5APXVADPS4PTZQAA done (276/300) | 5 likes, 5 dislikes | calls 3172 (new 342) | 5.0 min
+user AGZQ5IH5EKGM37I5AKT4GSN7OPAA done (277/300) | 5 likes, 5 dislikes | calls 3183 (new 343) | 5.0 min
+user AGS5FB5PZ2IVUUUKIUCDOVNKQI3A done (278/300) | 5 likes, 5 dislikes | calls 3194 (new 344) | 5.0 min
+user AE447E2RM3FLYHQYXZSH2N5R2UVQ done (279/300) | 5 likes, 0 dislikes | calls 3205 (new 345) | 5.0 min
+user AELD623QN2MJQQ2WDDCHAZNQLFJA done (280/300) | 5 likes, 5 dislikes | calls 3217 (new 347) | 5.0 min
+user AG2XR3JOIIARMG3V7OCYQIWGWO3Q done (281/300) | 5 likes, 5 dislikes | calls 3230 (new 350) | 5.0 min
+user AHLUL2U47JGXVMRHI4AQOKA76PZQ done (282/300) | 5 likes, 5 dislikes | calls 3241 (new 351) | 5.1 min
+user AEYVGIBFCUHLHHADWLMSNU7RVCFQ done (283/300) | 5 likes, 5 dislikes | calls 3252 (new 352) | 5.1 min
+user AHYY45DWYE5TS4AIAMKWUEU3CQTA done (284/300) | 1 likes, 1 dislikes | calls 3263 (new 353) | 5.1 min
+user AF2KJ7IOWVNCADO2WPMK4HBNZUVA done (285/300) | 5 likes, 5 dislikes | calls 3274 (new 354) | 5.1 min
+user AFMHTOFIKX2MC7Q6GSTJTNVULFUA done (286/300) | 5 likes, 5 dislikes | calls 3285 (new 355) | 5.1 min
+user AF5EPOIB6X6GLFHULLOOGMGQFZZQ done (287/300) | 5 likes, 5 dislikes | calls 3296 (new 356) | 5.1 min
+user AH2W76FVMQ2EIML3QWT3P3DSFJKQ done (288/300) | 5 likes, 5 dislikes | calls 3307 (new 357) | 5.1 min
+user AHYSBVPG3WAMPZR2Y5WV3WWOZR6A done (289/300) | 1 likes, 1 dislikes | calls 3318 (new 358) | 5.1 min
+user AHASQEVOHZTPBCONDQAWGLITMIUQ done (290/300) | 5 likes, 5 dislikes | calls 3329 (new 359) | 5.2 min
+user AHJW34WVAQQO2ZSYQU3L2K4W4I5A done (291/300) | 5 likes, 5 dislikes | calls 3340 (new 360) | 5.2 min
+user AFOZGLUXTXM2YCN4EUGILC6R3BRQ done (292/300) | 5 likes, 5 dislikes | calls 3341 (new 361) | 5.2 min
+user AE4FMOYYXAJLKH5F7RHZFPSNE6MA done (293/300) | 5 likes, 5 dislikes | calls 3362 (new 362) | 5.2 min
+user AFU6MUD5H3M7RR3YGYA6HNK4PT2Q done (294/300) | 5 likes, 5 dislikes | calls 3363 (new 363) | 5.2 min
+user AENQ354NXVIKARVKNX2LLSX7CYTQ done (295/300) | 5 likes, 5 dislikes | calls 3364 (new 364) | 5.2 min
+user AGFVWV22R364CGJK4RDQXNL7ZTQQ done (296/300) | 5 likes, 5 dislikes | calls 3365 (new 365) | 5.2 min
+user AFZV63JNX3HOWNTKOIVR76RG465A done (297/300) | 5 likes, 5 dislikes | calls 3366 (new 366) | 5.2 min
+user AGBN654NPBY2U2MTQELGBWGZ6Z7Q done (298/300) | 5 likes, 0 dislikes | calls 3368 (new 368) | 5.3 min
+user AH2OSSSLGXNEFZBCUYANAUUFUNBA done (299/300) | 5 likes, 5 dislikes | calls 3369 (new 369) | 5.3 min
+user AEYJ3I677GAJWPCACWLEBOHTUUUQ done (300/300) | 5 likes, 5 dislikes | calls 3370 (new 370) | 5.3 min
+{"users_done": 300, "users_failed": {}, "calls": 3370, "new_calls": 370, "cached_calls": 3000, "prompt_tokens": 365948, "completion_tokens": 79757, "reasoning_tokens": 0, "llm_seconds": 2469.4, "wall_minutes": 5.3, "finish_length": 1, "invalid_extractions": 0, "profiles_missing_tag": 20, "profiles_no_dislikes": 22, "retries": 70, "model": "gpt-oss:20b"}
+
+=== personas for 700 train user(s)  [23.6 min]
+$ D:\thies\reRankPoc\.venv\Scripts\python.exe -u D:\thies\reRankPoc\personas.py --input D:\thies\reRankPoc\data\rr_input --out $dst --cache D:\thies\reRankPoc\runs\cache --base-url http://127.0.0.1:11435/v1 --model gpt-oss:20b --reasoning-effort low --set train --users all --threads 8
+700 train users, about 7700 calls | model gpt-oss:20b | reasoning low | threads 8
+user AGTDCDT2366WHNZDPQJMJ2I2E46A done (1/700) | 5 likes, 5 dislikes | calls 83 (new 3) | 0.1 min
+user AFEF4AUBD37TR2O5SYWXEMETPJCQ done (2/700) | 5 likes, 5 dislikes | calls 95 (new 5) | 0.1 min
+user AFK7IELTW4MJOZRL37EX2G2E3QMQ done (3/700) | 5 likes, 5 dislikes | calls 98 (new 6) | 0.1 min
+user AEMBRSMMX2FU5FOKXPH755WO4XCQ done (4/700) | 5 likes, 5 dislikes | calls 117 (new 7) | 0.1 min
+user AGVND2TY2XWCC4HLRA5XUAVKQAEQ done (5/700) | 5 likes, 5 dislikes | calls 128 (new 8) | 0.1 min
+user AHQTJMITZ6JEWF6P2BQZISP4K3PQ done (6/700) | 5 likes, 5 dislikes | calls 139 (new 9) | 0.2 min
+user AHWBTR5X2H4RK7DL5YCMGI5WXFJA done (7/700) | 5 likes, 5 dislikes | calls 150 (new 10) | 0.2 min
+user AHVVCOHU3JSWWTNBYKJZAGVKCPRA done (8/700) | 5 likes, 5 dislikes | calls 161 (new 11) | 0.2 min
+user AFLQNXKMH3WOV24QCTCAABBDIKAQ done (9/700) | 5 likes, 5 dislikes | calls 172 (new 12) | 0.2 min
+user AHVMONFYDICPUAELESD2QQEUYDCA done (10/700) | 5 likes, 5 dislikes | calls 183 (new 13) | 0.2 min
+user AGOHEWI7WIHAWKI6BUZ23N2ORAQQ done (11/700) | 5 likes, 5 dislikes | calls 194 (new 14) | 0.2 min
+user AFD6DGSYOEJJ4OJRY5JYJUGAM7SQ done (12/700) | 5 likes, 5 dislikes | calls 206 (new 16) | 0.3 min
+user AHKTF2JNIISNQR7G7IN5PP2MIOLA done (13/700) | 6 likes, 5 dislikes | calls 217 (new 17) | 0.3 min
+user AFIJ6A6E6YOC5LHXP34Q42C4OCUA done (14/700) | 5 likes, 5 dislikes | calls 228 (new 18) | 0.3 min
+user AEWJIVCRRXGX7QXGJEWJCR65DQ4Q done (15/700) | 5 likes, 5 dislikes | calls 239 (new 19) | 0.3 min
+user AEWSR3XLXU5XDZ4WAIU5WXMTQRXQ done (16/700) | 5 likes, 5 dislikes | calls 250 (new 20) | 0.3 min
+user AEEJ4YKLB5MBZAPG2NSNFGHCKPDA done (17/700) | 5 likes, 5 dislikes | calls 261 (new 21) | 0.3 min
+user AEIZPDHXXVC2LONCDEAFUU35Q2GQ done (18/700) | 5 likes, 5 dislikes | calls 272 (new 22) | 0.3 min
+user AGLGIKIGTM6DKUUU4DXK3XJMVZBQ done (19/700) | 5 likes, 5 dislikes | calls 283 (new 23) | 0.3 min
+user AHTQV2QGC6HMI724O5TW2TRBPZJQ done (20/700) | 5 likes, 5 dislikes | calls 295 (new 25) | 0.4 min
+user AHJRQ5UAEPSOXQK55C6JFB6DHEZQ done (21/700) | 5 likes, 5 dislikes | calls 306 (new 26) | 0.4 min
+  [net] InternalServerError, retry in 5s
+user AGOFAAZS5S3YJW6XLHR77LLHD2AA done (22/700) | 5 likes, 4 dislikes | calls 317 (new 27) | 0.4 min
+user AEUCRRW6GMPD72SMLEUFTUDUHN4Q done (23/700) | 5 likes, 5 dislikes | calls 328 (new 28) | 0.4 min
+user AFSCENVMZLC37MZILHOBS4KQVBOA done (24/700) | 5 likes, 5 dislikes | calls 339 (new 29) | 0.4 min
+user AF4QF4JEN6KBODBLJHYGY2SZTZMA done (25/700) | 5 likes, 5 dislikes | calls 350 (new 30) | 0.4 min
+user AHUGOAYOFP6BN25KIR4XXTJIPG3Q done (26/700) | 5 likes, 5 dislikes | calls 361 (new 31) | 0.5 min
+user AF56MELRSDVK4SUNEFE2NZUGLITQ done (27/700) | 5 likes, 5 dislikes | calls 372 (new 32) | 0.5 min
+user AGA4LTSNG7KSIBWLEPGI25S2SYYQ done (28/700) | 5 likes, 5 dislikes | calls 383 (new 33) | 0.5 min
+user AH5ARF2A2W5YAUWSK27TZTDRRUVQ done (29/700) | 5 likes, 5 dislikes | calls 394 (new 34) | 0.5 min
+user AHMGA4BTBBTXFEECCJ3SGCK6HBLQ done (30/700) | 5 likes, 5 dislikes | calls 405 (new 35) | 0.5 min
+user AHKXXPG53GFHCLZM655F6E3SASMA done (31/700) | 5 likes, 5 dislikes | calls 417 (new 37) | 0.6 min
+user AEPZJKTEQULK6YRAUWMIJ6ESBP4A done (32/700) | 5 likes, 5 dislikes | calls 429 (new 39) | 0.6 min
+user AEE7HJ4ALXIF445HXTCSCNNI2UJQ done (33/700) | 5 likes, 5 dislikes | calls 440 (new 40) | 0.6 min
+user AEKIBDVA5L4H7JMMGSEZ2QORIXQA done (34/700) | 5 likes, 5 dislikes | calls 451 (new 41) | 0.6 min
+user AG52DYP3R4GTWILHWFAXBR6SNDKQ done (35/700) | 5 likes, 5 dislikes | calls 462 (new 42) | 0.6 min
+user AHW4THABLZUWEEBTT7DCI3WGINCQ done (36/700) | 0 likes, 5 dislikes | calls 473 (new 43) | 0.7 min
+user AEPPEOALZV6H5JPLAOLV637XHVUQ done (37/700) | 5 likes, 5 dislikes | calls 484 (new 44) | 0.7 min
+user AF2CAT74GWSL263DKI57SLQZ5DIA done (38/700) | 5 likes, 5 dislikes | calls 495 (new 45) | 0.7 min
+user AEBJOLNLS7IRLB7HGXXFBZSLXAWQ done (39/700) | 5 likes, 5 dislikes | calls 507 (new 47) | 0.7 min
+user AH5P3O7AADCQIXRJP3JP3VAVD7QQ done (40/700) | 5 likes, 5 dislikes | calls 518 (new 48) | 0.7 min
+user AH7P2ZJ7NDT2NNVS7ZEGNEPT2J2Q done (41/700) | 5 likes, 5 dislikes | calls 531 (new 51) | 0.8 min
+user AHYERIHRQKLG4X4BTVTR7LK7NHDQ done (42/700) | 5 likes, 5 dislikes | calls 542 (new 52) | 0.8 min
+user AHLQYRCQYISGJEBPS6E34DBMPTZQ done (43/700) | 5 likes, 5 dislikes | calls 553 (new 53) | 0.8 min
+user AGG6S7D5L5ITH6TUCVR6JZAUA2AA done (44/700) | 5 likes, 3 dislikes | calls 564 (new 54) | 0.8 min
+user AFSJZTY2CE5XOCTAJX3UBMWYJDZQ done (45/700) | 5 likes, 5 dislikes | calls 575 (new 55) | 0.8 min
+user AGZQFPDPVEJVIAOUCH3LBJZGN36Q done (46/700) | 5 likes, 5 dislikes | calls 587 (new 57) | 0.8 min
+user AGAPBN322G2K4GACEVDPF2DTHD3Q done (47/700) | 5 likes, 5 dislikes | calls 598 (new 58) | 0.8 min
+user AEZY3KVDDJHOMUVQIFU52UVBXM2A done (48/700) | 5 likes, 5 dislikes | calls 609 (new 59) | 0.9 min
+user AEZUL77IAF7KVROG6KRDI72VIOMA done (49/700) | 5 likes, 5 dislikes | calls 620 (new 60) | 0.9 min
+user AHR3ZABAFDJNM6VFYUJ4IT2HR55A done (50/700) | 5 likes, 5 dislikes | calls 631 (new 61) | 0.9 min
+user AGASXUO65F2OZAKO2ZI2MWCYXXDA done (51/700) | 5 likes, 5 dislikes | calls 642 (new 62) | 0.9 min
+user AE4NTF2EM6WC5W32ICKNXSD765TQ done (52/700) | 5 likes, 5 dislikes | calls 653 (new 63) | 0.9 min
+user AF25GNLE2ZVNE4EKR3WNEGZELMNQ done (53/700) | 3 likes, 5 dislikes | calls 666 (new 66) | 1.0 min
+user AFQEQK6BVI7GBKXNVHZMNFY22LCA done (54/700) | 5 likes, 5 dislikes | calls 677 (new 67) | 1.0 min
+user AGZ4OG76BTULPYDEJ7WRPPPZXI2Q done (55/700) | 3 likes, 5 dislikes | calls 688 (new 68) | 1.0 min
+user AEG4FLZ4O76767BUDUK3DKMDDUYA done (56/700) | 5 likes, 5 dislikes | calls 699 (new 69) | 1.0 min
+user AE7HVFJCPV5HEVKWZVJW6XG5UIZA done (57/700) | 5 likes, 5 dislikes | calls 710 (new 70) | 1.0 min
+user AEHSEI5EQP2LOQ63H567SBTDOOUQ done (58/700) | 5 likes, 5 dislikes | calls 721 (new 71) | 1.1 min
+user AHW56HHRKMQ4CAENQR6Q42E3H4DQ done (59/700) | 5 likes, 5 dislikes | calls 732 (new 72) | 1.1 min
+user AGACDEZ5ETKGFTGBYPFECZ5X2ZHQ done (60/700) | 5 likes, 5 dislikes | calls 743 (new 73) | 1.1 min
+user AHSE2ALSFL3A2TRGSMAOFJTIQ6OQ done (61/700) | 5 likes, 5 dislikes | calls 754 (new 74) | 1.1 min
+user AHXZGIBOLNYDT4FERFYJ27L2W2DQ done (62/700) | 5 likes, 5 dislikes | calls 765 (new 75) | 1.1 min
+user AFCKVPAHD2MMQXGI43GC44AUYNIA done (63/700) | 5 likes, 5 dislikes | calls 776 (new 76) | 1.2 min
+user AHGE3WWBN57AWKV2QF5IDZIZYEYA done (64/700) | 5 likes, 5 dislikes | calls 787 (new 77) | 1.2 min
+user AFJOJKXWRSWERTS2HL32SBTFMIBA done (65/700) | 5 likes, 5 dislikes | calls 798 (new 78) | 1.2 min
+user AENDKPJRPIFCYXU665AADZ5SWZUA done (66/700) | 5 likes, 5 dislikes | calls 811 (new 81) | 1.2 min
+user AEWXNZHSYBSGH3PM22GM63K5THEA done (67/700) | 5 likes, 5 dislikes | calls 822 (new 82) | 1.2 min
+user AHURCUZYA5HKJZ7GZ4FPCCHA7IOQ done (68/700) | 5 likes, 5 dislikes | calls 834 (new 84) | 1.2 min
+user AG3HKFCM3HZDYKXE7WMBNMJ2DDGQ done (69/700) | 5 likes, 5 dislikes | calls 845 (new 85) | 1.3 min
+user AE3J6PBFAQG5ORTSNKDKWTVGUJHQ done (70/700) | 5 likes, 5 dislikes | calls 856 (new 86) | 1.3 min
+user AGWHLZ25XRAFQ7HPLJTONRCJYIHQ done (71/700) | 5 likes, 5 dislikes | calls 867 (new 87) | 1.3 min
+user AFJPSFWZB2GVNQ3HQ5G4F4YFOU2A done (72/700) | 3 likes, 5 dislikes | calls 878 (new 88) | 1.3 min
+user AFKKCI2RYJ77LAY2QZGU53PRXZXA done (73/700) | 5 likes, 5 dislikes | calls 889 (new 89) | 1.3 min
+user AFSGOZRPI4AW6TBABT3MAKA5AI5A done (74/700) | 5 likes, 5 dislikes | calls 900 (new 90) | 1.3 min
+user AFUZG4S57VOZIENQ5LJHBPEO5T2Q done (75/700) | 5 likes, 5 dislikes | calls 911 (new 91) | 1.3 min
+user AGH2VQM5PG2XA7PHTTTFEFZF5IDQ done (76/700) | 5 likes, 5 dislikes | calls 922 (new 92) | 1.4 min
+user AE5BCR7O2S3PPLIJCKVCYI524YMA done (77/700) | 5 likes, 5 dislikes | calls 933 (new 93) | 1.4 min
+user AFRSBPRMAI6LXVCVIBKXKXF2OR5Q done (78/700) | 5 likes, 5 dislikes | calls 944 (new 94) | 1.4 min
+user AGH2SA6TN5U73CW7HAZ4IY54LF4A done (79/700) | 1 likes, 1 dislikes | calls 955 (new 95) | 1.4 min
+user AHH6I2XKPLAXFFFPYNNJRYMN2FMA done (80/700) | 5 likes, 5 dislikes | calls 967 (new 97) | 1.4 min
+user AG3PPSZ5PLBMPGXBETNMLPWGRMKA done (81/700) | 5 likes, 5 dislikes | calls 979 (new 99) | 1.4 min
+user AHOSO5AB2V3TPUIYV5QMPKOYCC6Q done (82/700) | 5 likes, 5 dislikes | calls 990 (new 100) | 1.4 min
+user AGXISSDRKCFAXZLTGY7ON7G5O5NQ done (83/700) | 5 likes, 5 dislikes | calls 1001 (new 101) | 1.4 min
+user AGUD6RD3SXUZFJUJKXI2SB3IF2GA done (84/700) | 5 likes, 5 dislikes | calls 1012 (new 102) | 1.5 min
+user AGATQNUSXSWOXGHW632HCEBMUF2A done (85/700) | 5 likes, 5 dislikes | calls 1023 (new 103) | 1.5 min
+user AHEDDD23YIMMGRGDKX3QD2NL5B2A done (86/700) | 5 likes, 5 dislikes | calls 1035 (new 105) | 1.5 min
+user AEQXNMQGHKZOQBUK46FLRTUL2C6Q done (87/700) | 5 likes, 5 dislikes | calls 1046 (new 106) | 1.5 min
+user AEKHBIGFC4OTS3Q7QXGD2U2SGN3A done (88/700) | 5 likes, 5 dislikes | calls 1059 (new 109) | 1.5 min
+user AGRATAC6UWRKLQIUOPOFFQATIWRA done (89/700) | 5 likes, 5 dislikes | calls 1070 (new 110) | 1.5 min
+user AHMYN6UJJYJ7BJV2EVY62X3EG6GQ done (90/700) | 5 likes, 0 dislikes | calls 1081 (new 111) | 1.5 min
+user AH2JTDDQ4SH6WSA2XCF7GLKIPH3A done (91/700) | 5 likes, 5 dislikes | calls 1092 (new 112) | 1.6 min
+user AF5QX2JD4MZPYNRHVKYSGYTWSFDQ done (92/700) | 5 likes, 0 dislikes | calls 1103 (new 113) | 1.6 min
+user AFIBRPRMSNV5KOKIHPOCIU3MLJ4Q done (93/700) | 5 likes, 5 dislikes | calls 1114 (new 114) | 1.6 min
+user AHPYUGLHWRZEFKPELXC2UNPY7EOA done (94/700) | 5 likes, 5 dislikes | calls 1125 (new 115) | 1.6 min
+user AH77X6OTI2JCBSY66DWOMR4AEKTQ done (95/700) | 5 likes, 5 dislikes | calls 1136 (new 116) | 1.6 min
+user AGI6SPM3MRMRX2U2SQWJKV4RFGJQ done (96/700) | 5 likes, 5 dislikes | calls 1147 (new 117) | 1.6 min
+user AFN33VVEPWFHLOFNR25FBWHOQYKQ done (97/700) | 5 likes, 5 dislikes | calls 1158 (new 118) | 1.6 min
+user AH6Z2YQWTP6LAMLX7VN2IXJKNVAQ done (98/700) | 5 likes, 5 dislikes | calls 1169 (new 119) | 1.6 min
+user AHQNQPUIXLXOOAJDN7GXJQ4M32NQ done (99/700) | 5 likes, 5 dislikes | calls 1180 (new 120) | 1.7 min
+user AGVSPJPLXB4ERFBT5QUBF3PPXC4Q done (100/700) | 5 likes, 5 dislikes | calls 1191 (new 121) | 1.7 min
+  [net] InternalServerError, retry in 5s
+user AG4YV7MZPO5BUODPTLRTI7SIKQMA done (101/700) | 5 likes, 5 dislikes | calls 1202 (new 122) | 1.7 min
+user AEFB4CQ3S5M7OB7JQWLRCWMJASAA done (102/700) | 5 likes, 5 dislikes | calls 1213 (new 123) | 1.7 min
+user AHPVYORGEC25MPRMJ7MUM3XEJ3HA done (103/700) | 5 likes, 5 dislikes | calls 1224 (new 124) | 1.7 min
+user AGJVQMZ6WLLC4FC52WR6RVJKJAOQ done (104/700) | 5 likes, 5 dislikes | calls 1235 (new 125) | 1.7 min
+user AGPWQLGWNUO35L7BKSZKGAC3HJUA done (105/700) | 5 likes, 5 dislikes | calls 1246 (new 126) | 1.7 min
+user AGJQCPYJGJED5X7FUXZXSN5VIYQQ done (106/700) | 5 likes, 5 dislikes | calls 1257 (new 127) | 1.8 min
+user AHGMZOGOANJJCRIXOYUC5HLGMG2Q done (107/700) | 5 likes, 5 dislikes | calls 1268 (new 128) | 1.8 min
+user AEQFUAGGCTZN5PINMZRTEDHBZL4A done (108/700) | 5 likes, 5 dislikes | calls 1279 (new 129) | 1.8 min
+user AF3OPXYPMT4PH3GKBY6DL5QLIXKQ done (109/700) | 5 likes, 5 dislikes | calls 1290 (new 130) | 1.8 min
+user AHR2KQP6BZR3NNRFFUDIN73EJWCA done (110/700) | 5 likes, 5 dislikes | calls 1303 (new 133) | 1.8 min
+user AF5B4ZJBHSHWPGRFIWZNUAWXK3FA done (111/700) | 5 likes, 5 dislikes | calls 1315 (new 135) | 1.9 min
+  [net] InternalServerError, retry in 10s
+user AF4WSCQB6STPYY4YRWPHYST7LGFA done (112/700) | 5 likes, 0 dislikes | calls 1327 (new 137) | 1.9 min
+user AFZYDPUDSWVMFYHFGFGJLXXJXXTA done (113/700) | 5 likes, 5 dislikes | calls 1338 (new 138) | 1.9 min
+user AFKO7QSWNHYD7J57D5JCEPOHGIUQ done (114/700) | 5 likes, 5 dislikes | calls 1349 (new 139) | 1.9 min
+user AE24SU23XPDGKECJDTQNGPXAY72A done (115/700) | 5 likes, 5 dislikes | calls 1360 (new 140) | 1.9 min
+user AFWNKWOOTVHVWANA5GM2DSV3DIWQ done (116/700) | 5 likes, 5 dislikes | calls 1373 (new 143) | 2.0 min
+user AEP3AJKJ47ZIRN4LQRBKLK3PDWQQ done (117/700) | 5 likes, 5 dislikes | calls 1384 (new 144) | 2.0 min
+user AEH6E6AUEDASSJN6GBU6INZXM2IA done (118/700) | 5 likes, 5 dislikes | calls 1395 (new 145) | 2.0 min
+user AEGMLAG5FL7TQ2UJCA3FHD7GG5NQ done (119/700) | 5 likes, 5 dislikes | calls 1406 (new 146) | 2.0 min
+user AHNNRJ73DSMIIQKJ3A4SAB2QJTEQ done (120/700) | 5 likes, 1 dislikes | calls 1417 (new 147) | 2.1 min
+user AHP7ATJEI24PXTJDIXBKCQPXK3VA done (121/700) | 5 likes, 5 dislikes | calls 1428 (new 148) | 2.1 min
+user AFIIENWM5XY4MMQKPLBBOCP6LKPA done (122/700) | 5 likes, 5 dislikes | calls 1439 (new 149) | 2.1 min
+user AEXWX3AGXGPJ4BN74TVX6O6LYPMA done (123/700) | 5 likes, 5 dislikes | calls 1451 (new 151) | 2.1 min
+user AGBOCNJQTG7TKSG5MNJLGJKN7UMQ done (124/700) | 5 likes, 1 dislikes | calls 1462 (new 152) | 2.1 min
+user AHNPCSG46J6J3WF3GEPOGDMFCVQQ done (125/700) | 5 likes, 2 dislikes | calls 1473 (new 153) | 2.1 min
+user AEOIIY27NDTYITHR4IPHHNYKWJHQ done (126/700) | 5 likes, 5 dislikes | calls 1484 (new 154) | 2.2 min
+user AHHPNOFIXLPVE3LHUTETHXMEZZAQ done (127/700) | 5 likes, 5 dislikes | calls 1495 (new 155) | 2.2 min
+user AF5JI7CWMGLTIET75LI2T4TXNSJQ done (128/700) | 5 likes, 5 dislikes | calls 1506 (new 156) | 2.2 min
+user AHC7KSNVBOK2TP6XN662TLMPDJFQ done (129/700) | 5 likes, 5 dislikes | calls 1518 (new 158) | 2.2 min
+user AGFTSXD5XQO4U4GZTLQLZMSAUOUQ done (130/700) | 5 likes, 5 dislikes | calls 1529 (new 159) | 2.2 min
+user AFVO5M7YC5SH353INM3PT3WJYYEA done (131/700) | 5 likes, 0 dislikes | calls 1540 (new 160) | 2.2 min
+user AENCUOKZGNIS32HNCEDDJTHNYFTA done (132/700) | 5 likes, 5 dislikes | calls 1552 (new 162) | 2.3 min
+user AE4BUSB37F7BUAAQBI5JYZ3FM3XA done (133/700) | 5 likes, 0 dislikes | calls 1564 (new 164) | 2.3 min
+user AFRXWQYYM6I3TOXDZDDERC4NR2SA done (134/700) | 5 likes, 5 dislikes | calls 1577 (new 167) | 2.3 min
+user AHIZX3HDZ7HMFTC6RYVLFG6DK2ZQ done (135/700) | 5 likes, 5 dislikes | calls 1588 (new 168) | 2.3 min
+user AHZBKDI4P2GIIHE57ED2JZENW24A done (136/700) | 5 likes, 0 dislikes | calls 1599 (new 169) | 2.3 min
+user AFCE2JTNHV4MNKKY7JWOWRZCHZRQ done (137/700) | 5 likes, 5 dislikes | calls 1610 (new 170) | 2.3 min
+user AH5TPS43DNDZ5HF5I7NMH2R35C6A done (138/700) | 5 likes, 5 dislikes | calls 1621 (new 171) | 2.4 min
+user AGFYGC6GYXDSWIZOVK5D57A5KFFA done (139/700) | 5 likes, 5 dislikes | calls 1632 (new 172) | 2.4 min
+user AFILCCONH6VK2LERMUU3QBGK46PQ done (140/700) | 5 likes, 5 dislikes | calls 1643 (new 173) | 2.4 min
+user AGRA2MZWMFMBX7USRVCJXGMII7XQ done (141/700) | 5 likes, 5 dislikes | calls 1654 (new 174) | 2.4 min
+user AFJDHLORJ6YAKGMYY4C427BBFQRA done (142/700) | 5 likes, 5 dislikes | calls 1665 (new 175) | 2.4 min
+user AELI7LZK6BMLN25PMDUFX2RQG4EA done (143/700) | 5 likes, 5 dislikes | calls 1676 (new 176) | 2.4 min
+user AH2PFG5MQ25R3COSMQPZB335ARHQ done (144/700) | 5 likes, 5 dislikes | calls 1687 (new 177) | 2.4 min
+user AH4LE5JFTC5COH3IPFDL3WGOLHXQ done (145/700) | 5 likes, 5 dislikes | calls 1698 (new 178) | 2.5 min
+user AFYDKR7YHZ3SI7UG3ATD35BX7VPA done (146/700) | 5 likes, 5 dislikes | calls 1709 (new 179) | 2.5 min
+user AGP3IGRS4TDC7TYPFOYNLDTOYESA done (147/700) | 5 likes, 5 dislikes | calls 1720 (new 180) | 2.5 min
+user AGGFTX2P5CQ4FDIT6LQCQCPX5YNA done (148/700) | 5 likes, 5 dislikes | calls 1731 (new 181) | 2.5 min
+user AHYE62R4E4FJ77NTXIWHDQ53XMZQ done (149/700) | 5 likes, 5 dislikes | calls 1742 (new 182) | 2.5 min
+user AFBNEPL4ZFJOT6TG554UNJH7FQRA done (150/700) | 5 likes, 4 dislikes | calls 1743 (new 183) | 2.5 min
+user AEKANPNWIHM7FHZG5KJMOGAQLPQQ done (151/700) | 2 likes, 5 dislikes | calls 1764 (new 184) | 2.5 min
+user AGQTAOKYIXVKW4NRJZDAYB5SR26Q done (152/700) | 5 likes, 2 dislikes | calls 1775 (new 185) | 2.6 min
+user AGTPSQQRHYYSSP5ZNNZBRA74ZHIA done (153/700) | 5 likes, 5 dislikes | calls 1787 (new 187) | 2.6 min
+user AFNQDRKACFLI7DOVRNGTS6YOALIA done (154/700) | 3 likes, 5 dislikes | calls 1798 (new 188) | 2.6 min
+user AHREMY44APM4NXNAH5B6Z6M2ORDQ done (155/700) | 5 likes, 5 dislikes | calls 1810 (new 190) | 2.6 min
+user AHDJE2QEZTM7YRJHPUOLHGL4DWFA done (156/700) | 5 likes, 5 dislikes | calls 1822 (new 192) | 2.6 min
+user AGYDYGNVWC2VNM5SMV6BTMYV2LPA done (157/700) | 5 likes, 5 dislikes | calls 1833 (new 193) | 2.6 min
+user AH7SNYFIGORH6IDXILJMMBQN6RCQ done (158/700) | 5 likes, 0 dislikes | calls 1844 (new 194) | 2.7 min
+user AFHPOWDZX56DDBCXI6GSFU422ZUQ done (159/700) | 5 likes, 5 dislikes | calls 1855 (new 195) | 2.7 min
+user AE3ODVITM46O2JNN5UMZ74M42RRA done (160/700) | 5 likes, 5 dislikes | calls 1866 (new 196) | 2.7 min
+user AFXXELHYYJ3TIBL7KRSUKAVDQY5Q done (161/700) | 5 likes, 5 dislikes | calls 1877 (new 197) | 2.7 min
+user AHRUCTJNFEF6BA26GHKK2D6HK2IQ done (162/700) | 5 likes, 5 dislikes | calls 1888 (new 198) | 2.7 min
+user AEC3FWXXNFYLTXH4WX3VKHQL6MAA done (163/700) | 5 likes, 5 dislikes | calls 1900 (new 200) | 2.8 min
+user AGDRS6N7KYGPYLHHHIPEHIFYJYYQ done (164/700) | 5 likes, 5 dislikes | calls 1901 (new 201) | 2.8 min
+user AF5CF2S74R6NDTMQR2LNYCT3UDCA done (165/700) | 5 likes, 5 dislikes | calls 1922 (new 202) | 2.8 min
+user AEGBPDQOSSILUOJA5YSJ6V4F2TBA done (166/700) | 5 likes, 5 dislikes | calls 1933 (new 203) | 2.9 min
+  [net] InternalServerError, retry in 5s
+user AGDNOK4WENFWV3HIU6EWS3PGKFPQ done (167/700) | 5 likes, 5 dislikes | calls 1944 (new 204) | 2.9 min
+user AHTIPI23OALLA77FTKDFDKHVI25Q done (168/700) | 5 likes, 5 dislikes | calls 1955 (new 205) | 2.9 min
+user AF6DQT3YUH52BMXERVDLUKOBW6AA done (169/700) | 5 likes, 5 dislikes | calls 1967 (new 207) | 2.9 min
+user AF4YETYMJU7V7YHIVHJKK6VSNXGA done (170/700) | 5 likes, 4 dislikes | calls 1967 (new 207) | 2.9 min
+user AEI537EN3VLNFEGTYS6CFRWNTZ5Q done (171/700) | 5 likes, 5 dislikes | calls 1988 (new 208) | 3.0 min
+user AFJ253KM2B2LRBUQXKEHKIHKM4PA done (172/700) | 5 likes, 5 dislikes | calls 2000 (new 210) | 3.0 min
+user AGQUMITLC3BHQJP4Z3Z7E6HCW3IQ done (173/700) | 5 likes, 5 dislikes | calls 2012 (new 212) | 3.0 min
+user AEPTNY7FGKTC3SDQXJU2BB6TL7IQ done (174/700) | 5 likes, 5 dislikes | calls 2023 (new 213) | 3.1 min
+user AHHGSAARGZS6RC5KKCK2TDJAERIA done (175/700) | 1 likes, 5 dislikes | calls 2034 (new 214) | 3.1 min
+user AHW5XCLC7FNVXMPT7SZJCQXYWJBA done (176/700) | 5 likes, 0 dislikes | calls 2045 (new 215) | 3.1 min
+user AHERPQL2G7M53IZHGGWVT5EVMYHA done (177/700) | 5 likes, 0 dislikes | calls 2056 (new 216) | 3.1 min
+user AEYNZ7GH26UM3IVVSPV5TOW4S5UA done (178/700) | 5 likes, 5 dislikes | calls 2067 (new 217) | 3.1 min
+user AFCDFCIQQ626L7CMOLONYI2REBHQ done (179/700) | 5 likes, 5 dislikes | calls 2078 (new 218) | 3.1 min
+user AFGV6IPXJWTOP4UIGMQ3Y4EPJ7XQ done (180/700) | 5 likes, 5 dislikes | calls 2089 (new 219) | 3.1 min
+user AHBQNXZZCNFHQ2D7ONUQFEG4HX2A done (181/700) | 5 likes, 5 dislikes | calls 2100 (new 220) | 3.2 min
+user AHFJOOXHFV7YUIQPVPQ7K25GPFNQ done (182/700) | 5 likes, 5 dislikes | calls 2111 (new 221) | 3.2 min
+user AHQEQWMG5AHHDEVONRL37ZZIFTGA done (183/700) | 5 likes, 5 dislikes | calls 2122 (new 222) | 3.2 min
+user AFCCEZRXKA3R3377ZW6VL5EG6Y6Q done (184/700) | 5 likes, 5 dislikes | calls 2135 (new 225) | 3.3 min
+user AEANDTT6FA44G43SXM5WRBOGDPQQ done (185/700) | 5 likes, 5 dislikes | calls 2146 (new 226) | 3.3 min
+user AG63LI2GGRX3MG6DWDAEVDFEQNZA done (186/700) | 5 likes, 5 dislikes | calls 2157 (new 227) | 3.3 min
+user AGELFC6J7JVACC5GUVUANBYX7YMA done (187/700) | 5 likes, 5 dislikes | calls 2168 (new 228) | 3.3 min
+user AGZIB4NOT5MX6UA325TIGJV4ZL3Q done (188/700) | 5 likes, 5 dislikes | calls 2179 (new 229) | 3.3 min
+user AHPH4QMJC5IJKOLHAZX232UNUQQQ done (189/700) | 5 likes, 5 dislikes | calls 2190 (new 230) | 3.4 min
+user AFZFEPW5XLRNILLGZ3KNQEB324KA done (190/700) | 5 likes, 5 dislikes | calls 2201 (new 231) | 3.4 min
+user AFHLGK2TUFNLPV2TFFGWSBNZX4XA done (191/700) | 5 likes, 5 dislikes | calls 2213 (new 233) | 3.4 min
+user AHTMYBTWSYDZ5ZPPMC5PZLESXVBQ done (192/700) | 5 likes, 5 dislikes | calls 2224 (new 234) | 3.4 min
+user AEHEAHYI5WLIA5XLWJHT2TMGCZ3A done (193/700) | 5 likes, 5 dislikes | calls 2235 (new 235) | 3.4 min
+user AE7V3QLPXAPNEZJHXY3I2CSJNS3A done (194/700) | 5 likes, 5 dislikes | calls 2246 (new 236) | 3.5 min
+user AGCPXAZPSJYSZPTIRGRD73NRXZOA done (195/700) | 5 likes, 2 dislikes | calls 2257 (new 237) | 3.5 min
+user AGGABN224YER3QKCLXHNZYNG545A done (196/700) | 5 likes, 5 dislikes | calls 2268 (new 238) | 3.5 min
+user AHFGIFWFRGG4UKGJVMU5XJQH36RA done (197/700) | 5 likes, 5 dislikes | calls 2271 (new 239) | 3.5 min
+user AFG4PA3EIDPSSJ4IKHX3ABZ7T3JA done (198/700) | 5 likes, 5 dislikes | calls 2291 (new 241) | 3.5 min
+user AHAVTJQZZI3QY3SA7NNUNER2SGHQ done (199/700) | 5 likes, 5 dislikes | calls 2302 (new 242) | 3.6 min
+  [net] InternalServerError, retry in 5s
+user AFPJ6XTVLZ6FKZQCBLWTTJMBJZUQ done (200/700) | 5 likes, 5 dislikes | calls 2313 (new 243) | 3.6 min
+user AFHVA72C6OYJRDBL6ST7LLM23YPA done (201/700) | 5 likes, 5 dislikes | calls 2324 (new 244) | 3.6 min
+user AEHLLNITFQ52GFMASOGKKW2WXJ4A done (202/700) | 5 likes, 0 dislikes | calls 2335 (new 245) | 3.6 min
+user AHWG5F34STXQWHP6Z2WRRIUKRXSA done (203/700) | 5 likes, 5 dislikes | calls 2346 (new 246) | 3.6 min
+user AGHV5OL3ZMDP6ENLHAU24ES65FNA done (204/700) | 5 likes, 5 dislikes | calls 2358 (new 248) | 3.7 min
+user AHBUNSVE5DIKWSN3FR4EQMKHW43A done (205/700) | 5 likes, 5 dislikes | calls 2369 (new 249) | 3.7 min
+user AGZIRXOWS77PH3HLJTETGVTJ4F5Q done (206/700) | 5 likes, 5 dislikes | calls 2380 (new 250) | 3.7 min
+user AFAPY6Q67HMIBQTTW53CM3N47SMQ done (207/700) | 5 likes, 5 dislikes | calls 2391 (new 251) | 3.7 min
+user AEVHBX27WNA25ADWBSCTPHMCQ5FQ done (208/700) | 5 likes, 0 dislikes | calls 2402 (new 252) | 3.7 min
+user AHFG6DBOC5H5PRWGFY43YE2GKN4Q done (209/700) | 5 likes, 5 dislikes | calls 2404 (new 253) | 3.7 min
+user AHQ2MC3AXKK623H3PWO3TX2KQLTQ done (210/700) | 5 likes, 5 dislikes | calls 2426 (new 256) | 3.8 min
+user AF62AEIOEKVHHD4XH2ID7PXWB7AQ done (211/700) | 1 likes, 1 dislikes | calls 2437 (new 257) | 3.8 min
+  [net] InternalServerError, retry in 10s
+user AEJ7HB4OSD6GTXPKGPZSF2PVBZWQ done (212/700) | 5 likes, 0 dislikes | calls 2448 (new 258) | 3.8 min
+user AFTGOVRDVMR2GC4APDB7JBF5HCGA done (213/700) | 5 likes, 5 dislikes | calls 2459 (new 259) | 3.8 min
+user AF636MODXMIEKKJMMRYHUZ6EANVQ done (214/700) | 5 likes, 5 dislikes | calls 2470 (new 260) | 3.9 min
+user AFN7NRSSCCUOITWQTGYMVMPFW5VA done (215/700) | 5 likes, 5 dislikes | calls 2481 (new 261) | 3.9 min
+user AGBTZXCY5WGWD4KCJGUYZW52KOIQ done (216/700) | 1 likes, 1 dislikes | calls 2492 (new 262) | 3.9 min
+user AHCCG7TJZTVXWCOJOMAP7OTJS33A done (217/700) | 5 likes, 5 dislikes | calls 2504 (new 264) | 3.9 min
+user AGVQ2KODSTVJCIKFNDXH4JPUMLMA done (218/700) | 5 likes, 5 dislikes | calls 2515 (new 265) | 3.9 min
+user AEEBIK6BTSAPYA3NRUIOYXJMKJ4Q done (219/700) | 4 likes, 5 dislikes | calls 2527 (new 267) | 4.0 min
+user AEEU2GIHLZ6SWB7LGPSNUNT4FZXQ done (220/700) | 5 likes, 5 dislikes | calls 2538 (new 268) | 4.0 min
+user AHMJWYKKPPC5VIRSQSIT7TE5H7LQ done (221/700) | 5 likes, 5 dislikes | calls 2549 (new 269) | 4.0 min
+user AHW6VDCQHMYWBCHR3UCFRZ7FLNAQ done (222/700) | 5 likes, 5 dislikes | calls 2561 (new 271) | 4.0 min
+user AHPUJ3X2GNPVNAZIY7OBXNMGCE2A done (223/700) | 5 likes, 5 dislikes | calls 2572 (new 272) | 4.0 min
+user AE2OLMDWE767UUWUE4D7H5VCHSQQ done (224/700) | 5 likes, 3 dislikes | calls 2583 (new 273) | 4.1 min
+user AHXZJYSFO5PQUH5IHCYHESGBR2UA done (225/700) | 5 likes, 5 dislikes | calls 2594 (new 274) | 4.1 min
+user AH4YFLUWAZGPVK3OLL6XFG347D2Q done (226/700) | 5 likes, 5 dislikes | calls 2605 (new 275) | 4.1 min
+  [net] InternalServerError, retry in 20s
+user AE5UK2SSDDXGIFBECZJR7EFXKZSA done (227/700) | 5 likes, 5 dislikes | calls 2616 (new 276) | 4.2 min
+user AEVF5EIFNSPO7NULRHJ2WPUMPPQA done (228/700) | 5 likes, 5 dislikes | calls 2627 (new 277) | 4.2 min
+user AF5GVABETN5JQ6TS2CJHYMSAXMSA done (229/700) | 5 likes, 5 dislikes | calls 2638 (new 278) | 4.2 min
+user AEDFM4VDH2MKYVBKGYVTU6R5L5FQ done (230/700) | 5 likes, 5 dislikes | calls 2650 (new 280) | 4.2 min
+user AH3AKENLTTJ5N6NBZEDJ4ULXDB5Q done (231/700) | 5 likes, 5 dislikes | calls 2661 (new 281) | 4.2 min
+user AHBB5QJDO3NBIANIMUV2XUTUWX3Q done (232/700) | 5 likes, 5 dislikes | calls 2672 (new 282) | 4.2 min
+user AHRV3FEDHGYLFVU2I4EN4XGPHPGQ done (233/700) | 5 likes, 5 dislikes | calls 2683 (new 283) | 4.3 min
+user AEMWZLMHQ2S5ZTPAWYPIU7LMGVXQ done (234/700) | 5 likes, 5 dislikes | calls 2694 (new 284) | 4.3 min
+user AHQZDXZWEJQHG3UKDZOL6R7LH2YQ done (235/700) | 5 likes, 5 dislikes | calls 2706 (new 286) | 4.3 min
+user AESENPY2SJZGKXOAJ2L7ISPDVOFQ done (236/700) | 5 likes, 5 dislikes | calls 2719 (new 289) | 4.4 min
+user AHSHUIZHSPWYY3OD3PI56MSBKZ4Q done (237/700) | 5 likes, 5 dislikes | calls 2730 (new 290) | 4.4 min
+user AH3BXW7KLIS2VAE56UXJS2NS7I5A done (238/700) | 5 likes, 5 dislikes | calls 2741 (new 291) | 4.4 min
+user AFP2K2GGAVSGHQEFBCZXGRUMC5YA done (239/700) | 5 likes, 0 dislikes | calls 2752 (new 292) | 4.4 min
+user AEYFUS6Z4LQABDAPLDSZHG5JNEGQ done (240/700) | 5 likes, 5 dislikes | calls 2763 (new 293) | 4.4 min
+user AG6GPLYH33CLR3SYPPAALIYGY5AA done (241/700) | 5 likes, 5 dislikes | calls 2774 (new 294) | 4.5 min
+user AGVABW6HPQD3PDLBQLEFLYLGARZA done (242/700) | 5 likes, 5 dislikes | calls 2785 (new 295) | 4.5 min
+user AHQH47HVC2AGPDAKPARHVVXBQJ4A done (243/700) | 5 likes, 5 dislikes | calls 2796 (new 296) | 4.5 min
+user AEKAQB36LMSNV6IZRDBN3QEZZ6QQ done (244/700) | 5 likes, 5 dislikes | calls 2807 (new 297) | 4.5 min
+user AGF4T6MBMMZJ2V6RGBMEGE6EGLRQ done (245/700) | 5 likes, 3 dislikes | calls 2818 (new 298) | 4.5 min
+user AGWMGODUBZML6N6XR3QPY3PYHT3A done (246/700) | 5 likes, 5 dislikes | calls 2829 (new 299) | 4.6 min
+user AHEEC7PJ77IOCOUBENBZ5JFLR3BA done (247/700) | 5 likes, 5 dislikes | calls 2841 (new 301) | 4.6 min
+user AGKUMHQVVHY7KRNLMCPM6H4WMTGQ done (248/700) | 5 likes, 5 dislikes | calls 2852 (new 302) | 4.6 min
+user AFV56JPETD6T2HTLKK4LPOIP7RSQ done (249/700) | 5 likes, 5 dislikes | calls 2863 (new 303) | 4.6 min
+user AE4B34A4YU5TKBYGPZD2V4QWLODA done (250/700) | 5 likes, 5 dislikes | calls 2875 (new 305) | 4.6 min
+user AEKAJSDF5OXGK7BSVJEXW3SGFJ4Q done (251/700) | 5 likes, 0 dislikes | calls 2886 (new 306) | 4.6 min
+user AFA4GS2V7VBQTZZMWWNSVKWZAPMQ done (252/700) | 5 likes, 5 dislikes | calls 2897 (new 307) | 4.7 min
+user AFMBVKASNP6LJUUOVQF2IMMV44JA done (253/700) | 5 likes, 5 dislikes | calls 2908 (new 308) | 4.7 min
+user AFQNOHUKLO6MQQ4DZD4XU3D44K3Q done (254/700) | 5 likes, 5 dislikes | calls 2919 (new 309) | 4.7 min
+user AESZ3RUCGPFGR6OZ4DGXCJ3ALTOA done (255/700) | 5 likes, 5 dislikes | calls 2930 (new 310) | 4.7 min
+user AENPVPTF7GYBBVY5ZNNL3E4OSF7A done (256/700) | 5 likes, 5 dislikes | calls 2941 (new 311) | 4.7 min
+user AFQ7JFHBRONKONY2FSEJU6LTPPFA done (257/700) | 5 likes, 1 dislikes | calls 2952 (new 312) | 4.7 min
+user AGF6B5JVOC3V5QNVEFXJV57ZNJHQ done (258/700) | 5 likes, 5 dislikes | calls 2963 (new 313) | 4.8 min
+user AHHC73ESOUIVZZYBI2HKQK4JPORA done (259/700) | 5 likes, 5 dislikes | calls 2975 (new 315) | 4.8 min
+user AFNUQ3AEZURU3ESYTHW3ZAYQM26A done (260/700) | 5 likes, 5 dislikes | calls 2987 (new 317) | 4.8 min
+user AGBW6JOCDHVQ7ADIMCBPMO7IZ2SA done (261/700) | 5 likes, 5 dislikes | calls 2999 (new 319) | 4.9 min
+user AGNZSAVFZKEP4OE3GOPQRTVUG46Q done (262/700) | 5 likes, 5 dislikes | calls 3010 (new 320) | 4.9 min
+user AH65BXU7EEWYTBPJF2UXWEGNRHEQ done (263/700) | 5 likes, 1 dislikes | calls 3021 (new 321) | 4.9 min
+user AHD32XAGUS7AF63X6RUY4HV7O2WQ done (264/700) | 4 likes, 5 dislikes | calls 3032 (new 322) | 5.0 min
+user AFGSEJWXKCHEY2UVXM7KX2SWXMRQ done (265/700) | 5 likes, 5 dislikes | calls 3043 (new 323) | 5.0 min
+user AHZDMNJZB4AZ3GIL5WDA5JHBXGPQ done (266/700) | 5 likes, 5 dislikes | calls 3054 (new 324) | 5.0 min
+user AFMDMZSEJF5J6AORWMKTBKCV66TA done (267/700) | 5 likes, 5 dislikes | calls 3065 (new 325) | 5.0 min
+user AEVQM5XU77Y2COK62ZPBBRKDVF3Q done (268/700) | 5 likes, 5 dislikes | calls 3076 (new 326) | 5.0 min
+user AGLDRB4F3YD2BW5MGQWMII7FW5CA done (269/700) | 5 likes, 5 dislikes | calls 3088 (new 328) | 5.1 min
+user AE7PYOEPAE3CP5QH6QJJS2CGGKAQ done (270/700) | 5 likes, 5 dislikes | calls 3099 (new 329) | 5.1 min
+user AEHKONTPDWP6KEAPA5NFIG2CRENQ done (271/700) | 5 likes, 5 dislikes | calls 3110 (new 330) | 5.1 min
+user AHC74VSSBC7AOPUFC772UJRZNR5A done (272/700) | 5 likes, 5 dislikes | calls 3121 (new 331) | 5.1 min
+user AGS5T4UNQA776XJH2L6S6Q3WZYQQ done (273/700) | 5 likes, 5 dislikes | calls 3132 (new 332) | 5.1 min
+user AGSSVGPVCFA5EKRE2ITTTZPYMTCA done (274/700) | 5 likes, 5 dislikes | calls 3143 (new 333) | 5.1 min
+user AF3OGRU6PKZP2C5CMS7QLOMC4NAQ done (275/700) | 5 likes, 5 dislikes | calls 3154 (new 334) | 5.1 min
+user AFA2GKQV4X7QO4ERZ2Y6XPRKVKSA done (276/700) | 5 likes, 5 dislikes | calls 3165 (new 335) | 5.2 min
+user AEVUA4WPQ76B53Q6QEYKZ4EHLLCA done (277/700) | 5 likes, 5 dislikes | calls 3176 (new 336) | 5.2 min
+user AGYD2B363IF7I62BXJ5SYWCJWTVQ done (278/700) | 5 likes, 5 dislikes | calls 3187 (new 337) | 5.2 min
+user AEY7D5UWDUGXC6LC6IFBF5QFEZ3Q done (279/700) | 5 likes, 5 dislikes | calls 3198 (new 338) | 5.2 min
+user AGZBCPR2HF46ZZ7C7RJS3PLQBOUQ done (280/700) | 5 likes, 5 dislikes | calls 3211 (new 341) | 5.3 min
+user AFABCEIH37BKCTMJQY57CEVO4JAQ done (281/700) | 5 likes, 5 dislikes | calls 3223 (new 343) | 5.3 min
+user AFUMQN5NHKCKJ5V6H3N23SKXRXYQ done (282/700) | 5 likes, 5 dislikes | calls 3234 (new 344) | 5.3 min
+user AHY6HCBQ7P4NC7V72CVGKE33URJA done (283/700) | 5 likes, 5 dislikes | calls 3245 (new 345) | 5.3 min
+user AEMVPODUJ7WJW5E3QDMLZZHOA4PA done (284/700) | 5 likes, 0 dislikes | calls 3256 (new 346) | 5.3 min
+user AGYLTSEG3Q3VS2BK32PCR7HUHJQQ done (285/700) | 5 likes, 5 dislikes | calls 3267 (new 347) | 5.3 min
+user AHM2YO44HU7UZHLDT46R7V2ZMYFQ done (286/700) | 5 likes, 5 dislikes | calls 3278 (new 348) | 5.4 min
+user AFZLLJO23W6TRHFBQ5F5KMXE5QYQ done (287/700) | 5 likes, 5 dislikes | calls 3289 (new 349) | 5.4 min
+user AFCLO4FPAYAQ4TJ6FPJP54QCVVZQ done (288/700) | 5 likes, 5 dislikes | calls 3300 (new 350) | 5.4 min
+  [net] InternalServerError, retry in 5s
+user AHLAFAC6QNFNS3ZAH77ALNQ6IKDA done (289/700) | 5 likes, 5 dislikes | calls 3311 (new 351) | 5.4 min
+user AGDF7MLSGSI7TOXFT57XFCJEHM6Q done (290/700) | 5 likes, 5 dislikes | calls 3322 (new 352) | 5.4 min
+user AGZUKJX25ING3657R5MFL7RQCPGA done (291/700) | 5 likes, 5 dislikes | calls 3333 (new 353) | 5.4 min
+user AFSN2TDDWZ4NKN7GZ5LJIPZBUJHA done (292/700) | 5 likes, 5 dislikes | calls 3344 (new 354) | 5.5 min
+user AG4SCXINQYGNIUCONLBQCDOJI3FA done (293/700) | 5 likes, 5 dislikes | calls 3357 (new 357) | 5.5 min
+user AHPTE3SLVAJSNLD23EWV4IRNFBCA done (294/700) | 5 likes, 5 dislikes | calls 3368 (new 358) | 5.5 min
+user AEAV7YND36VHYW4O4CIE3HB5TJKQ done (295/700) | 5 likes, 5 dislikes | calls 3379 (new 359) | 5.5 min
+user AHC4VVR36IO4QJHXVIMXJ4RC7OAA done (296/700) | 5 likes, 5 dislikes | calls 3390 (new 360) | 5.5 min
+user AHN5DJHSZBPDFSFJT2HPFD7YNQGA done (297/700) | 5 likes, 5 dislikes | calls 3401 (new 361) | 5.6 min
+user AHDWRQO7YT44ODO3XB7WC3FXUCNQ done (298/700) | 5 likes, 1 dislikes | calls 3412 (new 362) | 5.6 min
+user AGO7QGYXJ5UI7H37JSE5BJZWE3AA done (299/700) | 5 likes, 5 dislikes | calls 3423 (new 363) | 5.6 min
+user AGR3PACRGN6RTC2633ZB2CHDJJ3Q done (300/700) | 5 likes, 5 dislikes | calls 3434 (new 364) | 5.6 min
+user AFFU7I7R4TPYRPHHFTB3DXICHVWQ done (301/700) | 5 likes, 5 dislikes | calls 3445 (new 365) | 5.6 min
+user AHLBZB53TIDL3VXRN33NH5O4AKWQ done (302/700) | 5 likes, 5 dislikes | calls 3456 (new 366) | 5.6 min
+user AG2NYJC53ROWKHLZSGJN2JPA7ZAQ done (303/700) | 5 likes, 5 dislikes | calls 3467 (new 367) | 5.6 min
+user AFXXQZP4V6EMO5ES5PKP4BPMQKWA done (304/700) | 5 likes, 5 dislikes | calls 3479 (new 369) | 5.7 min
+user AFTUKCLK34PXMXQSQABKQ7CIJUYQ done (305/700) | 5 likes, 5 dislikes | calls 3490 (new 370) | 5.7 min
+user AHW32JBVX2AQW7JI5WVYHJOWTH4A done (306/700) | 1 likes, 5 dislikes | calls 3501 (new 371) | 5.7 min
+user AGWUP32SH6BH4G342WRBEXI4ZFTA done (307/700) | 5 likes, 5 dislikes | calls 3512 (new 372) | 5.7 min
+user AHBHMULY5XR7ZQ45GL2F4GIRJMDQ done (308/700) | 5 likes, 5 dislikes | calls 3513 (new 373) | 5.7 min
+user AE4INNTCJ3SY5LNCFKTKR5243ARQ done (309/700) | 5 likes, 5 dislikes | calls 3534 (new 374) | 5.8 min
+user AHSN74K7JKQBMSRE3RONKSFNR77Q done (310/700) | 5 likes, 5 dislikes | calls 3546 (new 376) | 5.8 min
+user AG3UWHS7HRCP5GUOC3UEOIJH5PHA done (311/700) | 5 likes, 5 dislikes | calls 3557 (new 377) | 5.8 min
+user AFCEUNXG3DA3OQODX44I4QK267JA done (312/700) | 5 likes, 5 dislikes | calls 3568 (new 378) | 5.8 min
+user AHNWN3DXE2WW3WAQDGMWC7JBZZCQ done (313/700) | 5 likes, 5 dislikes | calls 3580 (new 380) | 5.8 min
+user AGNK6ATYRNYJDUY6CXJ2MNEIDEAA done (314/700) | 5 likes, 5 dislikes | calls 3591 (new 381) | 5.8 min
+user AFH64VFGETC3KE5SPITE27ESMC5A done (315/700) | 5 likes, 0 dislikes | calls 3603 (new 383) | 5.8 min
+user AHZET3VJABYFFUYP4M3EQPLBJDWQ done (316/700) | 5 likes, 5 dislikes | calls 3615 (new 385) | 5.9 min
+user AHKKBG2MNHUFGAWPO2PBO4ELAWLA done (317/700) | 5 likes, 5 dislikes | calls 3626 (new 386) | 5.9 min
+user AGRL6VEZCSAODUUQFL5I4WHXUXFQ done (318/700) | 5 likes, 5 dislikes | calls 3637 (new 387) | 5.9 min
+user AE3CWNTZG3OEUIRS5YV2EQHYFZYQ done (319/700) | 5 likes, 0 dislikes | calls 3648 (new 388) | 5.9 min
+user AEO55FJZLRLGL76QISY77CEJJH4Q done (320/700) | 5 likes, 5 dislikes | calls 3659 (new 389) | 5.9 min
+user AHXNZ75VJUMZ34ASD2BFHTPRD6BA done (321/700) | 5 likes, 5 dislikes | calls 3670 (new 390) | 5.9 min
+user AHQJKTGB4JSHVMMOUSNFBXHCSGOA done (322/700) | 5 likes, 5 dislikes | calls 3681 (new 391) | 6.0 min
+user AFMIEHC3T7JKUU74U6YXENSBIS2Q done (323/700) | 5 likes, 5 dislikes | calls 3692 (new 392) | 6.0 min
+user AEEJC43NFUEXNG6WIWW6G2HGQIKQ done (324/700) | 5 likes, 5 dislikes | calls 3703 (new 393) | 6.0 min
+user AFVEVAPYUQJBEEOPBR35WIQNGGTA done (325/700) | 5 likes, 5 dislikes | calls 3714 (new 394) | 6.0 min
+user AE7DA62S4DX2SPYWNRUUOBLMIYHA done (326/700) | 5 likes, 5 dislikes | calls 3725 (new 395) | 6.0 min
+user AE6BON6K5BLJC7CW5FNBII2PFQCQ done (327/700) | 5 likes, 5 dislikes | calls 3736 (new 396) | 6.0 min
+user AEOITE4SM64SW257C7WCCRLUPS5Q done (328/700) | 5 likes, 5 dislikes | calls 3747 (new 397) | 6.1 min
+user AHDPKEXT4ALD4Z4UOHIZ6ZWG4MCQ done (329/700) | 5 likes, 5 dislikes | calls 3758 (new 398) | 6.1 min
+user AGISIXGSOLYYFTN5T7W6F3ZBDCEA done (330/700) | 5 likes, 5 dislikes | calls 3769 (new 399) | 6.1 min
+user AET4YIHWM6MLIW73J4ZVDPHK2CNQ done (331/700) | 5 likes, 5 dislikes | calls 3781 (new 401) | 6.1 min
+user AH2IZCNERD5W2N32BJQMDCUBG3AA done (332/700) | 5 likes, 5 dislikes | calls 3792 (new 402) | 6.1 min
+user AEPGYWEY3ZWEXWHDYPDF3JDCEUBQ done (333/700) | 5 likes, 5 dislikes | calls 3804 (new 404) | 6.1 min
+user AGMY5ILV6BKWZ22ADOMCTFNSSH5Q done (334/700) | 5 likes, 5 dislikes | calls 3815 (new 405) | 6.2 min
+user AEFPBUTMSHIRTHXTSLJ4BOPG6QIA done (335/700) | 5 likes, 5 dislikes | calls 3826 (new 406) | 6.2 min
+user AH2AXQDISWGHYRPOAY5PVPSXMSVQ done (336/700) | 5 likes, 5 dislikes | calls 3837 (new 407) | 6.2 min
+user AGLSMJWJHJL6JUJIEAX4WLKMTCNA done (337/700) | 5 likes, 5 dislikes | calls 3848 (new 408) | 6.2 min
+user AGR5DK4UGICALVPCFIHWSPJHCGRQ done (338/700) | 5 likes, 5 dislikes | calls 3859 (new 409) | 6.2 min
+user AGUYMMFXOZMSJJUET7RN2A6O5AJQ done (339/700) | 5 likes, 5 dislikes | calls 3870 (new 410) | 6.2 min
+user AFZ6M5CX67QHQ7EVNV5DNMIED2HA done (340/700) | 5 likes, 5 dislikes | calls 3881 (new 411) | 6.3 min
+user AE5UE3ZAHE2I3APDFJEG4HQR3UYA done (341/700) | 5 likes, 5 dislikes | calls 3893 (new 413) | 6.3 min
+user AHVRJFW4YZH2SS67QNDQFPH4TSGA done (342/700) | 1 likes, 1 dislikes | calls 3904 (new 414) | 6.3 min
+user AHAAQGMPETK6PJ3CNRYHODCVQ2WQ done (343/700) | 5 likes, 1 dislikes | calls 3916 (new 416) | 6.3 min
+user AGOO2Q2BBZG3P6MEYTYCFUC5NSXQ done (344/700) | 5 likes, 5 dislikes | calls 3927 (new 417) | 6.3 min
+user AFDSOJHQ5IMFUD6KY5GT4NHIL4TA done (345/700) | 5 likes, 5 dislikes | calls 3938 (new 418) | 6.4 min
+user AGSHIJWV4SSLEAOCXCV6Y5PJYSPQ done (346/700) | 5 likes, 5 dislikes | calls 3949 (new 419) | 6.4 min
+user AFSWWDOM3J3TWHOFSAEUO4RKKHTA done (347/700) | 5 likes, 5 dislikes | calls 3960 (new 420) | 6.4 min
+user AH52OJCXLPPBYTJHVOARU2G57TMA done (348/700) | 5 likes, 5 dislikes | calls 3971 (new 421) | 6.4 min
+user AH47G4USSLGCOH7E3ENRJBTQTM3Q done (349/700) | 5 likes, 5 dislikes | calls 3982 (new 422) | 6.4 min
+user AF5GA6UV3U2J4TQXJH752CGUBAIQ done (350/700) | 5 likes, 5 dislikes | calls 3993 (new 423) | 6.4 min
+user AHQB2ER7UGONG6G7LI5Y4GXNYGBA done (351/700) | 5 likes, 5 dislikes | calls 4004 (new 424) | 6.4 min
+user AFJYKXUASC4YWY2OWKMUEQ5HDT2Q done (352/700) | 5 likes, 3 dislikes | calls 4015 (new 425) | 6.5 min
+user AGFQYUMTKVKHQJ7FTIVGO2GE6VLA done (353/700) | 5 likes, 5 dislikes | calls 4026 (new 426) | 6.5 min
+user AF5KDOJRCT3JBOEZE74LWVFONYHQ done (354/700) | 5 likes, 5 dislikes | calls 4038 (new 428) | 6.5 min
+user AEG7YMG2W4WUPYNK7SXY3XQEP42A done (355/700) | 5 likes, 5 dislikes | calls 4050 (new 430) | 6.5 min
+user AENP5JQC2KF3UFWNM77ZKQZ3OZXQ done (356/700) | 5 likes, 5 dislikes | calls 4061 (new 431) | 6.5 min
+  [net] InternalServerError, retry in 5s
+user AH7ANVNOCCQGX4VLRIS3B7VYIMRQ done (357/700) | 5 likes, 5 dislikes | calls 4072 (new 432) | 6.6 min
+user AHIHDDXTTJLCEDCLSHPJWPTHVDMQ done (358/700) | 5 likes, 5 dislikes | calls 4084 (new 434) | 6.6 min
+user AGFAO4KF3ZSLI2DGXSCEY3SQFA2Q done (359/700) | 5 likes, 5 dislikes | calls 4095 (new 435) | 6.6 min
+user AGRVCPPBMUQULYSF342YUSUJ2URQ done (360/700) | 5 likes, 5 dislikes | calls 4106 (new 436) | 6.6 min
+user AEBTGUW7NHNPNZB23H7KL762BC5A done (361/700) | 5 likes, 5 dislikes | calls 4117 (new 437) | 6.6 min
+user AH4VXC7M6KDQZTEGXZBWFDSU6WPA done (362/700) | 5 likes, 4 dislikes | calls 4128 (new 438) | 6.6 min
+user AEFAIUAHTSM3E3C2YKIY7TNJ6GGA done (363/700) | 5 likes, 5 dislikes | calls 4139 (new 439) | 6.6 min
+user AGBVYQ62D45M7ZUXQBPZMD7NTCQQ done (364/700) | 5 likes, 5 dislikes | calls 4150 (new 440) | 6.7 min
+user AG45YVFCK232MVKS4TAI6WU4VFOQ done (365/700) | 5 likes, 5 dislikes | calls 4161 (new 441) | 6.7 min
+user AECBMHKL55UBC66INDLJP6MOOZPA done (366/700) | 5 likes, 5 dislikes | calls 4173 (new 443) | 6.7 min
+user AGACYRIPOY5RLABKZ4MYYHNXVUZQ done (367/700) | 5 likes, 5 dislikes | calls 4184 (new 444) | 6.7 min
+user AHZULZX4Q3A55QBJJKDGMGHHPHIA done (368/700) | 5 likes, 5 dislikes | calls 4195 (new 445) | 6.7 min
+user AHFMFQIRH23WMGOUHC2ZSERT6J4A done (369/700) | 5 likes, 5 dislikes | calls 4206 (new 446) | 6.7 min
+  [net] InternalServerError, retry in 10s
+user AG3GG3ABEYB2L3B5TNLRJHMAOWYA done (370/700) | 5 likes, 5 dislikes | calls 4217 (new 447) | 6.8 min
+user AHM3KI73N7N4NZX5C2SFDC6F22VA done (371/700) | 5 likes, 5 dislikes | calls 4228 (new 448) | 6.8 min
+user AFX73PHGL2HW7TFIWRDQWNDFCH6A done (372/700) | 5 likes, 5 dislikes | calls 4239 (new 449) | 6.8 min
+user AEN7CTOP64CHE57LBP6A3ABHCJFA done (373/700) | 5 likes, 5 dislikes | calls 4250 (new 450) | 6.8 min
+user AFPWPBX6W2O7P2AKYU2PPVO2HL2A done (374/700) | 5 likes, 5 dislikes | calls 4261 (new 451) | 6.8 min
+user AHDU3AEQ5INQCVVKWI67GOYCTZIQ done (375/700) | 5 likes, 5 dislikes | calls 4272 (new 452) | 6.8 min
+user AETLBNQNERPD5BDQT7RGLQTOOR4Q done (376/700) | 5 likes, 5 dislikes | calls 4284 (new 454) | 6.9 min
+user AHK55NUHBTQH3HHW6GNLUP3JXQGQ done (377/700) | 5 likes, 5 dislikes | calls 4295 (new 455) | 6.9 min
+user AFPUGWQJ3T3PJ3PF23V5IULHNN2A done (378/700) | 2 likes, 2 dislikes | calls 4308 (new 458) | 6.9 min
+user AEUEGCOFNEEXEH637R4KODJXAAKQ done (379/700) | 5 likes, 5 dislikes | calls 4319 (new 459) | 6.9 min
+user AFNJKA76PQBXCOGI7FGOLVMMUJZQ done (380/700) | 5 likes, 5 dislikes | calls 4330 (new 460) | 6.9 min
+user AF2ALOULKZNSDGZVXHXWVZ2DR7ZQ done (381/700) | 5 likes, 5 dislikes | calls 4341 (new 461) | 6.9 min
+user AFV6ZOD6TXXMOQRMIGTKYGWXPBDA done (382/700) | 5 likes, 5 dislikes | calls 4352 (new 462) | 6.9 min
+user AED3PND3AFD7SXBGOVPX5VLFD3NA done (383/700) | 5 likes, 5 dislikes | calls 4363 (new 463) | 7.0 min
+user AFFGG733FWTSX2SWDFRXYOJZBB5A done (384/700) | 5 likes, 5 dislikes | calls 4374 (new 464) | 7.0 min
+user AEUOM5QA2CY277WHLGL7F67LVSIA done (385/700) | 5 likes, 5 dislikes | calls 4385 (new 465) | 7.0 min
+user AGJYER2JPK5XF6SDAO73XSY7YOLQ done (386/700) | 5 likes, 0 dislikes | calls 4396 (new 466) | 7.0 min
+user AHYE3MUHSKTP5WRBVOVVS5E6TTSQ done (387/700) | 2 likes, 5 dislikes | calls 4407 (new 467) | 7.0 min
+user AGNIP2B4XIIF5IWGFQLKCFLTZJPA done (388/700) | 5 likes, 5 dislikes | calls 4418 (new 468) | 7.0 min
+user AFTEQPUUPE5BVTIC4JGQB4UJKJBQ done (389/700) | 5 likes, 5 dislikes | calls 4430 (new 470) | 7.1 min
+user AHBL3XD7GZ3QEZ2N3G2RVPJC74VQ done (390/700) | 5 likes, 5 dislikes | calls 4442 (new 472) | 7.1 min
+user AHZA33RDLCJPXWMP2NLKJVPC5OUA done (391/700) | 5 likes, 5 dislikes | calls 4453 (new 473) | 7.1 min
+user AH3LZWYHD425U4EVZR5ZAMZT5DTA done (392/700) | 5 likes, 5 dislikes | calls 4464 (new 474) | 7.1 min
+user AGVOYO5W45UWJY4I6MBEPU2GTW2A done (393/700) | 5 likes, 5 dislikes | calls 4475 (new 475) | 7.1 min
+user AEAGT3SWOXLKNWZUNFOLOM6CDZBA done (394/700) | 5 likes, 5 dislikes | calls 4487 (new 477) | 7.2 min
+user AFX2XI4ZNUYSZBLKJRJBGSSRMNCQ done (395/700) | 5 likes, 5 dislikes | calls 4490 (new 478) | 7.2 min
+user AEQIJRWOK3SH2ETEXH52SCHWVT7A done (396/700) | 5 likes, 5 dislikes | calls 4509 (new 479) | 7.2 min
+user AFGG7XDAE4EJNTOGOE2NMFYBJPCA done (397/700) | 5 likes, 5 dislikes | calls 4520 (new 480) | 7.2 min
+user AFTD2FPIKRFWE6P22BQ4L2VRLMTA done (398/700) | 5 likes, 5 dislikes | calls 4531 (new 481) | 7.2 min
+user AEPC4SFRQF5DJ4A5LKJWNTHRJEHA done (399/700) | 5 likes, 5 dislikes | calls 4542 (new 482) | 7.2 min
+user AGSSKFGAJS2GI7QRLMUFMFM3AJIA done (400/700) | 5 likes, 5 dislikes | calls 4553 (new 483) | 7.3 min
+user AFDG573A7J6VVDIMDQT47FJ6IXRQ done (401/700) | 5 likes, 5 dislikes | calls 4565 (new 485) | 7.3 min
+user AEKADIJLABPOBSJOX5JIZFLQIUEA done (402/700) | 5 likes, 5 dislikes | calls 4576 (new 486) | 7.3 min
+user AHDOJ45GMDIOXBCHSHXKPEQ3CHPQ done (403/700) | 5 likes, 5 dislikes | calls 4587 (new 487) | 7.3 min
+user AEPI3EAL2I6IWZBRLT2D3TSLZWNA done (404/700) | 5 likes, 5 dislikes | calls 4598 (new 488) | 7.3 min
+user AF3UBZCZ2LJ67E3W5HQ2DVP4434A done (405/700) | 5 likes, 5 dislikes | calls 4609 (new 489) | 7.4 min
+user AFQ7O6BVMEP2EOFWCSMZDAOXD6UQ done (406/700) | 5 likes, 5 dislikes | calls 4621 (new 491) | 7.4 min
+user AHXRZE4RH5YIPVVGKCXMDDGC3VAQ done (407/700) | 5 likes, 5 dislikes | calls 4632 (new 492) | 7.4 min
+user AEWZKUYRETKDRLTFTC6ZLWX5R5NA done (408/700) | 5 likes, 5 dislikes | calls 4643 (new 493) | 7.4 min
+user AGCHPONNCE36AGPJBW5RMIAOKDLQ done (409/700) | 5 likes, 5 dislikes | calls 4654 (new 494) | 7.4 min
+user AH5BRUCOE3KTT7BII2ZHG2TFVH6Q done (410/700) | 5 likes, 5 dislikes | calls 4656 (new 495) | 7.4 min
+user AHGEOLFHOPZLODHQSIZDSJWZA2XA done (411/700) | 5 likes, 5 dislikes | calls 4676 (new 496) | 7.5 min
+user AECFFKW54C572LLPYMZVDMOJJCJA done (412/700) | 5 likes, 5 dislikes | calls 4687 (new 497) | 7.5 min
+user AHRDHIJGRYBSA3EMXUDXVHFYCCUQ done (413/700) | 5 likes, 5 dislikes | calls 4699 (new 499) | 7.5 min
+user AENQZB2PFLM3HDPDZ7NSUKSUZS2Q done (414/700) | 5 likes, 5 dislikes | calls 4710 (new 500) | 7.5 min
+user AEOFJ7PTDAUCHOLHA7F57RM7YG5Q done (415/700) | 5 likes, 5 dislikes | calls 4721 (new 501) | 7.6 min
+user AFXTYDWSBATLV4VNQ2OTIXSWU52A done (416/700) | 5 likes, 5 dislikes | calls 4732 (new 502) | 7.6 min
+user AH32KVO4GT2QOYMRI6AAUGDRSJGQ done (417/700) | 5 likes, 5 dislikes | calls 4744 (new 504) | 7.6 min
+user AEBUVVPTM7YHO3XKT2VRKXYHLWMA done (418/700) | 5 likes, 5 dislikes | calls 4755 (new 505) | 7.6 min
+user AFQYSA5CCAMZWUWGA6W7GUKRX66A done (419/700) | 5 likes, 5 dislikes | calls 4766 (new 506) | 7.7 min
+user AHNK2SKOLCZ3MGVLEVFSRHFDRZQQ done (420/700) | 5 likes, 5 dislikes | calls 4777 (new 507) | 7.7 min
+user AFKIHJHNT5Y3WNJSFWXIGBKJSBKA done (421/700) | 5 likes, 5 dislikes | calls 4789 (new 509) | 7.7 min
+user AE7WZA5TBNCGXXLSPLLRENNDUH6A done (422/700) | 5 likes, 5 dislikes | calls 4800 (new 510) | 7.7 min
+user AGHVU6NNGI7MMF2HOIQLQIY7GFMQ done (423/700) | 5 likes, 5 dislikes | calls 4812 (new 512) | 7.7 min
+user AHT6JAQGRMPILBIF3BCAERS4WLXA done (424/700) | 5 likes, 5 dislikes | calls 4823 (new 513) | 7.8 min
+user AHI4CG3CFX5BOLCA5VACJA4JO3LA done (425/700) | 5 likes, 4 dislikes | calls 4834 (new 514) | 7.8 min
+user AEY4SMCPQWESNHN37EFHSFLVUWQA done (426/700) | 5 likes, 0 dislikes | calls 4846 (new 516) | 7.8 min
+user AF6EN2USWQZMMMZACQMBKFJ6KMHA done (427/700) | 5 likes, 5 dislikes | calls 4857 (new 517) | 7.9 min
+user AEAI66EERQKVFIZUNJ4C2NRJ6BQA done (428/700) | 4 likes, 5 dislikes | calls 4861 (new 518) | 7.9 min
+user AEGOEFFSLGSP6VVDBEJO6DDOOUZA done (429/700) | 5 likes, 5 dislikes | calls 4879 (new 519) | 7.9 min
+user AFB763TVHMRWUPBPO2QZKFRMNGDQ done (430/700) | 5 likes, 5 dislikes | calls 4890 (new 520) | 7.9 min
+user AG3HCLAOWPI44WPSBNQTZOZZF76Q done (431/700) | 5 likes, 5 dislikes | calls 4901 (new 521) | 7.9 min
+user AFEBIROAXLIDRIA7UKEONIX2T5LQ done (432/700) | 5 likes, 5 dislikes | calls 4913 (new 523) | 7.9 min
+user AEEJLR6WXZRHLPMNXQQSLG7Y5LWA done (433/700) | 5 likes, 5 dislikes | calls 4924 (new 524) | 8.0 min
+user AHH4UFDK7S2X4ZEYLPGRGRQ76FPQ done (434/700) | 5 likes, 5 dislikes | calls 4935 (new 525) | 8.0 min
+user AH7J7WMOHPQMX5UWFK3V2DZZKREA done (435/700) | 5 likes, 5 dislikes | calls 4947 (new 527) | 8.0 min
+user AGH6LSTQLINP4DKFQPD2WQYV5OLA done (436/700) | 5 likes, 5 dislikes | calls 4958 (new 528) | 8.0 min
+user AGV5TGAEU6FWSV35KKSTVYXFC4RQ done (437/700) | 5 likes, 5 dislikes | calls 4971 (new 531) | 8.1 min
+user AGVDKID4S22U4SIICHC76AXX3BYQ done (438/700) | 5 likes, 5 dislikes | calls 4982 (new 532) | 8.1 min
+user AFUQQUSUSJZEB6XAOTAXJI4A634Q done (439/700) | 5 likes, 5 dislikes | calls 4985 (new 533) | 8.1 min
+user AF4V75AI5T6QW5MVE4MSTEQTGFOA done (440/700) | 5 likes, 5 dislikes | calls 5004 (new 534) | 8.1 min
+user AH5KFQTE3QYG7B4SSI3JDXNMGD5A done (441/700) | 5 likes, 5 dislikes | calls 5006 (new 535) | 8.1 min
+user AFVJITCWIG27P4QMA7GCHD5GM2JQ done (442/700) | 5 likes, 5 dislikes | calls 5026 (new 536) | 8.2 min
+user AGC5E7YX7FNFC5ELZCO2GNJHBJCA done (443/700) | 5 likes, 5 dislikes | calls 5037 (new 537) | 8.2 min
+user AGRYGYTBSMP2ZMISILJOD2AGB5JA done (444/700) | 5 likes, 3 dislikes | calls 5048 (new 538) | 8.2 min
+user AGI7NOC63SKU74SUFV6VMAVUQWAQ done (445/700) | 5 likes, 2 dislikes | calls 5060 (new 540) | 8.2 min
+user AEODU7MLUW3PRQIN3HROY4RLOIXA done (446/700) | 5 likes, 5 dislikes | calls 5071 (new 541) | 8.3 min
+user AG5KZJO4LYLW3IMR7UYNCWTZNMVA done (447/700) | 5 likes, 5 dislikes | calls 5082 (new 542) | 8.3 min
+user AH2KKQH7OD2US43YB6D3KPSCY6ZQ done (448/700) | 5 likes, 5 dislikes | calls 5093 (new 543) | 8.3 min
+user AGAZC4FBWU4MTRMKYUGHHLIUB2GA done (449/700) | 5 likes, 5 dislikes | calls 5104 (new 544) | 8.3 min
+user AH2NL4JNUXUG43MVJ36DC4WLXBEA done (450/700) | 5 likes, 5 dislikes | calls 5107 (new 545) | 8.3 min
+user AFN6V26ABNCSIWH37LXFBSOSKBTA done (451/700) | 5 likes, 5 dislikes | calls 5126 (new 546) | 8.3 min
+user AGS6KEXIXITP3HUMEMTISK6Z36YA done (452/700) | 5 likes, 5 dislikes | calls 5137 (new 547) | 8.4 min
+user AHBOIOPBZ633JAY5QUAP3ADUF5HQ done (453/700) | 5 likes, 5 dislikes | calls 5148 (new 548) | 8.4 min
+user AEWVP7S6BR5JZPB63GUP3A57EQ2Q done (454/700) | 5 likes, 5 dislikes | calls 5159 (new 549) | 8.4 min
+user AFFHCJ7TUHC4DLDFZRHMSXFVCHCA done (455/700) | 5 likes, 5 dislikes | calls 5170 (new 550) | 8.4 min
+user AGVZFZTN4MW2CXG7R34S6N3NTB6A done (456/700) | 5 likes, 5 dislikes | calls 5181 (new 551) | 8.4 min
+user AEYUONDZ5CP75KHCENI7GA34XDFA done (457/700) | 5 likes, 5 dislikes | calls 5192 (new 552) | 8.5 min
+user AEH4Y332KQ4FVFT5VTSILR2RGJ4A done (458/700) | 5 likes, 5 dislikes | calls 5203 (new 553) | 8.5 min
+user AGIXTIMXPEXIUXG7Q663I7GMLOTA done (459/700) | 5 likes, 5 dislikes | calls 5215 (new 555) | 8.5 min
+user AGGMVW745FPKGFSU3QXYUSCJ2ACA done (460/700) | 5 likes, 5 dislikes | calls 5226 (new 556) | 8.5 min
+user AGYWWXTNGXSM6YEEPGIVUMO4UP5A done (461/700) | 5 likes, 5 dislikes | calls 5237 (new 557) | 8.5 min
+user AHSRLS4TYALPWYNKMX32TCDUWYPQ done (462/700) | 5 likes, 2 dislikes | calls 5248 (new 558) | 8.5 min
+user AHDRD2ZPD3MN2NXR2M3OGOMCNVOA done (463/700) | 5 likes, 5 dislikes | calls 5259 (new 559) | 8.6 min
+user AF6PZDOFGKLEJUU7VZF5POEU3DTA done (464/700) | 5 likes, 5 dislikes | calls 5271 (new 561) | 8.6 min
+user AGPFOYCTJF2EJPC7ALGHDZQGXEQQ done (465/700) | 5 likes, 5 dislikes | calls 5282 (new 562) | 8.7 min
+user AH563HDZG6ILTLD47SB7BT556TKA done (466/700) | 5 likes, 5 dislikes | calls 5293 (new 563) | 8.7 min
+user AGO7Y2JSJJJZCBP7FLCM7RZ6JQ5A done (467/700) | 5 likes, 5 dislikes | calls 5304 (new 564) | 8.7 min
+user AFHO2ALK4ICQ4VW4RY3OZ5344VOA done (468/700) | 5 likes, 5 dislikes | calls 5315 (new 565) | 8.7 min
+user AEGOPHZNHH5MSFNFKCYHFZHQMWMA done (469/700) | 5 likes, 4 dislikes | calls 5326 (new 566) | 8.7 min
+user AEPHXZXQYYXJ64UG66AU7B7EFKEA done (470/700) | 1 likes, 1 dislikes | calls 5337 (new 567) | 8.7 min
+user AH7XN3SVWXOXLWBEIOOPK55GQNCQ done (471/700) | 5 likes, 5 dislikes | calls 5348 (new 568) | 8.8 min
+user AFEKEDOINXG53MKQQMD7Q7FIEAJQ done (472/700) | 5 likes, 5 dislikes | calls 5359 (new 569) | 8.8 min
+user AGUXPL33B67HSVONEGZINYLL6ERA done (473/700) | 5 likes, 5 dislikes | calls 5370 (new 570) | 8.8 min
+user AGGD7RSNIPWGMWXZAVUGL4FSZCPQ done (474/700) | 5 likes, 5 dislikes | calls 5382 (new 572) | 8.8 min
+user AEUAUWQ47UPU3JF4IPVNQ7NUQN4Q done (475/700) | 5 likes, 5 dislikes | calls 5393 (new 573) | 8.9 min
+user AGPBK6LP5DEEHH6BEVAMLHP4TN2Q done (476/700) | 5 likes, 5 dislikes | calls 5404 (new 574) | 8.9 min
+user AFZWRRMTIUIVYZGPEH2QLTYDIYOA done (477/700) | 5 likes, 5 dislikes | calls 5415 (new 575) | 8.9 min
+user AESFXAJY7YZDUBYDCVUXBX3DR2LQ done (478/700) | 5 likes, 0 dislikes | calls 5427 (new 577) | 8.9 min
+user AEHOELBZJPBQ4ZKC3OJHPR6QHKGA done (479/700) | 5 likes, 5 dislikes | calls 5438 (new 578) | 8.9 min
+user AFU7HSSLPBMVEQUYLJM6N6LLPU3Q done (480/700) | 5 likes, 5 dislikes | calls 5449 (new 579) | 9.0 min
+user AH6AW4JDA2SB7OMDL6A62FP3SM6Q done (481/700) | 5 likes, 5 dislikes | calls 5460 (new 580) | 9.0 min
+user AFDMW3CDXU5FX5SJJC3NXESMQUZA done (482/700) | 5 likes, 5 dislikes | calls 5471 (new 581) | 9.0 min
+user AHNB3PJ2DESSPTTPZAW34A2MKDCA done (483/700) | 5 likes, 5 dislikes | calls 5482 (new 582) | 9.0 min
+user AGTYBPFDCNVSVZRG4ZG46ALOT2NA done (484/700) | 5 likes, 5 dislikes | calls 5493 (new 583) | 9.0 min
+user AGGYVACW6LCHZEHXWCIAD2VREKFA done (485/700) | 5 likes, 5 dislikes | calls 5504 (new 584) | 9.0 min
+user AF6BRUEXLYY5ARVTNVIYKRWJDETA done (486/700) | 5 likes, 5 dislikes | calls 5515 (new 585) | 9.1 min
+user AENNMJAZ3SETIRAXBEDS3FDN2XFQ done (487/700) | 5 likes, 5 dislikes | calls 5526 (new 586) | 9.1 min
+user AHPPVOKN2GL7CHSFWWG3HCMMGECQ done (488/700) | 5 likes, 5 dislikes | calls 5540 (new 590) | 9.1 min
+user AHDDD7H6XZKHJMVL5M3EXHLE473Q done (489/700) | 5 likes, 5 dislikes | calls 5551 (new 591) | 9.1 min
+user AFZDTN26EUZKRJV3XMBHOFMYFNQA done (490/700) | 5 likes, 5 dislikes | calls 5562 (new 592) | 9.1 min
+user AHVIMKECEZDXXK5QIGX7KWJPN6DQ done (491/700) | 5 likes, 5 dislikes | calls 5573 (new 593) | 9.2 min
+user AFLJCJLCJP4NQI2MWWTXISR5B62Q done (492/700) | 5 likes, 5 dislikes | calls 5584 (new 594) | 9.2 min
+user AELTIKGUMD4RJZDUPSXIVMMRVH6Q done (493/700) | 1 likes, 1 dislikes | calls 5595 (new 595) | 9.2 min
+user AE4DDDWGSHWBV7S6UHY4IL5XUEEQ done (494/700) | 5 likes, 5 dislikes | calls 5606 (new 596) | 9.2 min
+user AF6NBUCE7Q3LSVXQI4ZFMR67DVJA done (495/700) | 5 likes, 5 dislikes | calls 5618 (new 598) | 9.3 min
+user AFRLEP77EZQC4MMMO2IQLBOD6NWQ done (496/700) | 5 likes, 5 dislikes | calls 5629 (new 599) | 9.3 min
+user AHBVUD7EINRJQMWR5BDIODK6AMCQ done (497/700) | 5 likes, 5 dislikes | calls 5640 (new 600) | 9.3 min
+user AHCPCKY34VFDW3MZQIEG76MOFY4A done (498/700) | 5 likes, 5 dislikes | calls 5652 (new 602) | 9.3 min
+user AF5ZIYXZC2J2OJSFXONFYUECUKHA done (499/700) | 5 likes, 5 dislikes | calls 5664 (new 604) | 9.3 min
+user AEQBAMISYFLUJPH2DXXN4M7JLJZQ done (500/700) | 5 likes, 5 dislikes | calls 5675 (new 605) | 9.4 min
+user AHND5IP5MB5OZQREAEX5GAPDERMA done (501/700) | 5 likes, 3 dislikes | calls 5686 (new 606) | 9.4 min
+user AFKKRODZCBNEMJHNE5IYF6Z6TTOQ done (502/700) | 5 likes, 5 dislikes | calls 5697 (new 607) | 9.4 min
+user AHSLRVYVCA7H5OKMHGBIWIAZPQDA done (503/700) | 5 likes, 5 dislikes | calls 5709 (new 609) | 9.4 min
+user AFIIU7UHCHTG2CV7WNIXUTB3MU5Q done (504/700) | 5 likes, 5 dislikes | calls 5720 (new 610) | 9.4 min
+user AHK6RJVI2OYOERODDVLUTK7CRAYQ done (505/700) | 5 likes, 5 dislikes | calls 5731 (new 611) | 9.5 min
+user AGQW4NJZ7FBJU4UTJN4IAOXPMIXQ done (506/700) | 5 likes, 5 dislikes | calls 5742 (new 612) | 9.5 min
+user AFYQVPRXMMBWVDUDF5BOYZWVDNZA done (507/700) | 5 likes, 5 dislikes | calls 5753 (new 613) | 9.5 min
+user AGE7IV5YUXW76KZOQ6FIULC5LXUA done (508/700) | 5 likes, 0 dislikes | calls 5765 (new 615) | 9.5 min
+user AFV7HZPQOLSHNVJO6IV66M5N353Q done (509/700) | 5 likes, 5 dislikes | calls 5777 (new 617) | 9.6 min
+user AEMEM3R2RXVX3C53ZDOK5LAHL62A done (510/700) | 5 likes, 5 dislikes | calls 5788 (new 618) | 9.6 min
+user AF2SNIELTN7CUXTW34F352V2B2YA done (511/700) | 5 likes, 5 dislikes | calls 5799 (new 619) | 9.6 min
+user AFGCFW64XBXF6PDWL3QJGXISIHUA done (512/700) | 5 likes, 5 dislikes | calls 5810 (new 620) | 9.6 min
+user AHHUJMZGT4PHMEB22R7GNLQUD2VQ done (513/700) | 5 likes, 5 dislikes | calls 5821 (new 621) | 9.6 min
+user AFKAHGJVMFQAC5WFZLGSQK264NBQ done (514/700) | 5 likes, 5 dislikes | calls 5832 (new 622) | 9.6 min
+user AHIC27OCM2MUNFNYTYRUCXFFRNFQ done (515/700) | 5 likes, 5 dislikes | calls 5843 (new 623) | 9.7 min
+user AHQQAPMZGAM7SJHMMFNVLQWW4A4Q done (516/700) | 5 likes, 5 dislikes | calls 5854 (new 624) | 9.7 min
+user AFGTIXU3BMHCWG2ALITQWHF2KGYA done (517/700) | 5 likes, 5 dislikes | calls 5865 (new 625) | 9.7 min
+user AGIRLFCNJKY3JOE5MMUVRVXWAYDA done (518/700) | 1 likes, 1 dislikes | calls 5876 (new 626) | 9.7 min
+user AGJNRHLFSKTR75KXXFU5USAWKTYQ done (519/700) | 5 likes, 5 dislikes | calls 5888 (new 628) | 9.8 min
+user AEKFAG7D34UF6MLAU76J7ZTPFFLQ done (520/700) | 5 likes, 5 dislikes | calls 5892 (new 629) | 9.8 min
+user AFNTZL4G75UBAG4Q2QDTLFI6N5RA done (521/700) | 5 likes, 5 dislikes | calls 5911 (new 631) | 9.8 min
+user AGVKTMR6UZO6F2V37TCNO5LWVNBA done (522/700) | 5 likes, 5 dislikes | calls 5923 (new 633) | 9.9 min
+user AEPUTKX6FQJK7NLQB3XALHMMX2DA done (523/700) | 5 likes, 5 dislikes | calls 5934 (new 634) | 9.9 min
+user AGJREA6HUQ24HW2UPRZEWMB64TAA done (524/700) | 5 likes, 5 dislikes | calls 5946 (new 636) | 9.9 min
+user AETF5YLY6YRZN2XMZOTBGIEASIBQ done (525/700) | 5 likes, 5 dislikes | calls 5957 (new 637) | 9.9 min
+user AHE3KW7GDTZZKGYESN4MIIEBP3PA done (526/700) | 5 likes, 3 dislikes | calls 5968 (new 638) | 9.9 min
+user AHWPJ65YL7KYQQ4KIJ6KSRZR3O5A done (527/700) | 5 likes, 5 dislikes | calls 5979 (new 639) | 10.0 min
+user AHD5RKJVSTYCXDNNXMA4P74OLYBQ done (528/700) | 5 likes, 5 dislikes | calls 5990 (new 640) | 10.0 min
+user AFJJGWVI3ZCYQKGTBYPPR5RDETSA done (529/700) | 5 likes, 0 dislikes | calls 6001 (new 641) | 10.0 min
+user AFE54MELB5IGFUYBSOBGJOSOMEPA done (530/700) | 5 likes, 5 dislikes | calls 6012 (new 642) | 10.0 min
+user AFNQ56RB5L22KPO23IIMTLWKWZ5A done (531/700) | 5 likes, 5 dislikes | calls 6025 (new 645) | 10.0 min
+user AGMLRHTABANODDQ257JJPPROX4GA done (532/700) | 5 likes, 5 dislikes | calls 6036 (new 646) | 10.0 min
+user AEYYWMQPZMTXE3EOW6JUJ5V5FYEA done (533/700) | 5 likes, 5 dislikes | calls 6048 (new 648) | 10.1 min
+user AFO2RDMKUTXC3M7C3T2UVFANWQVA done (534/700) | 5 likes, 5 dislikes | calls 6059 (new 649) | 10.1 min
+user AFWWBHPO45RGULNNDDMKXF3T3JKA done (535/700) | 6 likes, 0 dislikes | calls 6070 (new 650) | 10.1 min
+user AFDQ4DTNUSFZLSXK2NEYNCCMDJMA done (536/700) | 5 likes, 5 dislikes | calls 6081 (new 651) | 10.1 min
+user AGEVP4W7MG4G3LSEQPVD6XV5ZIZQ done (537/700) | 5 likes, 5 dislikes | calls 6093 (new 653) | 10.1 min
+user AGYH2ICRKDCWFYCCOQCDXL7GI72A done (538/700) | 5 likes, 5 dislikes | calls 6105 (new 655) | 10.2 min
+user AELGGYATKEO2GRPWYZS6TR7MFZPQ done (539/700) | 5 likes, 5 dislikes | calls 6116 (new 656) | 10.2 min
+user AF6SDHOJ3OHGHZIAN3AAC263C4NQ done (540/700) | 5 likes, 5 dislikes | calls 6127 (new 657) | 10.2 min
+user AEVXLDOK6ZH4T3NNCORYIGVRKJEQ done (541/700) | 5 likes, 5 dislikes | calls 6138 (new 658) | 10.2 min
+user AEEBJF65QOW6VKIMN265IOZ5GJIQ done (542/700) | 5 likes, 5 dislikes | calls 6149 (new 659) | 10.2 min
+user AHKJBONNRKZ32UBTOEUIVI2QGO6A done (543/700) | 5 likes, 0 dislikes | calls 6160 (new 660) | 10.2 min
+user AGIDG7JRNNRQKILC2CENF56V5GGA done (544/700) | 5 likes, 5 dislikes | calls 6162 (new 661) | 10.2 min
+user AFF4TIOQKY6XNINOADBDDDGNJLJA done (545/700) | 5 likes, 5 dislikes | calls 6182 (new 662) | 10.2 min
+user AGKEHXDCCQBMRQIGN2Z7533W6U2A done (546/700) | 5 likes, 5 dislikes | calls 6194 (new 664) | 10.3 min
+user AEJ3VZZW2UE3I32CYPZFKDWEAGQA done (547/700) | 5 likes, 5 dislikes | calls 6205 (new 665) | 10.3 min
+user AFOZ6JFXXK2IQ6DA2EJRK53TCDFQ done (548/700) | 5 likes, 5 dislikes | calls 6216 (new 666) | 10.3 min
+user AEUV3MU72RZHXVZWRGRBOMEBNZMA done (549/700) | 5 likes, 5 dislikes | calls 6227 (new 667) | 10.3 min
+user AHFBBXF42H32I7EJDYKRG7AKMINQ done (550/700) | 1 likes, 1 dislikes | calls 6239 (new 669) | 10.4 min
+user AEUI4EM6UBCN6FUKBGISB7UJIFBA done (551/700) | 5 likes, 5 dislikes | calls 6250 (new 670) | 10.4 min
+user AHF2BPGWDZ52UX6V7VJWP7BB4CLQ done (552/700) | 5 likes, 5 dislikes | calls 6261 (new 671) | 10.4 min
+user AGCSNJ2EC4FYUWMBCYCZM6JZVVDA done (553/700) | 5 likes, 5 dislikes | calls 6272 (new 672) | 10.4 min
+user AENTNMY5XH3U5R6FVA4ECBDPLZJQ done (554/700) | 5 likes, 5 dislikes | calls 6283 (new 673) | 10.4 min
+user AED3QN6QCNJH4MWR4HXJIHL7H7SA done (555/700) | 5 likes, 0 dislikes | calls 6294 (new 674) | 10.4 min
+user AF3E44E4DEMPV5UVQ62VIEYNU4VA done (556/700) | 5 likes, 5 dislikes | calls 6305 (new 675) | 10.4 min
+user AGRL4X5FYQLA4YXKNIUPNGPBSQ4Q done (557/700) | 5 likes, 5 dislikes | calls 6316 (new 676) | 10.4 min
+user AELWAE2SD7OZT34XURN6OZ5QVS2Q done (558/700) | 5 likes, 5 dislikes | calls 6329 (new 679) | 10.5 min
+user AGPYG5JL3SNWMJL4WZ4RUNVV6J3Q done (559/700) | 5 likes, 5 dislikes | calls 6340 (new 680) | 10.5 min
+user AG3GUAVSPHMQ5BGAWTSKKKEVNNWA done (560/700) | 5 likes, 5 dislikes | calls 6351 (new 681) | 10.5 min
+user AFMKDSGXR27OUSEXQE42EHWK57IA done (561/700) | 5 likes, 5 dislikes | calls 6362 (new 682) | 10.5 min
+user AE4CRFV46QHI3DKTUAILVQTPLEIQ done (562/700) | 5 likes, 5 dislikes | calls 6373 (new 683) | 10.5 min
+user AELM2D3UUSLNF7X7TE3N2CWQSTTQ done (563/700) | 5 likes, 5 dislikes | calls 6384 (new 684) | 10.5 min
+user AGJXR66STC5UQOBITGRZF7YDMOPA done (564/700) | 5 likes, 5 dislikes | calls 6395 (new 685) | 10.5 min
+user AHW5MFGQ3GO2IIOZQPKLD2D44CDA done (565/700) | 5 likes, 5 dislikes | calls 6406 (new 686) | 10.6 min
+user AGZKIITIRJE5JBTBQCAXEUL56YLQ done (566/700) | 5 likes, 5 dislikes | calls 6417 (new 687) | 10.6 min
+user AF3JOMFS5DHOGCJFK4D66VLOE66A done (567/700) | 5 likes, 5 dislikes | calls 6429 (new 689) | 10.6 min
+user AGHRXV4RZFQOJMFJFNJXVDHPORNA done (568/700) | 5 likes, 5 dislikes | calls 6440 (new 690) | 10.6 min
+user AEPE3UTKKD5Q3AWQ7OX3SGUYLUPQ done (569/700) | 2 likes, 5 dislikes | calls 6451 (new 691) | 10.6 min
+user AFZRO74Y6KDTOVVNHVTFTX2MUIMQ done (570/700) | 5 likes, 5 dislikes | calls 6463 (new 693) | 10.6 min
+user AHEG4VLYHRJOBCN4XKHHUPP6I3AQ done (571/700) | 5 likes, 5 dislikes | calls 6475 (new 695) | 10.7 min
+user AFQMBWSO7W3F4IJWLSPJE3VEXHDQ done (572/700) | 5 likes, 5 dislikes | calls 6487 (new 697) | 10.7 min
+user AHXVZ5DOSSIP5XYTQBIRPQTVCPCQ done (573/700) | 5 likes, 0 dislikes | calls 6498 (new 698) | 10.7 min
+user AFAH6F73GAEN7GTGYGIJK2ZMF46Q done (574/700) | 5 likes, 5 dislikes | calls 6509 (new 699) | 10.7 min
+user AFBLBT4UK3PNUOOS4DA2EIKHYU5A done (575/700) | 5 likes, 5 dislikes | calls 6520 (new 700) | 10.7 min
+user AGTXYRCGBAAVCVG4ALHWYTGIQVQQ done (576/700) | 5 likes, 5 dislikes | calls 6531 (new 701) | 10.7 min
+user AFOG5UE2QIWC2RAOIIIJFPVBYYQA done (577/700) | 3 likes, 5 dislikes | calls 6542 (new 702) | 10.7 min
+user AHA2UOYIUOVYY5MVZIWSDLKQRUZQ done (578/700) | 5 likes, 0 dislikes | calls 6553 (new 703) | 10.7 min
+user AFFQPO5BFRLISJII2XBGHVYVIT5Q done (579/700) | 5 likes, 5 dislikes | calls 6564 (new 704) | 10.7 min
+user AFILPGEMVIJG6MVDKGIMMULUXH4A done (580/700) | 5 likes, 5 dislikes | calls 6575 (new 705) | 10.8 min
+user AGTFXMLMO5RPS2UX4U273AMNHRFA done (581/700) | 5 likes, 5 dislikes | calls 6586 (new 706) | 10.8 min
+user AFF6THUFEL4YFPNNWVH3PT5WKH4A done (582/700) | 5 likes, 5 dislikes | calls 6597 (new 707) | 10.8 min
+user AFLYMLM3CCCVA3VKHBV2QUGOHQYQ done (583/700) | 5 likes, 5 dislikes | calls 6608 (new 708) | 10.8 min
+user AEJDOR45TYYFYBLY5FH63XFCIEBQ done (584/700) | 5 likes, 5 dislikes | calls 6620 (new 710) | 10.8 min
+user AGSSMESBM73NKW4GSV2LE6OT7TSA done (585/700) | 5 likes, 5 dislikes | calls 6632 (new 712) | 10.8 min
+user AFFV5747NXT7LJR3AFMJSAGOJM3Q done (586/700) | 5 likes, 5 dislikes | calls 6644 (new 714) | 10.9 min
+user AGJ3KB2NOMFSOSFOHV2HSC276N6A done (587/700) | 5 likes, 5 dislikes | calls 6655 (new 715) | 10.9 min
+user AHB5KVGAYEBNV2RZP5GUOBTREL6Q done (588/700) | 5 likes, 5 dislikes | calls 6668 (new 718) | 10.9 min
+user AFKHF6MTXTT5BUH3XD44K6P52FGA done (589/700) | 5 likes, 5 dislikes | calls 6680 (new 720) | 10.9 min
+user AH2XJGYFHRSHZJQA3FW6KFG6OVQA done (590/700) | 5 likes, 5 dislikes | calls 6691 (new 721) | 11.0 min
+user AHT45AYRRCRMXWO3FBFOHFMKKQOQ done (591/700) | 5 likes, 5 dislikes | calls 6702 (new 722) | 11.0 min
+user AG5BEOPY4KIVXHBUCZFDU3M5KQCA done (592/700) | 5 likes, 0 dislikes | calls 6713 (new 723) | 11.0 min
+user AFXNE265LMGA7B75KTJ7G42XPZ7Q done (593/700) | 5 likes, 0 dislikes | calls 6724 (new 724) | 11.0 min
+user AE6CXBRKCQHVBZYBGO7N6OYYDBSA done (594/700) | 5 likes, 5 dislikes | calls 6735 (new 725) | 11.0 min
+user AG6AXZODAQPGZU7AFJVZGDJ4FVRA done (595/700) | 5 likes, 5 dislikes | calls 6746 (new 726) | 11.0 min
+user AG4U36EZZYW4MQAT4TBXNET4ERTQ done (596/700) | 5 likes, 3 dislikes | calls 6758 (new 728) | 11.0 min
+user AHLAYBQQCNWF36TCKXKWMTEJO56Q done (597/700) | 5 likes, 5 dislikes | calls 6769 (new 729) | 11.1 min
+user AHM3EKU27PF7IGRLYX3JNJ6J6USQ done (598/700) | 5 likes, 0 dislikes | calls 6781 (new 731) | 11.1 min
+user AEV25ES7P5I7IAVNCUVSDQ3I7LCA done (599/700) | 5 likes, 5 dislikes | calls 6792 (new 732) | 11.1 min
+user AFZHE5NHEVDX7KVTV2NSY3FA4XWA done (600/700) | 5 likes, 5 dislikes | calls 6803 (new 733) | 11.1 min
+user AGR2NYAXRXXIHOMDK5PCIWUX5KHQ done (601/700) | 5 likes, 5 dislikes | calls 6814 (new 734) | 11.1 min
+user AE7JFUZNNUTMM5M4QQLVG6MNES2A done (602/700) | 5 likes, 0 dislikes | calls 6825 (new 735) | 11.1 min
+user AGQ6KFAPOLB73ENTJFR267ERJ3NQ done (603/700) | 5 likes, 5 dislikes | calls 6836 (new 736) | 11.1 min
+user AHT2TGLPHB7GY36IVNTGOVN5F7IQ done (604/700) | 5 likes, 5 dislikes | calls 6847 (new 737) | 11.2 min
+user AGH2TMSQYJR6HSNT4NYMQ6MQTNDA done (605/700) | 5 likes, 5 dislikes | calls 6859 (new 739) | 11.2 min
+user AFHABUGYWGV2D2E5R3VV3JQ7AYBQ done (606/700) | 5 likes, 5 dislikes | calls 6871 (new 741) | 11.2 min
+user AHCPQAYEJFSGCTWFMANHR4IJXAYQ done (607/700) | 5 likes, 5 dislikes | calls 6883 (new 743) | 11.2 min
+user AF7M4DAGRUGVHWFBA4ABYLARY7BA done (608/700) | 5 likes, 5 dislikes | calls 6894 (new 744) | 11.2 min
+user AFWS5G4VP6D52HDDAINYAR7TEKYQ done (609/700) | 5 likes, 5 dislikes | calls 6905 (new 745) | 11.2 min
+user AESALCXRLBLEUT2NN2MAZN336KTQ done (610/700) | 5 likes, 2 dislikes | calls 6917 (new 747) | 11.2 min
+user AFIVV26YBE2BKWJF7IN4HCMMVWRQ done (611/700) | 5 likes, 0 dislikes | calls 6928 (new 748) | 11.3 min
+user AHWIO2YS5QHEKZZR2SSA6SPKTC7A done (612/700) | 5 likes, 1 dislikes | calls 6939 (new 749) | 11.3 min
+user AE6K5GUNE7E6TXDE4XG7R3FU7LQQ done (613/700) | 5 likes, 5 dislikes | calls 6950 (new 750) | 11.3 min
+user AEIX7ETYLHLADWW2SWVTOUCHY2JQ done (614/700) | 5 likes, 0 dislikes | calls 6961 (new 751) | 11.3 min
+user AGPIAGYJGSVVOVKSMPZOVVMUU5IA done (615/700) | 5 likes, 5 dislikes | calls 6972 (new 752) | 11.3 min
+user AGDHPVVET6OGCB7LGTY366AYJ36Q done (616/700) | 5 likes, 5 dislikes | calls 6983 (new 753) | 11.3 min
+user AFUS3T57MS22CPYE6VLFYXICG3BQ done (617/700) | 5 likes, 5 dislikes | calls 6994 (new 754) | 11.3 min
+user AGB6BZAVXGVMJESPCD4YGQXBZCIQ done (618/700) | 5 likes, 5 dislikes | calls 7007 (new 757) | 11.4 min
+user AFBDTS5ZXMERGRJZJLDZSJ3EL6BQ done (619/700) | 5 likes, 5 dislikes | calls 7021 (new 761) | 11.4 min
+user AFP5DFS2CHHTZ7SI6HD6D7235YRQ done (620/700) | 5 likes, 5 dislikes | calls 7032 (new 762) | 11.4 min
+user AFKZLORHEVJIFJ57RE3KCRPB4HEQ done (621/700) | 5 likes, 5 dislikes | calls 7043 (new 763) | 11.4 min
+user AGTIGOF3PLSNVUIKE4G3DEHX3TIQ done (622/700) | 5 likes, 0 dislikes | calls 7054 (new 764) | 11.4 min
+user AH3R7CY7OLGJTDWPTIL6S5S27C6A done (623/700) | 5 likes, 5 dislikes | calls 7065 (new 765) | 11.4 min
+user AFWI3KDVSKQBJ6QBLFBMYLGLDJQQ done (624/700) | 5 likes, 5 dislikes | calls 7076 (new 766) | 11.4 min
+user AGFZQUYGZKTUO4ZCIBEMUXN7EYLA done (625/700) | 5 likes, 5 dislikes | calls 7087 (new 767) | 11.4 min
+user AGBE7MH5JRWDPYQR3FUIG3PQPFAQ done (626/700) | 5 likes, 5 dislikes | calls 7098 (new 768) | 11.5 min
+user AEV2ZWB7VYW7HSYKAWFB55NR6IOA done (627/700) | 5 likes, 5 dislikes | calls 7109 (new 769) | 11.5 min
+user AH4DCBYSKIP3BHB7TTKXLRJCWU6Q done (628/700) | 5 likes, 5 dislikes | calls 7120 (new 770) | 11.5 min
+user AFDPVX5O3VAGOUMLI6RJP6RCUEQQ done (629/700) | 5 likes, 5 dislikes | calls 7131 (new 771) | 11.5 min
+user AGELLMCBM4F5YNI2PECOSBATA4NQ done (630/700) | 5 likes, 5 dislikes | calls 7142 (new 772) | 11.6 min
+user AGABHBOBAGSWDZ4D35ZAFOXJHUPA done (631/700) | 5 likes, 3 dislikes | calls 7153 (new 773) | 11.6 min
+user AEUNUFYIL72NAGCG2YG6Y63VVBVQ done (632/700) | 5 likes, 5 dislikes | calls 7165 (new 775) | 11.6 min
+user AHV3XVH2SSVP77CA4IAOWW5GKBDA done (633/700) | 5 likes, 5 dislikes | calls 7176 (new 776) | 11.6 min
+user AFVDXODYDUW7ZWW3ZTDXUQYRH6HQ done (634/700) | 5 likes, 5 dislikes | calls 7187 (new 777) | 11.6 min
+user AGJU3WA6MT5OBLMF6A6JDJEYKL4Q done (635/700) | 5 likes, 5 dislikes | calls 7198 (new 778) | 11.6 min
+user AEHQH5RSHJVTGZLNY7ZO2WLEGUHQ done (636/700) | 5 likes, 5 dislikes | calls 7199 (new 779) | 11.6 min
+user AGM5WQH3I32PLTONR75OG34PMO2A done (637/700) | 5 likes, 5 dislikes | calls 7220 (new 780) | 11.6 min
+user AGZ6VHT3GDQUUTBP3YEQUTS2R5PA done (638/700) | 5 likes, 5 dislikes | calls 7231 (new 781) | 11.7 min
+user AFTF2WKUPHGEWH5QVDZNR4WDM2BA done (639/700) | 5 likes, 5 dislikes | calls 7242 (new 782) | 11.7 min
+user AHF65XTOWOODQ3UANAJAUA3IXD7A done (640/700) | 5 likes, 5 dislikes | calls 7253 (new 783) | 11.7 min
+user AEWL7R6Q32ZXGBV67PUNFT363WQQ done (641/700) | 5 likes, 5 dislikes | calls 7264 (new 784) | 11.7 min
+user AGW4Y6AJJAXQGA6JTXP2AOZ2WOMQ done (642/700) | 5 likes, 5 dislikes | calls 7275 (new 785) | 11.7 min
+user AHTZ36JK3WDQLEHG4Q45ZP77GMSA done (643/700) | 5 likes, 5 dislikes | calls 7286 (new 786) | 11.7 min
+user AFASG2GDWFZAQE5PMQKKX2DLFYVA done (644/700) | 5 likes, 5 dislikes | calls 7297 (new 787) | 11.8 min
+user AFGHKWFAZITBOBGU2P36NHKJNMKQ done (645/700) | 5 likes, 5 dislikes | calls 7308 (new 788) | 11.8 min
+user AGK7AQJJZOF4Y3X7X2GBQIZXSFMQ done (646/700) | 5 likes, 5 dislikes | calls 7309 (new 789) | 11.8 min
+user AGHLG4NLNIEJD27SYNQYVD6NZNQQ done (647/700) | 5 likes, 5 dislikes | calls 7330 (new 790) | 11.8 min
+user AGCLNV7OKHTGMHWIPKWNNVJ6AA6A done (648/700) | 5 likes, 5 dislikes | calls 7342 (new 792) | 11.8 min
+user AEMSIBERIGOBJRGND6Y6VVVT2ASA done (649/700) | 5 likes, 3 dislikes | calls 7353 (new 793) | 11.8 min
+user AFRCXEE5VYN43NVBJIMS7MJ2Q65Q done (650/700) | 5 likes, 5 dislikes | calls 7365 (new 795) | 11.9 min
+user AEBY42YEV7V7E6WQD3RXKIMMVMDQ done (651/700) | 5 likes, 5 dislikes | calls 7376 (new 796) | 11.9 min
+user AGAELWMVSVXNGXG7LNL4VCP6345Q done (652/700) | 5 likes, 0 dislikes | calls 7387 (new 797) | 11.9 min
+user AHBRETQRMIH54NRYG26KJUTMHTHA done (653/700) | 5 likes, 5 dislikes | calls 7398 (new 798) | 11.9 min
+  [net] InternalServerError, retry in 5s
+user AHORPPB47KQ2CVPPQNVO3JR72JXA done (654/700) | 5 likes, 5 dislikes | calls 7409 (new 799) | 11.9 min
+user AEUDDWG35QHSHFDO7ZRBM5HJTFEA done (655/700) | 5 likes, 0 dislikes | calls 7420 (new 800) | 11.9 min
+user AHJP6IHDG33YFZDANWWW34LWHKBA done (656/700) | 5 likes, 5 dislikes | calls 7431 (new 801) | 12.0 min
+user AGR2NS6I4RJY2LJARBNENIVO27XA done (657/700) | 5 likes, 5 dislikes | calls 7442 (new 802) | 12.0 min
+user AHCJ2Y6H7V6BZBCCKI2J4LGLLFQA done (658/700) | 5 likes, 5 dislikes | calls 7453 (new 803) | 12.0 min
+user AHIRNPOCFWYPXSXGMHZDAR4XECZA done (659/700) | 5 likes, 5 dislikes | calls 7465 (new 805) | 12.0 min
+user AHJ3S3V3XBCJZFF7EE4RALKBJPPQ done (660/700) | 5 likes, 5 dislikes | calls 7476 (new 806) | 12.0 min
+user AGXBBFXITJP7QPWL2SMWVQB6G6DA done (661/700) | 5 likes, 5 dislikes | calls 7487 (new 807) | 12.0 min
+user AGE5X4G4OSWKHFI3O6SAES5WAEUA done (662/700) | 5 likes, 5 dislikes | calls 7489 (new 808) | 12.1 min
+user AFPYARWVJCTUEUA7H6QQASX2J73A done (663/700) | 5 likes, 5 dislikes | calls 7510 (new 810) | 12.1 min
+user AFNA2BH3LXJ5ATEN224SM6XY7BCA done (664/700) | 5 likes, 5 dislikes | calls 7521 (new 811) | 12.1 min
+user AEZ3AX3A7FXGPKYDO7LIQDZXOEZA done (665/700) | 5 likes, 5 dislikes | calls 7532 (new 812) | 12.1 min
+user AHB3OO3NL2UHNUDO7PKCEGME5CJA done (666/700) | 5 likes, 5 dislikes | calls 7544 (new 814) | 12.1 min
+user AFPIIL4WXK67JOCPHQTE7NAVIJIA done (667/700) | 5 likes, 5 dislikes | calls 7555 (new 815) | 12.2 min
+user AHOF4S7FNSXBWGXRSXICDKRABKMQ done (668/700) | 5 likes, 5 dislikes | calls 7566 (new 816) | 12.2 min
+  [net] InternalServerError, retry in 10s
+user AFUQTSXHBPMA72MT5XV22B2YQ3PQ done (669/700) | 5 likes, 5 dislikes | calls 7577 (new 817) | 12.2 min
+user AEQKUPDPM2ALGKYCGCDQOPLUDUGQ done (670/700) | 5 likes, 0 dislikes | calls 7588 (new 818) | 12.2 min
+user AF5FIHZSXOQJ5Z32VPNZKAUZ5TSA done (671/700) | 5 likes, 5 dislikes | calls 7599 (new 819) | 12.2 min
+user AGWMRK2NWS37CRCJLIXMJRWZVXBQ done (672/700) | 5 likes, 5 dislikes | calls 7610 (new 820) | 12.2 min
+user AGET2PYSUKME6WTHQ2B5J4N6BDEQ done (673/700) | 5 likes, 5 dislikes | calls 7621 (new 821) | 12.2 min
+user AE2G2AJ6WBURM5VMYU7SPJO2LJHQ done (674/700) | 5 likes, 5 dislikes | calls 7633 (new 823) | 12.3 min
+user AGJFXBU6F2PHQEQTCTEXWHXMX2HA done (675/700) | 5 likes, 5 dislikes | calls 7644 (new 824) | 12.3 min
+user AGYPMTL7YFDNZPN7T7GDWHLAIJTQ done (676/700) | 5 likes, 5 dislikes | calls 7655 (new 825) | 12.3 min
+user AGXBJBMNINPRTKOLH7M73LR6DBOA done (677/700) | 5 likes, 5 dislikes | calls 7666 (new 826) | 12.3 min
+user AGJHN3R5FIX6VVOXESXR2MQVWXXQ done (678/700) | 5 likes, 5 dislikes | calls 7677 (new 827) | 12.3 min
+user AEBLUD7KOWVXTKHXUI3B5MFNGNVA done (679/700) | 5 likes, 0 dislikes | calls 7678 (new 828) | 12.3 min
+user AFHRGQTFN4Q2PI2FSOCWLHTO6QEA done (680/700) | 5 likes, 5 dislikes | calls 7699 (new 829) | 12.3 min
+user AEAMUHU34ZB7JCXLKGTZ4Y4NRPNQ done (681/700) | 5 likes, 5 dislikes | calls 7710 (new 830) | 12.4 min
+user AGJA2YZUNFLGSDZUXIAJ66APA6DQ done (682/700) | 5 likes, 5 dislikes | calls 7721 (new 831) | 12.4 min
+user AHTGV7CYWPSL5HXDFYQRR5DSGYPQ done (683/700) | 5 likes, 4 dislikes | calls 7732 (new 832) | 12.4 min
+user AE6QD4QG6O2CF3GWUTXVBBFSYQYA done (684/700) | 5 likes, 5 dislikes | calls 7743 (new 833) | 12.4 min
+user AHM3DV54FVIKHA6BZNOAIH26VKRA done (685/700) | 5 likes, 5 dislikes | calls 7754 (new 834) | 12.4 min
+user AHKIMAZCYXPUKXM2LKWAQ76MZLPQ done (686/700) | 5 likes, 5 dislikes | calls 7765 (new 835) | 12.4 min
+  [net] InternalServerError, retry in 5s
+user AFQEQFBUVZFK2QGTCRO4PKLJUGDA done (687/700) | 5 likes, 5 dislikes | calls 7779 (new 839) | 12.5 min
+user AF4WO2PDLMTVGEDHMYFTZ2W7H6XA done (688/700) | 5 likes, 5 dislikes | calls 7790 (new 840) | 12.5 min
+user AGMWLBXF3MF6V4YIWVKAGOYTURHQ done (689/700) | 5 likes, 5 dislikes | calls 7802 (new 842) | 12.5 min
+user AGO573TJWHHKBIZQARB5WNZ5JMIQ done (690/700) | 5 likes, 0 dislikes | calls 7813 (new 843) | 12.6 min
+user AGQA5OROYXZAK47HQPYKXVAWIZEQ done (691/700) | 5 likes, 5 dislikes | calls 7824 (new 844) | 12.6 min
+user AE5WU7K6PPNKUQYNBMYKPXQUUHNA done (692/700) | 5 likes, 5 dislikes | calls 7825 (new 845) | 12.6 min
+user AGA6CWU3PNWCQCV6TTD2JV662WZQ done (693/700) | 5 likes, 5 dislikes | calls 7846 (new 846) | 12.6 min
+user AGCMT2PSECWYWBSCVSDU6WHBOBHA done (694/700) | 5 likes, 5 dislikes | calls 7847 (new 847) | 12.6 min
+user AFBQ5PCRNDQBRUZPCZ6H7PMJSBNQ done (695/700) | 5 likes, 5 dislikes | calls 7849 (new 849) | 12.6 min
+user AHUF2YXS7TOZAT7LUVNC7YYUBJCA done (696/700) | 5 likes, 5 dislikes | calls 7852 (new 852) | 12.6 min
+user AFGCTQDBCSBBVUX2GFHTCY3CDPDA done (697/700) | 5 likes, 5 dislikes | calls 7854 (new 854) | 12.7 min
+user AGFHHZIEFIIXJZKWRCLKISPPFGWQ done (698/700) | 5 likes, 5 dislikes | calls 7855 (new 855) | 12.7 min
+user AFZLREGIZMHNVH27XLX3WK7CNMKQ done (699/700) | 5 likes, 5 dislikes | calls 7856 (new 856) | 12.7 min
+user AFVJWANXWQKNHIDECZQEQTJBV5YQ done (700/700) | 5 likes, 5 dislikes | calls 7857 (new 857) | 12.7 min
+{"users_done": 700, "users_failed": {}, "calls": 7857, "new_calls": 857, "cached_calls": 7000, "prompt_tokens": 830307, "completion_tokens": 190292, "reasoning_tokens": 0, "llm_seconds": 5785.9, "wall_minutes": 12.7, "finish_length": 1, "invalid_extractions": 0, "profiles_missing_tag": 37, "profiles_no_dislikes": 39, "retries": 157, "model": "gpt-oss:20b"}
+
+=== item profiles (the items in this run)  [36.3 min]
+$ D:\thies\reRankPoc\.venv\Scripts\python.exe -u D:\thies\reRankPoc\item_profiles.py --input D:\thies\reRankPoc\data\rr_input --out D:\thies\reRankPoc\data\item_profiles --cache D:\thies\reRankPoc\runs\cache --base-url http://127.0.0.1:11435/v1 --model gpt-oss:20b --reasoning-effort low --threads 8 --items lists --run $dst
+26273 items (lists), 49312 already profiled, 0 without reviews, 0 to do | model gpt-oss:20b | reasoning low | threads 8
+
+=== evaluation  [36.4 min]
+$ D:\thies\reRankPoc\.venv\Scripts\python.exe -u D:\thies\reRankPoc\evaluate.py $dst --input D:\thies\reRankPoc\data\rr_input
+300 test users (with a persona), lists of 500
+W1114 11:17:31.530000 77428 .venv\Lib\site-packages\torch\distributed\elastic\multiprocessing\redirects.py:29] NOTE: Redirects are currently not supported in Windows or MacOs.
+
+Loading weights:   0%|          | 0/199 [00:00<?, ?it/s]
+Loading weights:  12%|█▏        | 24/199 [00:00<00:01, 171.34it/s]
+Loading weights: 100%|██████████| 199/199 [00:00<00:00, 911.25it/s]
+encoder BAAI/bge-small-en-v1.5: 384 dimensions
+item profiles: 49312 items in D:\thies\reRankPoc\data\item_profiles\item_profiles.jsonl
+item reviews: 49312 items in D:\thies\reRankPoc\data\rr_input\item_reviews.jsonl.gz
+  item profiles: 26273 of the 26273 items in the lists have one
+  encoding 784882 review sentences of 26273 items with BAAI/bge-small-en-v1.5 (cached afterwards) ...
+    50005/784882 sentences, 0.3 min
+    100008/784882 sentences, 0.6 min
+    150028/784882 sentences, 0.9 min
+    200052/784882 sentences, 1.3 min
+    250059/784882 sentences, 1.6 min
+    300083/784882 sentences, 1.9 min
+    350094/784882 sentences, 2.2 min
+    400121/784882 sentences, 2.5 min
+    450144/784882 sentences, 2.8 min
+    500152/784882 sentences, 3.1 min
+    550182/784882 sentences, 3.4 min
+    600207/784882 sentences, 3.7 min
+    650232/784882 sentences, 4.0 min
+    700242/784882 sentences, 4.3 min
+    750263/784882 sentences, 4.7 min
+    784882/784882 sentences, 4.9 min
+  item reviews: 26226 of the 26273 items in the lists have a good review, 22054 a bad one
+features of 152004 (user, item) rows; alpha 1.0 beta 1.0 gamma 1.0
+candidates_train.jsonl: lists for 700 training users from embeddings.npz
+  encoding 172 profile lines of 22 items (cached afterwards) ...
+  item profiles: 32499 of the 32499 items in the lists have one
+  encoding 258285 review sentences of 9250 items with BAAI/bge-small-en-v1.5 (cached afterwards) ...
+    50007/258285 sentences, 0.3 min
+    100030/258285 sentences, 0.6 min
+    150054/258285 sentences, 0.9 min
+    200059/258285 sentences, 1.2 min
+    250082/258285 sentences, 1.5 min
+    258285/258285 sentences, 1.6 min
+  item reviews: 32436 of the 32499 items in the lists have a good review, 26613 a bad one
+D:\thies\reRankPoc\.venv\Lib\site-packages\lightgbm\sklearn.py:1106: LGBMDeprecationWarning: The argument 'eval_set' is deprecated, use 'eval_X' and 'eval_y' instead.
+  eval_set = _validate_eval_set_Xy(eval_set=eval_set, eval_X=eval_X, eval_y=eval_y)
+LightGBM on 595 training users (301556 rows, 4854 targets): 1 trees, validation mean target rank 160.9 on 105 users -> lgbm.txt, lgbm.json
+  most used features (gain): n_crit 44, dis_mean 22, z_like_max 15, z_naive 13, like_top3 10
+R10_mix on 413 training users with an in-list target (944 targets, 6 Newton steps, converged True): in-list rank change on the training users -0.9 (in-sample)
+R11_mix_crit on 413 training users with an in-list target (944 targets, 6 Newton steps, converged True): in-list rank change on the training users -3.4 (in-sample)
+R12_mix_reviews on 413 training users with an in-list target (944 targets, 6 Newton steps, converged True): in-list rank change on the training users -7.4 (in-sample)
+  item profiles: 26273 of the 26273 items in the lists have one
+  item reviews: 26226 of the 26273 items in the lists have a good review, 22054 a bad one
+run $dst | encoder BAAI/bge-small-en-v1.5 | alpha 1.0 beta 1.0 gamma 1.0
+
+| metric | lightgcn | R1_like | R2_like-dis | R3_soft | R4_rocchio | R5_naive | R8_rev_like | R9_rev | R7_lgbm | R10_mix | R11_mix_crit | R12_mix_reviews |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| users | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 |
+| list_size | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 |
+| targets | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 |
+| in_list | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 |
+| in_list_mean_rank_lightgcn | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 |
+| in_list_mean_rank | 196.1 | 199.3 | 213.8 | 201.2 | 202.7 | 192.3 | 197.6 | 202.6 | 218.3 | 192.9 | 189.6 | 188.2 |
+| in_list_rank_change | 0.0 | 3.2 | 17.7 | 5.2 | 6.7 | -3.8 | 1.5 | 6.6 | 22.3 | -3.1 | -6.5 | -7.9 |
+| in_list_moved_up | 0 | 236 | 208 | 239 | 232 | 250 | 351 | 180 | 168 | 277 | 268 | 271 |
+| in_list_stayed | 514 | 7 | 6 | 9 | 10 | 7 | 12 | 5 | 6 | 44 | 16 | 14 |
+| in_list_moved_down | 0 | 271 | 300 | 266 | 272 | 257 | 151 | 329 | 340 | 193 | 230 | 229 |
+| in_list_top10 | 27 | 27 | 29 | 25 | 27 | 30 | 25 | 23 | 26 | 26 | 28 | 32 |
+| out_of_list | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 |
+| out_pulled_in | 0 | 825 | 822 | 818 | 891 | 924 | 739 | 764 | 712 | 33 | 149 | 438 |
+| all_mean_rank | 438.8 | 423.3 | 427.5 | 424.7 | 424.1 | 420.8 | 424.2 | 426.2 | 425.9 | 438.0 | 436.4 | 431.3 |
+
+mean rank change of the in-list targets per user, bootstrap over users (95% interval):
+
+| reranker | mean change | 2.5% | 97.5% |
+|---|---|---|---|
+| R1_like | -4.4 | -17.7 | +9.4 |
+| R2_like-dis | +16.1 | +4.4 | +28.2 |
+| R3_soft | -1.1 | -14.2 | +12.4 |
+| R4_rocchio | +5.2 | -7.9 | +18.1 |
+| R5_naive | -13.7 | -27.4 | +0.2 |
+| R8_rev_like | +3.6 | -7.2 | +16.1 |
+| R9_rev | +9.4 | -0.6 | +19.2 |
+| R7_lgbm | +24.4 | +13.9 | +34.3 |
+| R10_mix | -4.2 | -6.1 | -2.2 |
+| R11_mix_crit | -9.9 | -15.7 | -4.0 |
+| R12_mix_reviews | -5.0 | -13.5 | +3.8 |
+
+control: the same rerankers with another user's persona (what any persona moves):
+
+| metric | lightgcn | R1_like | R2_like-dis | R3_soft | R4_rocchio | R5_naive | R8_rev_like | R9_rev | R7_lgbm | R10_mix | R11_mix_crit | R12_mix_reviews |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| users | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 | 300 |
+| list_size | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 | 500 |
+| targets | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 | 2518 |
+| in_list | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 | 514 |
+| in_list_mean_rank_lightgcn | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 | 196.1 |
+| in_list_mean_rank | 196.1 | 208.8 | 208.8 | 208.7 | 213.0 | 206.2 | 201.6 | 206.5 | 215.4 | 194.1 | 193.6 | 199.0 |
+| in_list_rank_change | 0.0 | 12.7 | 12.7 | 12.6 | 17.0 | 10.1 | 5.6 | 10.4 | 19.4 | -2.0 | -2.5 | 2.9 |
+| in_list_moved_up | 0 | 226 | 220 | 224 | 216 | 229 | 343 | 176 | 190 | 243 | 250 | 232 |
+| in_list_stayed | 514 | 4 | 9 | 8 | 6 | 6 | 17 | 8 | 2 | 50 | 20 | 16 |
+| in_list_moved_down | 0 | 284 | 285 | 282 | 292 | 279 | 154 | 330 | 322 | 221 | 244 | 266 |
+| in_list_top10 | 27 | 25 | 29 | 27 | 23 | 24 | 24 | 21 | 29 | 26 | 30 | 28 |
+| out_of_list | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 | 2004 |
+| out_pulled_in | 0 | 815 | 827 | 812 | 905 | 875 | 744 | 747 | 647 | 37 | 148 | 435 |
+| all_mean_rank | 438.8 | 426.4 | 427.5 | 427.1 | 427.0 | 426.5 | 424.9 | 426.5 | 427.5 | 438.3 | 437.2 | 433.6 |
+
+| reranker | in-list rank change, own persona | another user's persona |
+|---|---|---|
+| R1_like | +3.2 | +12.7 |
+| R2_like-dis | +17.7 | +12.7 |
+| R3_soft | +5.2 | +12.6 |
+| R4_rocchio | +6.7 | +17.0 |
+| R5_naive | -3.8 | +10.1 |
+| R8_rev_like | +1.5 | +5.6 |
+| R9_rev | +6.6 | +10.4 |
+| R7_lgbm | +22.3 | +19.4 |
+| R10_mix | -3.1 | -2.0 |
+| R11_mix_crit | -6.5 | -2.5 |
+| R12_mix_reviews | -7.9 | +2.9 |
+
+R10_mix weights: logistic regression on 413 training users with a target inside the list (944 targets, 206500 rows); inputs z-scored within each user's list; L2 penalty 10000, picked by 5-fold cross-validation over users from 1, 10, 100, 1000, 10000, 100000:
+
+| input | weight | std. error |
+|---|---|---|
+| base | +0.315 | 0.025 |
+| like_s1 | +0.006 | 0.010 |
+| like_s2 | +0.007 | 0.010 |
+| like_s3 | +0.005 | 0.010 |
+| like_s4 | +0.002 | 0.010 |
+| like_s5 | +0.003 | 0.010 |
+| dis_s1 | +0.004 | 0.010 |
+| dis_s2 | +0.000 | 0.010 |
+| dis_s3 | +0.001 | 0.010 |
+| dis_s4 | +0.002 | 0.010 |
+| dis_s5 | +0.004 | 0.010 |
+| sum of the like weights | +0.023 | 0.019 |
+| sum of the dislike weights | +0.011 | 0.019 |
+
+R11_mix_crit weights: logistic regression on 413 training users with a target inside the list (944 targets, 206500 rows); inputs z-scored within each user's list; L2 penalty 1000, picked by 5-fold cross-validation over users from 1, 10, 100, 1000, 10000, 100000:
+
+| input | weight | std. error |
+|---|---|---|
+| base | +0.312 | 0.025 |
+| like_s1 | +0.026 | 0.025 |
+| like_s2 | +0.029 | 0.027 |
+| like_s3 | +0.014 | 0.027 |
+| like_s4 | -0.004 | 0.027 |
+| like_s5 | +0.006 | 0.026 |
+| dis_crit_s1 | +0.032 | 0.026 |
+| dis_crit_s2 | +0.020 | 0.027 |
+| dis_crit_s3 | +0.006 | 0.028 |
+| dis_crit_s4 | +0.005 | 0.027 |
+| dis_crit_s5 | -0.024 | 0.027 |
+| no_crit | -0.027 | 0.023 |
+| sum of the like weights | +0.072 | 0.033 |
+| sum of the dislike weights | +0.038 | 0.039 |
+
+R12_mix_reviews weights: logistic regression on 413 training users with a target inside the list (944 targets, 206500 rows); inputs z-scored within each user's list; L2 penalty 1000, picked by 5-fold cross-validation over users from 1, 10, 100, 1000, 10000, 100000:
+
+| input | weight | std. error |
+|---|---|---|
+| base | +0.306 | 0.025 |
+| like_good_s1 | +0.055 | 0.024 |
+| like_good_s2 | +0.052 | 0.026 |
+| like_good_s3 | +0.009 | 0.026 |
+| like_good_s4 | +0.035 | 0.026 |
+| like_good_s5 | +0.026 | 0.025 |
+| dis_bad_s1 | +0.041 | 0.026 |
+| dis_bad_s2 | +0.022 | 0.027 |
+| dis_bad_s3 | +0.008 | 0.027 |
+| dis_bad_s4 | +0.008 | 0.027 |
+| dis_bad_s5 | +0.003 | 0.026 |
+| no_bad | +0.005 | 0.024 |
+| n_good | -0.014 | 0.023 |
+| n_bad | -0.004 | 0.024 |
+| sum of the like weights | +0.178 | 0.036 |
+| sum of the dislike weights | +0.083 | 0.036 |
+
+=== user AGL6KBSZAZE5JBN73DDQUEJHYMDA
+  likes:    Prefers crime dramas with mature, nuanced storytelling and strong character arcs | Values period authenticity and detailed cinematography in historical settings | Enjoys series that honor legacy characters and original themes | Appreciates high production values and faithful musical cues | Loves quirky, character-driven shows set in small communities
+  dislikes: 
+  tau (dislike threshold) 0.00; like/dis = closest like/dislike line (cosine)
+  top 10 of the list:
+     1.  like 0.56 dis 0.00  Vera, Set 3
+     2.  like 0.53 dis 0.00  Masterpiece: Downton Abbey Season 5
+     3.  like 0.61 dis 0.00  Vera
+     4.  like 0.52 dis 0.00  Foyle's War, Set 8
+     5.  like 0.54 dis 0.00  Masterpiece Mystery: Inspector Lewis 7
+     6.  like 0.59 dis 0.00  Masterpiece: Mr. Selfridge Season 2
+     7.  like 0.57 dis 0.00  George Gently, Series 6
+     8.  like 0.54 dis 0.00  Masterpiece: Downton Abbey Season 6
+     9.  like 0.52 dis 0.00  Doc Martin Series 6
+    10.  like 0.53 dis 0.00  Vera, Set 4
+  targets (stars, rank among the 500, rank under LightGCN):
+    2* rank 500 (lightgcn 501)  like 0.51 dis 0.00  Rex Stout's Nero Wolfe Complete Series // All 14 Episodes
+    5* rank 475 (lightgcn 501)  like 0.52 dis 0.00  A Nero Wolfe Mystery (Series 1-3) - 8-DVD Box Set
+
+=== done  [47.4 min]
+calls.jsonl               678,969 bytes
+calls_train.jsonl       1,582,818 bytes
+candidates.jsonl        2,895,663 bytes
+candidates_train.jsonl    6,744,000 bytes
+embeddings.npz         37,463,542 bytes
+eval.md                     6,653 bytes
+extractions.jsonl       1,219,327 bytes
+extractions_train.jsonl    2,802,635 bytes
+lgbm.json                     911 bytes
+lgbm.txt                    5,611 bytes
+lightgcn.json              11,911 bytes
+mix.json                    3,672 bytes
+ollama.log             53,775,213 bytes
+personas.jsonl            242,077 bytes
+personas_train.jsonl      577,156 bytes
+run.log                   121,548 bytes
+summary.json                  554 bytes
+summary_train.json            557 bytes
+
+results in $dst  (eval.md, personas.jsonl, candidates.jsonl, summary.json, lightgcn.json)
