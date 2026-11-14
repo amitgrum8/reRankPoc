@@ -1,0 +1,191 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="11" markerHeight="11" markerUnits="userSpaceOnUse" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#6B7280"/></marker></defs>
+<rect width="1920" height="1080" fill="#FFFFFF"/>
+<text x="40" y="58" font-size="32" font-weight="700" fill="#1F2430" text-anchor="start">Persona reranking with learned mixes (R10–R12)</text>
+<text x="40" y="92" font-size="16.5" font-weight="400" fill="#5B6270" text-anchor="start">What goes into and comes out of each model · Amazon Reviews 2023, Movies &amp; TV, split at 1 Jan 2018 · the same pipeline runs for 700 training users (to fit the mixes) and 300 test users</text>
+<text x="40" y="136" font-size="12.5" font-weight="700" fill="#5B6270" text-anchor="start" letter-spacing="1.4">INPUT DATA</text>
+<text x="300" y="136" font-size="12.5" font-weight="700" fill="#5B6270" text-anchor="start" letter-spacing="1.4">MODELS</text>
+<text x="1000" y="136" font-size="12.5" font-weight="700" fill="#5B6270" text-anchor="start" letter-spacing="1.4">TEXT → VECTORS</text>
+<text x="1210" y="136" font-size="12.5" font-weight="700" fill="#5B6270" text-anchor="start" letter-spacing="1.4">FEATURES PER MOVIE</text>
+<text x="1620" y="136" font-size="12.5" font-weight="700" fill="#5B6270" text-anchor="start" letter-spacing="1.4">MIX AND EVALUATION</text>
+<rect x="40" y="150" width="220" height="146" rx="12" fill="#F4F5F7" stroke="#A3A9B3" stroke-width="2"/>
+<text x="56" y="179" font-size="17" font-weight="700" fill="#1F2430" text-anchor="start">Reviews before 2018</text>
+<text x="56" y="203" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">as a user–movie graph:</text>
+<text x="56" y="224" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">97k users, 49k movies,</text>
+<text x="56" y="245" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">1.14M reviews</text>
+<rect x="40" y="316" width="220" height="167" rx="12" fill="#F4F5F7" stroke="#A3A9B3" stroke-width="2"/>
+<text x="56" y="345" font-size="17" font-weight="700" fill="#1F2430" text-anchor="start">User's history</text>
+<text x="56" y="369" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">the 10 latest reviews</text>
+<text x="56" y="390" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">before 2018, at least</text>
+<text x="56" y="411" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">two of them 1–2★</text>
+<rect x="40" y="503" width="220" height="70" rx="12" fill="#F4F5F7" stroke="#A3A9B3" stroke-width="2"/>
+<text x="56" y="532" font-size="17" font-weight="700" fill="#1F2430" text-anchor="start">Movie text</text>
+<text x="56" y="556" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">title + description</text>
+<rect x="40" y="593" width="220" height="261" rx="12" fill="#F4F5F7" stroke="#A3A9B3" stroke-width="2"/>
+<text x="56" y="622" font-size="17" font-weight="700" fill="#1F2430" text-anchor="start">Movie's reviews</text>
+<text x="56" y="646" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">before 2018: up to 3</text>
+<text x="56" y="667" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">lowest- and 3 highest-</text>
+<text x="56" y="688" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">rated, ≤80 words each</text>
+<rect x="40" y="884" width="570" height="50" rx="12" fill="#F4F5F7" stroke="#A3A9B3" stroke-width="2"/>
+<text x="56" y="915" font-size="16"><tspan font-weight="700" fill="#1F2430">After 2018 · targets: </tspan><tspan font-weight="400" fill="#1F2430">the movies the user went on to review (any rating)</tspan></text>
+<rect x="300" y="150" width="310" height="155" rx="12" fill="#EAF1FD" stroke="#3D6FD1" stroke-width="2"/>
+<text x="316" y="180" font-size="18.5" font-weight="700" fill="#1F2430" text-anchor="start">LightGCN</text>
+<text x="316" y="203" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start">graph collaborative filtering</text>
+<text x="316" y="232" font-size="12.5" font-weight="700" fill="#2A56B0" text-anchor="start" letter-spacing="1">IN</text>
+<text x="362" y="232" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">user–movie graph before 2018</text>
+<text x="316" y="263" font-size="12.5" font-weight="700" fill="#2A56B0" text-anchor="start" letter-spacing="1">OUT</text>
+<text x="362" y="263" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">top 500 unseen movies per</text>
+<text x="362" y="285" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">user, each with a score</text>
+<rect x="300" y="316" width="310" height="177" rx="12" fill="#FFF3E3" stroke="#D98324" stroke-width="2"/>
+<text x="316" y="346" font-size="18.5" font-weight="700" fill="#1F2430" text-anchor="start">gpt-oss:20b · EXP3RT step 1</text>
+<text x="316" y="369" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start">one call per review, 10 per user</text>
+<text x="316" y="398" font-size="12.5" font-weight="700" fill="#A35710" text-anchor="start" letter-spacing="1">IN</text>
+<text x="362" y="398" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">one review: title + text</text>
+<text x="362" y="420" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">(the stars are not shown)</text>
+<text x="316" y="451" font-size="12.5" font-weight="700" fill="#A35710" text-anchor="start" letter-spacing="1">OUT</text>
+<text x="362" y="451" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">what the user liked and</text>
+<text x="362" y="473" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">disliked, as short bullets</text>
+<rect x="650" y="316" width="310" height="177" rx="12" fill="#FFF3E3" stroke="#D98324" stroke-width="2"/>
+<text x="666" y="346" font-size="18.5" font-weight="700" fill="#1F2430" text-anchor="start">gpt-oss:20b · EXP3RT step 2</text>
+<text x="666" y="369" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start">one call per user</text>
+<text x="666" y="398" font-size="12.5" font-weight="700" fill="#A35710" text-anchor="start" letter-spacing="1">IN</text>
+<text x="712" y="398" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">the 10 blocks of bullets,</text>
+<text x="712" y="420" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">each headed by the title</text>
+<text x="666" y="451" font-size="12.5" font-weight="700" fill="#A35710" text-anchor="start" letter-spacing="1">OUT</text>
+<text x="712" y="451" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">persona: 5 like lines</text>
+<text x="712" y="473" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">and 5 dislike lines</text>
+<rect x="300" y="593" width="310" height="177" rx="12" fill="#FFF3E3" stroke="#D98324" stroke-width="2"/>
+<text x="316" y="623" font-size="18.5" font-weight="700" fill="#1F2430" text-anchor="start">gpt-oss:20b · item profile</text>
+<text x="316" y="646" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start">one call per movie · used by R11</text>
+<text x="316" y="675" font-size="12.5" font-weight="700" fill="#A35710" text-anchor="start" letter-spacing="1">IN</text>
+<text x="362" y="675" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">the title and these reviews,</text>
+<text x="362" y="697" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">each with its stars</text>
+<text x="316" y="728" font-size="12.5" font-weight="700" fill="#A35710" text-anchor="start" letter-spacing="1">OUT</text>
+<text x="362" y="728" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">up to 5 praised and</text>
+<text x="362" y="750" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">5 criticized lines</text>
+<rect x="650" y="780" width="310" height="74" rx="12" fill="#FFFFFF" stroke="#A3A9B3" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="666" y="808" font-size="16.5" font-weight="700" fill="#1F2430" text-anchor="start">Split into sentences · no model</text>
+<text x="666" y="834" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">good: 4–5★ reviews · bad: 1–2★ (R12)</text>
+<rect x="1000" y="316" width="170" height="538" rx="12" fill="#E5F5EF" stroke="#1E9A70" stroke-width="2"/>
+<text x="1085.0" y="428" font-size="19" font-weight="700" fill="#1F2430" text-anchor="middle">Encoder</text>
+<text x="1085.0" y="451" font-size="14.5" font-weight="400" fill="#1F2430" text-anchor="middle">Qwen3-Embedding-8B</text>
+<text x="1085.0" y="471" font-size="14" font-weight="400" fill="#5B6270" text-anchor="middle">frozen</text>
+<text x="1085.0" y="516" font-size="12.5" font-weight="700" fill="#147555" text-anchor="middle" letter-spacing="1">IN</text>
+<text x="1085.0" y="539" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="middle">persona lines</text>
+<text x="1085.0" y="561" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="middle">movie text</text>
+<text x="1085.0" y="583" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="middle">criticized lines</text>
+<text x="1085.0" y="605" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="middle">review sentences</text>
+<text x="1085.0" y="657" font-size="12.5" font-weight="700" fill="#147555" text-anchor="middle" letter-spacing="1">OUT</text>
+<text x="1085.0" y="680" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="middle">a vector per text;</text>
+<text x="1085.0" y="702" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="middle">cosine between</text>
+<text x="1085.0" y="724" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="middle">each persona line</text>
+<text x="1085.0" y="746" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="middle">and the movie's texts</text>
+<rect x="1210" y="150" width="370" height="704" rx="12" fill="#FAFAFB" stroke="#C5CAD3" stroke-width="2"/>
+<text x="1226" y="181" font-size="17" font-weight="700" fill="#1F2430" text-anchor="start">For each of the user's 500 movies</text>
+<rect x="1224" y="202" width="342" height="122" rx="10" fill="#FFFFFF" stroke="#D3D7DF" stroke-width="1.5"/>
+<rect x="1224" y="202" width="6" height="122" rx="3" fill="#7A5BC7"/>
+<rect x="1242" y="214" width="46" height="24" rx="12" fill="#7A5BC7"/>
+<text x="1265" y="231" font-size="14.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">R10</text>
+<text x="1298" y="232" font-size="16.5" font-weight="700" fill="#1F2430" text-anchor="start">movie description</text>
+<text x="1246" y="262" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="262" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">LightGCN score</text>
+<text x="1246" y="286" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="286" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">likes × movie text (5)</text>
+<text x="1246" y="310" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="310" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">dislikes × movie text (5)</text>
+<rect x="1224" y="338" width="342" height="146" rx="10" fill="#FFFFFF" stroke="#D3D7DF" stroke-width="1.5"/>
+<rect x="1224" y="338" width="6" height="146" rx="3" fill="#7A5BC7"/>
+<rect x="1242" y="350" width="46" height="24" rx="12" fill="#7A5BC7"/>
+<text x="1265" y="367" font-size="14.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">R11</text>
+<text x="1298" y="368" font-size="16.5" font-weight="700" fill="#1F2430" text-anchor="start">criticized lines</text>
+<text x="1246" y="398" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="398" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">LightGCN score</text>
+<text x="1246" y="422" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="422" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">likes × movie text (5)</text>
+<text x="1246" y="446" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="446" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">dislikes × criticized lines (5)</text>
+<text x="1246" y="470" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="470" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">flag: no criticized lines</text>
+<rect x="1224" y="498" width="342" height="146" rx="10" fill="#FFFFFF" stroke="#D3D7DF" stroke-width="1.5"/>
+<rect x="1224" y="498" width="6" height="146" rx="3" fill="#7A5BC7"/>
+<rect x="1242" y="510" width="46" height="24" rx="12" fill="#7A5BC7"/>
+<text x="1265" y="527" font-size="14.5" font-weight="700" fill="#FFFFFF" text-anchor="middle">R12</text>
+<text x="1298" y="528" font-size="16.5" font-weight="700" fill="#1F2430" text-anchor="start">the movie's reviews</text>
+<text x="1246" y="558" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="558" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">LightGCN score</text>
+<text x="1246" y="582" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="582" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">likes × good-review sentences (5)</text>
+<text x="1246" y="606" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="606" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">dislikes × bad-review sentences (5)</text>
+<text x="1246" y="630" font-size="15.5" font-weight="700" fill="#5B3FA6" text-anchor="start">•</text>
+<text x="1260" y="630" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">flag: no bad reviews · sentence counts</text>
+<text x="1228" y="680" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start" font-style="italic">× = cosine from the encoder</text>
+<text x="1228" y="701" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start" font-style="italic">(5) = each persona line's best match, sorted</text>
+<text x="1228" y="722" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start" font-style="italic">per movie (slot 1 = the closest line)</text>
+<text x="1228" y="743" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start" font-style="italic">Each column is z-scored within the user's 500</text>
+<rect x="1620" y="150" width="260" height="492" rx="12" fill="#F0EBFB" stroke="#7A5BC7" stroke-width="2"/>
+<text x="1636" y="180" font-size="18.5" font-weight="700" fill="#1F2430" text-anchor="start">Logistic regression</text>
+<text x="1636" y="203" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start">one per mix</text>
+<text x="1636" y="234" font-size="12.5" font-weight="700" fill="#5B3FA6" text-anchor="start" letter-spacing="1">IN</text>
+<text x="1636" y="256" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">the features of the 700</text>
+<text x="1636" y="277" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">training users' lists:</text>
+<text x="1636" y="298" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">413 users with a target in</text>
+<text x="1636" y="319" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">the 500 → 944 targets,</text>
+<text x="1636" y="340" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">206,500 rows</text>
+<text x="1636" y="369" font-size="12.5" font-weight="700" fill="#5B3FA6" text-anchor="start" letter-spacing="1">LABEL</text>
+<text x="1636" y="391" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">1 = the user reviewed the</text>
+<text x="1636" y="412" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">movie later (any rating)</text>
+<text x="1636" y="441" font-size="12.5" font-weight="700" fill="#5B3FA6" text-anchor="start" letter-spacing="1">FIT</text>
+<text x="1636" y="463" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">L2 penalty by 5-fold CV</text>
+<text x="1636" y="484" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">over users; LightGCN's</text>
+<text x="1636" y="505" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">weight is not penalized</text>
+<text x="1636" y="534" font-size="12.5" font-weight="700" fill="#5B3FA6" text-anchor="start" letter-spacing="1">OUT</text>
+<text x="1636" y="556" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">one weight per feature;</text>
+<text x="1636" y="577" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">score = Σ w · z(feature)</text>
+<text x="1636" y="598" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">→ new order of the 500</text>
+<text x="1636" y="619" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">for each test user</text>
+<rect x="1620" y="682" width="260" height="252" rx="12" fill="#FFFFFF" stroke="#4B5563" stroke-width="2"/>
+<text x="1636" y="712" font-size="18.5" font-weight="700" fill="#1F2430" text-anchor="start">Evaluation</text>
+<text x="1636" y="735" font-size="14" font-weight="400" fill="#5B6270" text-anchor="start">300 test users</text>
+<text x="1636" y="764" font-size="15.5" font-weight="700" fill="#374151" text-anchor="start">•</text>
+<text x="1650" y="764" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">how far the targets that</text>
+<text x="1650" y="786" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">are in the 500 moved</text>
+<text x="1636" y="808" font-size="15.5" font-weight="700" fill="#374151" text-anchor="start">•</text>
+<text x="1650" y="808" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">bootstrap over users</text>
+<text x="1636" y="830" font-size="15.5" font-weight="700" fill="#374151" text-anchor="start">•</text>
+<text x="1650" y="830" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">control: the same mix with</text>
+<text x="1650" y="852" font-size="15.5" font-weight="400" fill="#1F2430" text-anchor="start">another user's persona</text>
+<path d="M 260 223 L 300 223" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M 610 223 L 1210 223" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<text x="905" y="213" font-size="14" font-weight="600" fill="#5B6270" text-anchor="middle" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" paint-order="stroke">top-500 list + score (every mix)</text>
+<path d="M 260 400 L 300 400" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M 610 400 L 650 400" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M 960 400 L 1000 400" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M 260 538 L 1000 538" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<text x="630" y="528" font-size="14" font-weight="600" fill="#5B6270" text-anchor="middle" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" paint-order="stroke">movie text, no LLM (R10, R11)</text>
+<path d="M 260 676 L 300 676" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M 610 676 L 1000 676" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<text x="805" y="666" font-size="14" font-weight="600" fill="#5B6270" text-anchor="middle" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" paint-order="stroke">criticized lines (R11)</text>
+<path d="M 260 817 L 650 817" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<text x="455" y="807" font-size="14" font-weight="600" fill="#5B6270" text-anchor="middle" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" paint-order="stroke">review sentences (R12)</text>
+<path d="M 960 817 L 1000 817" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M 1170 585 L 1210 585" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M 1580 400 L 1620 400" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M 1750.0 642 L 1750.0 682" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<path d="M 610 909 L 1600 909 L 1600 617 L 1620 617" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<text x="1105" y="899" font-size="14" font-weight="600" fill="#5B6270" text-anchor="middle" stroke="#FFFFFF" stroke-width="6" stroke-linejoin="round" paint-order="stroke">labels for fitting the mix (training users) · ground truth for the evaluation (test users)</text>
+<path d="M 1600 909 L 1620 909" fill="none" stroke="#6B7280" stroke-width="2" marker-end="url(#ah)"/>
+<rect x="40" y="985" width="26" height="18" rx="4" fill="#F4F5F7" stroke="#A3A9B3" stroke-width="2"/>
+<text x="74" y="999" font-size="15" font-weight="400" fill="#1F2430" text-anchor="start">Data</text>
+<rect x="133.2" y="985" width="26" height="18" rx="4" fill="#EAF1FD" stroke="#3D6FD1" stroke-width="2"/>
+<text x="167.2" y="999" font-size="15" font-weight="400" fill="#1F2430" text-anchor="start">Graph CF model</text>
+<rect x="299.4" y="985" width="26" height="18" rx="4" fill="#FFF3E3" stroke="#D98324" stroke-width="2"/>
+<text x="333.4" y="999" font-size="15" font-weight="400" fill="#1F2430" text-anchor="start">LLM: gpt-oss:20b via Ollama</text>
+<rect x="560.5" y="985" width="26" height="18" rx="4" fill="#E5F5EF" stroke="#1E9A70" stroke-width="2"/>
+<text x="594.5" y="999" font-size="15" font-weight="400" fill="#1F2430" text-anchor="start">Text encoder</text>
+<rect x="712.1" y="985" width="26" height="18" rx="4" fill="#F0EBFB" stroke="#7A5BC7" stroke-width="2"/>
+<text x="746.1" y="999" font-size="15" font-weight="400" fill="#1F2430" text-anchor="start">Learned mix</text>
+<rect x="856.4000000000001" y="985" width="26" height="18" rx="4" fill="#FFFFFF" stroke="#A3A9B3" stroke-width="2" stroke-dasharray="8 6"/>
+<text x="890.4000000000001" y="999" font-size="15" font-weight="400" fill="#1F2430" text-anchor="start">No model</text>
+<text x="1880" y="999" font-size="13.5" font-weight="400" fill="#5B6270" text-anchor="end">Run 4, 14 Nov 2026 · LLM at temperature 0, reasoning low · bge-small was the encoder in runs 1–3</text>
+</svg>

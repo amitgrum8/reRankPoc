@@ -84,6 +84,7 @@ resumed run (`--out runs\<same folder>`) costs no LLM time. `uv run python run.p
 | `prep_items.py` | (local, once) each movie's lowest- and highest-rated reviews before the cutoff → `data/rr_input/item_reviews.jsonl.gz` |
 | `item_profiles.py` | (GPU machine) praised / criticized lines per movie → `data/item_profiles/item_profiles.jsonl` |
 | `lightgcn.py` | trains LightGCN → `candidates.jsonl`, `lightgcn.json`, `embeddings.npz` |
+| `base_models.py` | other base rankers in the same format: `--model pop` (popularity in the last year, CPU) or `--model sasrec` (GPU) → `candidates.jsonl`, `candidates_train.jsonl`, `base.json` |
 | `personas.py`, `prompts.py`, `llm.py` | EXP3RT personas → `personas.jsonl`, `extractions.jsonl`, `calls.jsonl`, `summary.json` |
 | `rerank.py` | persona reranker without an LLM: similarity features per (persona, movie), formulas R1–R5 and R8–R9 |
 | `train.py` | LightGBM reranker R7: training users' lists from `embeddings.npz`, lambdarank over the feature rows |
@@ -97,6 +98,15 @@ lists, minutes on a CPU, cached in `data/vectors/`): `python evaluate.py runs\<d
 switches the text encoder for everything (known names and their query prefixes: `ENCODERS` in `rerank.py`;
 vectors are cached per encoder in `data/vectors/`), and `--tag NAME` writes `eval_NAME.md` / `mix_NAME.json`, so
 runs with different encoders sit side by side.
+
+Another base ranker (the personas do not depend on it, so no LLM call): write its lists into a new run folder, copy
+the personas of an existing run in, and evaluate. The column called `lightgcn` in `eval.md` is then that base.
+
+```powershell
+python base_models.py --model sasrec --out runs\<new>         # or --model pop
+copy runs\<run with personas>\personas*.jsonl runs\<new>\
+python evaluate.py runs\<new> --encoder Qwen/Qwen3-Embedding-8B --alpha 0.1 --beta 0.1 --tag qwen8b
+```
 
 Budget of the real run at reasoning "low": about 11 LLM calls per user (10 reviews + 1 profile), roughly a
 minute per user with 4 parallel requests, so 300 test users take about 5 hours and the 700 training users about
