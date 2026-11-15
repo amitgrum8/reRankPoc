@@ -1,0 +1,45 @@
+D:\thies\reRankPoc\.venv\Scripts\python.exe -u D:\thies\reRankPoc\evaluate.py runs/2026-11-14_pop --encoder Qwen/Qwen3-Embedding-8B --alpha 0.1 --beta 0.1 --tag qwen8b_r13 --no-lgbm --show 0
+
+300 test users (with a persona), lists of 500
+W1115 09:26:31.426000 22568 .venv\Lib\site-packages\torch\distributed\elastic\multiprocessing\redirects.py:29] NOTE: Redirects are currently not supported in Windows or MacOs.
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+Loading weights:   0%|          | 0/398 [00:00<?, ?it/s]Loading weights:   1%|          | 2/398 [00:00<01:52,  3.51it/s]Loading weights:   1%|          | 3/398 [00:01<02:34,  2.56it/s]Loading weights:   1%|          | 4/398 [00:02<04:22,  1.50it/s]Loading weights:   1%|▏         | 5/398 [00:02<03:16,  2.00it/s]Loading weights:   2%|▏         | 6/398 [00:02<02:45,  2.36it/s]Loading weights:   2%|▏         | 8/398 [00:03<02:26,  2.67it/s]Loading weights:   2%|▏         | 9/398 [00:04<03:40,  1.76it/s]Loading weights:   3%|▎         | 10/398 [00:04<03:17,  1.97it/s]Loading weights:   3%|▎         | 11/398 [00:05<02:48,  2.30it/s]Loading weights:   3%|▎         | 12/398 [00:05<03:32,  1.82it/s]Loading weights:   4%|▍         | 15/398 [00:06<01:45,  3.62it/s]Loading weights:   4%|▍         | 16/398 [00:06<01:55,  3.30it/s]Loading weights:   4%|▍         | 17/398 [00:06<02:06,  3.01it/s]Loading weights:   5%|▍         | 18/398 [00:07<02:07,  2.97it/s]Loading weights:   5%|▍         | 19/398 [00:07<02:26,  2.59it/s]Loading weights:   5%|▌         | 20/398 [00:07<02:05,  3.02it/s]Loading weights:   5%|▌         | 21/398 [00:08<03:00,  2.09it/s]Loading weights:   6%|▌         | 22/398 [00:09<04:09,  1.51it/s]Loading weights:   6%|▌         | 23/398 [00:10<03:11,  1.96it/s]Loading weights: 100%|██████████| 398/398 [00:10<00:00, 39.44it/s]
+encoder Qwen/Qwen3-Embedding-8B: 1024 dimensions, bfloat16
+item profiles: 49312 items in D:\thies\reRankPoc\data\item_profiles\item_profiles.jsonl
+item reviews: 49312 items in D:\thies\reRankPoc\data\rr_input\item_reviews.jsonl.gz
+  item profiles: 2714 of the 2714 items in the lists have one
+  item reviews: 2711 of the 2714 items in the lists have a good review, 2362 a bad one
+features of 152329 (user, item) rows; alpha 0.1 beta 0.1 gamma 1.0
+  item profiles: 5101 of the 5101 items in the lists have one
+  item reviews: 5093 of the 5101 items in the lists have a good review, 4352 a bad one
+R10_mix on 265 training users with an in-list target (479 targets, 5 Newton steps, converged True): in-list rank change on the training users -21.5 (in-sample)
+R11_mix_crit on 265 training users with an in-list target (479 targets, 5 Newton steps, converged True): in-list rank change on the training users -23.8 (in-sample)
+R12_mix_reviews on 265 training users with an in-list target (479 targets, 5 Newton steps, converged True): in-list rank change on the training users -33.3 (in-sample)
+R13_near: leave-one-out over 265 training users, alphas 0, 0.25, 0.5, 1, 2 ...
+  R13_near leave-one-out, alpha 0: held-out log-likelihood -3095.56, in-list rank change -29.20, effective training users 264 of 264
+  R13_near leave-one-out, alpha 0.25: held-out log-likelihood -3093.85, in-list rank change -29.57, effective training users 251 of 264
+  R13_near leave-one-out, alpha 0.5: held-out log-likelihood -3092.60, in-list rank change -29.86, effective training users 222 of 264
+  R13_near leave-one-out, alpha 1: held-out log-likelihood -3091.78, in-list rank change -29.74, effective training users 146 of 264
+D:\thies\reRankPoc\mix.py:140: RuntimeWarning: overflow encountered in exp
+  p = 1.0 / (1.0 + np.exp(-(X1 @ w)))
+Traceback (most recent call last):
+  File "D:\thies\reRankPoc\evaluate.py", line 460, in <module>
+    main()
+  File "D:\thies\reRankPoc\evaluate.py", line 364, in main
+    alpha = near.select()
+            ^^^^^^^^^^^^^
+  File "D:\thies\reRankPoc\mix.py", line 270, in select
+    w = self.fit_for(user["pv"], a, exclude=j)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\thies\reRankPoc\mix.py", line 262, in fit_for
+    return _newton(self.X1, self.y, self.pen, s=s, w0=self.w_all)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\thies\reRankPoc\mix.py", line 145, in _newton
+    step = np.linalg.solve(H, X1.T @ e - pen @ w)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\thies\reRankPoc\.venv\Lib\site-packages\numpy\linalg\_linalg.py", line 410, in solve
+    r = gufunc(a, b, signature=signature)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\thies\reRankPoc\.venv\Lib\site-packages\numpy\linalg\_linalg.py", line 104, in _raise_linalgerror_singular
+    raise LinAlgError("Singular matrix")
+numpy.linalg.LinAlgError: Singular matrix
