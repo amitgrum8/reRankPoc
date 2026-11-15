@@ -27,7 +27,14 @@ rated reviews before the cutoff, each cut into its title and sentences), good = 
                              (0 when the persona has no lines of that kind; missing (NaN) when the item has no
                              review of that kind: no_good / no_bad = 1)
   n_good, n_bad              number of good / bad review sentences (mix.py, R12)
+  dis_good_s1..s5            per dislike line its closest sentence of the good reviews (the reverse routing)
+  dis_all_s1..s5             per dislike line its closest sentence of all its reviews, good and bad
+  mixed_s1..s10              one mixed persona: like and dislike lines pooled, each line against all review
+                             sentences, sorted over the lines (no_rev = 1: the item has no review at all)
+                             (the three groups above: the ablations A2-A4 in mix.py)
 Likes and dislikes stay in separate columns, so a formula (or a model) can give them opposite signs.
+user["pv"] = (unit mean of the like-line vectors, unit mean of the dislike-line vectors or None): the persona's
+position, for the persona closeness of R13_near (mix.py).
 
 Encoder: BAAI/bge-small-en-v1.5 by default (evaluate.py --encoder; ENCODERS below lists the query prefix and
 loading of each known model), frozen. Item text = title + description (first 120 words). Cached per encoder in
@@ -285,6 +292,11 @@ def pooled(sim):
 
 
 K_SORTED = 5
+K_MIXED = 2 * K_SORTED                      # the mixed persona has up to 5 + 5 lines
+
+
+def _unit(v):
+    return v / (np.linalg.norm(v) or 1.0)
 
 
 def sorted_sims(sim, k=K_SORTED):
@@ -326,6 +338,7 @@ def attach(users, items, enc, profiles=None, reviews=None, seed=42):
         q = enc.encode(["Likes: " + "; ".join(like) + ". Dislikes: " + ("; ".join(dis) or "none") + "."], query=True)[0]
         u = (L.mean(0) if len(L) else np.zeros(dim, np.float32)) - gamma * (D.mean(0) if len(D) else np.zeros(dim, np.float32))
         u = u / (np.linalg.norm(u) or 1.0)
+        user["pv"] = (_unit(L.mean(0)) if len(L) else np.zeros(dim, np.float32), _unit(D.mean(0)) if len(D) else None)
         ids = user["list"]
         M = enc.items(ids, items)
         SL, SD = L @ M.T, D @ M.T
@@ -337,7 +350,10 @@ def attach(users, items, enc, profiles=None, reviews=None, seed=42):
         if reviews:                                    # like lines x good review sentences, dislike lines x bad ones
             rg = [rv[i][0] if i in rv else E for i in ids]
             rb = [rv[i][1] if i in rv else E for i in ids]
-            lgs, dbs = sorted_sims(best_per_line(L, rg)), sorted_sims(best_per_line(D, rb))
+            LG, LB, DG, DB = best_per_line(L, rg), best_per_line(L, rb), best_per_line(D, rg), best_per_line(D, rb)
+            lgs, dbs = sorted_sims(LG), sorted_sims(DB)
+            dgs, das = sorted_sims(DG), sorted_sims(np.fmax(DG, DB))          # fmax: NaN only if both are NaN
+            mxs = sorted_sims(np.vstack([np.fmax(LG, LB), np.fmax(DG, DB)]), k=K_MIXED)
         feat = {}
         for k, i in enumerate(ids):
             b = user["base"][i]
@@ -359,10 +375,14 @@ def attach(users, items, enc, profiles=None, reviews=None, seed=42):
                 feat[i][f"dis_crit_s{j + 1}"] = float(dc[j, 0])
             if reviews:
                 feat[i].update({"n_good": len(rg[k]), "n_bad": len(rb[k]), "no_good": float(len(rg[k]) == 0),
-                                "no_bad": float(len(rb[k]) == 0)})
+                                "no_bad": float(len(rb[k]) == 0), "no_rev": float(len(rg[k]) + len(rb[k]) == 0)})
                 for j in range(K_SORTED):
                     feat[i][f"like_good_s{j + 1}"] = float(lgs[j, k])
                     feat[i][f"dis_bad_s{j + 1}"] = float(dbs[j, k])
+                    feat[i][f"dis_good_s{j + 1}"] = float(dgs[j, k])
+                    feat[i][f"dis_all_s{j + 1}"] = float(das[j, k])
+                for j in range(K_MIXED):
+                    feat[i][f"mixed_s{j + 1}"] = float(mxs[j, k])
         user["feat"], user["tau"] = feat, tau
 
 

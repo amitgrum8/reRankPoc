@@ -27,10 +27,17 @@ The plan and its reasons are in `BLUEPRINT.md`. The pipeline:
    dislike line's best cosine, sorted per movie; their weights replace alpha and beta. R10 compares the persona
    with the movie description, R11 the dislikes with what reviewers criticized (item profiles), and R12 the likes
    with the sentences of the movie's good reviews (4–5 stars) and the dislikes with those of its bad reviews
-   (1–2 stars), from `data/rr_input/item_reviews.jsonl.gz`.
+   (1–2 stars), from `data/rr_input/item_reviews.jsonl.gz`. R13_near refits R12 once per test user, with the
+   training users whose persona is close to the user's counting more (weight exp(alpha × z(closeness)), alpha
+   picked by leave-one-user-out; alpha 0 = R12); R13_near_ctrl takes the closeness from another user's persona.
+   A1–A6 are the ablations of the dislike part, each a refit of R12: likes only, dislikes against all / good
+   review sentences, one mixed persona, a CORAL-style likes-minus-dislikes term, and a satisfaction label (4–5★).
 5. **Evaluation** (`evaluate.py`): per reranker, how much the user's interacted items (the targets, any rating)
    moved inside LightGCN's list: mean rank change, moved up / stayed / moved down, pulled into the list; a
-   bootstrap interval over users; and a control where every user gets another user's persona.
+   bootstrap interval over users; and a control where every user gets another user's persona. Then the standard
+   metrics over all targets (Recall@10/20/50, NDCG@10/20; a target outside the list is a miss) with paired
+   per-user tests against the base, and paired comparisons: own vs another user's persona, R13 vs R12, each
+   ablation vs R12. Every target's rank under every reranker goes to `ranks.jsonl.gz`.
 
 ## Setup on the GPU machine (Windows, NVIDIA, uv)
 
@@ -69,6 +76,8 @@ Results land in `runs\<date_time>\`:
 | `data/item_profiles/item_profiles.jsonl` | (shared, not per run) one line per movie: `praised`, `criticized` lines |
 | `lightgcn.json`, `embeddings.npz` | training curve; the trained LightGCN (user and item vectors) |
 | `summary.json`, `calls.jsonl` (+ `_train`) | LLM call counts, tokens, timing |
+| `ranks.jsonl.gz` | every target's rank under every reranker, own and swapped persona (one line per test user), for any later metric without the encoder |
+| `mix.json` | the fitted weights of the mixes, the ablations, and R13's leave-one-out table |
 | `features.jsonl` | only with `evaluate.py --write-features`: one row per (user, movie), the reranker's numbers and the label |
 
 Zip the folder to bring it back. LLM answers are cached in `runs\cache\` and shared by all runs, so a repeated or
@@ -88,8 +97,9 @@ resumed run (`--out runs\<same folder>`) costs no LLM time. `uv run python run.p
 | `personas.py`, `prompts.py`, `llm.py` | EXP3RT personas → `personas.jsonl`, `extractions.jsonl`, `calls.jsonl`, `summary.json` |
 | `rerank.py` | persona reranker without an LLM: similarity features per (persona, movie), formulas R1–R5 and R8–R9 |
 | `train.py` | LightGBM reranker R7: training users' lists from `embeddings.npz`, lambdarank over the feature rows |
-| `mix.py` | learned linear mixes R10–R12: logistic regression over LightGCN + sorted persona similarities → `mix.json` |
-| `evaluate.py` | metrics per reranker → `eval.md`, plus example users (`--show 2 --show-with R1_like`) |
+| `mix.py` | learned linear mixes R10–R12, R13_near (persona-closeness weighted refit) and the ablations A1–A6: logistic regression over LightGCN + sorted persona similarities → `mix.json` |
+| `evaluate.py` | metrics per reranker → `eval.md`, `ranks.jsonl.gz`, plus example users (`--show 2 --show-with R1_like`) |
+| `run_r13.py` | (GPU machine) R13, the ablations and the standard metrics on the three base rankers with Qwen-8B, then commit and push the results |
 
 Plumbing check without a GPU or an LLM (fake answers): `python run.py --mock --cpu --lgcn-minutes 0.5 --users 5 --train-users 20`.
 Re-evaluating a run on any machine (the first time downloads bge-small, 130 MB, and encodes the movies in the
@@ -107,6 +117,19 @@ python base_models.py --model sasrec --out runs\<new>         # or --model pop
 copy runs\<run with personas>\personas*.jsonl runs\<new>\
 python evaluate.py runs\<new> --encoder Qwen/Qwen3-Embedding-8B --alpha 0.1 --beta 0.1 --tag qwen8b
 ```
+
+R13, the ablations and the standard metrics on the three base rankers (LightGCN run 4, popularity, SASRec), with
+no LLM, in one command on the GPU machine: a 10-user smoke pass first, then each run (`eval_qwen8b_r13.md`,
+`mix_qwen8b_r13.json`, `ranks_qwen8b_r13.jsonl.gz`, `evaluate_qwen8b_r13.txt`), then commit and push
+(`--no-push` keeps them local):
+
+```powershell
+git pull
+uv run python run_r13.py
+```
+
+`evaluate.py` options for this: `--no-near`, `--no-ablations`, `--no-lgbm` skip parts; `--users N` and
+`--train-users N` take only the first N users (smoke tests).
 
 Budget of the real run at reasoning "low": about 11 LLM calls per user (10 reviews + 1 profile), roughly a
 minute per user with 4 parallel requests, so 300 test users take about 5 hours and the 700 training users about
