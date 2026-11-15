@@ -128,23 +128,45 @@ def _penalty(inputs, l2):
     return np.diag([0.0 if j in free else l2 for j in range(len(inputs) + 1)])
 
 
+def _sigmoid(z):
+    return 1.0 / (1.0 + np.exp(-np.clip(z, -500.0, 500.0)))
+
+
+def _objective(X1, y, w, pen, s=None):
+    """The penalized (row-weighted) log-likelihood that _newton maximizes."""
+    z = X1 @ w
+    ll = y * z - np.logaddexp(0.0, z)
+    return float((ll if s is None else s * ll).sum() - 0.5 * w @ pen @ w)
+
+
 def _newton(X1, y, pen, s=None, w0=None, max_iter=50):
     """Penalized logistic regression, rows weighted by s (None = 1), started at w0 (None = the intercept only);
-    returns (weights, Newton steps, converged)."""
+    returns (weights, Newton steps, converged). A step that lowers the objective is halved until it does not
+    (with strongly uneven row weights a full step from w0 can overshoot and saturate the probabilities)."""
     if w0 is None:
         w = np.zeros(X1.shape[1])
         w[0] = np.log(y.mean() / (1 - y.mean()))
     else:
         w = np.array(w0, dtype=float)
+    obj = _objective(X1, y, w, pen, s)
     for it in range(1, max_iter + 1):
-        p = 1.0 / (1.0 + np.exp(-(X1 @ w)))
+        p = _sigmoid(X1 @ w)
         r, e = p * (1 - p), y - p
         if s is not None:
             r, e = s * r, s * e
         H = (X1 * r[:, None]).T @ X1 + pen
-        step = np.linalg.solve(H, X1.T @ e - pen @ w)
-        w += step
-        if np.abs(step).max() < 1e-7:
+        g = X1.T @ e - pen @ w
+        try:
+            step = np.linalg.solve(H, g)
+        except np.linalg.LinAlgError:
+            step = np.linalg.lstsq(H, g, rcond=None)[0]
+        t = 1.0
+        new = _objective(X1, y, w + step, pen, s)
+        while new < obj - 1e-9 * (1 + abs(obj)) and t > 1e-8:
+            t /= 2
+            new = _objective(X1, y, w + t * step, pen, s)
+        w, obj = w + t * step, new
+        if np.abs(t * step).max() < 1e-7:
             return w, it, True
     return w, max_iter, False
 
@@ -182,7 +204,7 @@ def fit(users, inputs, grid=L2_GRID, folds=FOLDS, seed=42, label="any"):
     l2 = max(cv, key=cv.get)
     pen = pen_of(l2)
     w, it, converged = _newton(X1, y, pen)
-    p = 1.0 / (1.0 + np.exp(-(X1 @ w)))
+    p = _sigmoid(X1 @ w)
     cov = np.linalg.inv((X1 * (p * (1 - p))[:, None]).T @ X1 + pen)
     weights = {c: float(w[1 + k]) for k, c in enumerate(inputs)}
     info = {"train_users": len(users), "users": len(kept), "rows": int(len(y)), "targets": int(y.sum()), "l2": l2,
@@ -266,21 +288,28 @@ class NearMix:
         the others (weighted by closeness to the held-out user), and the held-out in-list rank change."""
         for a in self.alphas:
             ll, chg, ess = 0.0, [], []
-            for j, user in enumerate(self.users):
-                w = self.fit_for(user["pv"], a, exclude=j)
-                sl = slice(self.start[j], self.start[j + 1])
-                X1j, yj = self.X1[sl], self.y[sl]
-                ll += _loglik(X1j, yj, w)
-                sc = X1j[:, 1:] @ w[1:]
-                for t in np.flatnonzero(yj == 1):
-                    chg.append(int((sc > sc[t]).sum()) + 1 - user["base_ranks"][user["candidates"][t]])
-                uw = np.delete(self.user_weights(user["pv"], a, exclude=j), j)
-                ess.append(uw.sum() ** 2 / (uw ** 2).sum())
+            try:
+                for j, user in enumerate(self.users):
+                    w = self.fit_for(user["pv"], a, exclude=j)
+                    sl = slice(self.start[j], self.start[j + 1])
+                    X1j, yj = self.X1[sl], self.y[sl]
+                    ll += _loglik(X1j, yj, w)
+                    sc = X1j[:, 1:] @ w[1:]
+                    for t in np.flatnonzero(yj == 1):
+                        chg.append(int((sc > sc[t]).sum()) + 1 - user["base_ranks"][user["candidates"][t]])
+                    uw = np.delete(self.user_weights(user["pv"], a, exclude=j), j)
+                    ess.append(uw.sum() ** 2 / (uw ** 2).sum())
+            except (np.linalg.LinAlgError, FloatingPointError, ValueError) as err:
+                log(f"  R13_near leave-one-out, alpha {a:g}: fit failed ({err}); this alpha is left out")
+                continue
+            if not np.isfinite(ll):
+                log(f"  R13_near leave-one-out, alpha {a:g}: held-out log-likelihood not finite; this alpha is left out")
+                continue
             self.loo[a] = {"loglik": round(ll, 2), "rank_change": round(float(np.mean(chg)), 2),
                            "ess": round(float(np.mean(ess)), 1)}
             log(f"  R13_near leave-one-out, alpha {a:g}: held-out log-likelihood {ll:.2f}, in-list rank change "
                 f"{np.mean(chg):+.2f}, effective training users {np.mean(ess):.0f} of {len(self.users) - 1}")
-        self.alpha = max(self.loo, key=lambda a: self.loo[a]["loglik"])     # ties: the smaller alpha (listed first)
+        self.alpha = max(self.loo, key=lambda a: self.loo[a]["loglik"]) if self.loo else 0.0   # ties: the smaller alpha
         return self.alpha
 
     def reranker(self, tag="own", pv_of=None):
