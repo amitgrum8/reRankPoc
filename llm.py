@@ -23,7 +23,9 @@ class LLM:
         self.model, self.mock, self.deadline = model, mock, deadline
         self.cache_dir = Path(cache_dir)
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        self.params = {"temperature": 0, "seed": 42, "reasoning_effort": reasoning_effort, "max_tokens": max_tokens}
+        self.params = {"temperature": 0, "seed": 42, "max_tokens": max_tokens}
+        if reasoning_effort and reasoning_effort != "none":      # "none": a model without reasoning (Llama 3.1)
+            self.params["reasoning_effort"] = reasoning_effort
         if json_mode:
             self.params["response_format"] = {"type": "json_object"}
         self._lock = threading.Lock()

@@ -17,6 +17,9 @@ a run costs no LLM time.
 
 Ollama is started by this script on its own port (11435) with the settings the prompts need (16k context,
 4 parallel requests), so the Ollama tray app, if any, does not matter.
+
+Model (2026-11-16): Llama 3.1 8B Instruct at full precision (llama3.1:8b-instruct-fp16, 16 GB), no reasoning. Runs 1-4
+used gpt-oss:20b at reasoning "low" (--model gpt-oss:20b brings that back; its reasoning defaults to "low").
 """
 import argparse
 import json
@@ -147,7 +150,7 @@ class Ollama:
     def pull(self, model):
         """Downloads the model through the server's API, printing progress every 15 s (a stopped download
         resumes where it was)."""
-        say(f"pulling {model} (once; about 13 GB)")
+        say(f"pulling {model} (once; 13-16 GB)")
         req = urllib.request.Request(self.url + "/api/pull", data=json.dumps({"name": model, "stream": True}).encode(),
                                      headers={"Content-Type": "application/json"})
         t0, last = time.time(), 0.0
@@ -176,15 +179,16 @@ class Ollama:
 
 # ------------------------------------------------------------------ LLM check
 def llm_check(args, base_url, out, n_users):
-    """The same prompt at reasoning 'low' and 'high' (high must use clearly more output tokens), then 8 timed
-    calls at 'high' with 4 in parallel. Returns the extra personas.py flags (JSON mode off if it fails)."""
+    """For a reasoning model, the same prompt at reasoning 'low' and 'high' (high must use clearly more output
+    tokens); then 8 timed calls with 4 in parallel. Returns the extra personas.py flags (JSON mode off if it fails)."""
     sys.path.insert(0, str(HERE))
     import llm as L, prompts as P, personas as PS
-    say("reasoning check")
     users = json.loads((args.input / "test_users.json").read_text(encoding="utf-8"))["users"]
     hist = users[0]["history"]
     msgs = [P.extract(h.get("review_title", ""), h.get("text", "")) for h in hist[:9]]
-    for effort in ("low", "high"):
+    if args.reasoning != "none":
+        say("reasoning check")
+    for effort in (("low", "high") if args.reasoning != "none" else ()):
         c = L.LLM(base_url, args.model, out / "cache_check", effort)
         t0 = time.time()
         c.call(msgs[0], {"role": "extract"})
@@ -229,8 +233,9 @@ def main():
     ap.add_argument("--train-users", default="all",
                     help="'all', the first n, or 0: the reranker's training users (train_users.json) to run personas for")
     ap.add_argument("--lgcn-minutes", type=float, default=None, help="LightGCN time limit (default 30; --smoke 2)")
-    ap.add_argument("--model", default="gpt-oss:20b")
-    ap.add_argument("--reasoning", default="low")
+    ap.add_argument("--model", default="llama3.1:8b-instruct-fp16")
+    ap.add_argument("--reasoning", default=None, help="low / medium / high for a reasoning model (gpt-oss: default "
+                                                        "low), none for a model without reasoning (the default otherwise)")
     ap.add_argument("--threads", type=int, default=8)
     ap.add_argument("--port", type=int, default=11435)
     ap.add_argument("--hours", type=float, default=0, help="stop new LLM calls after this many hours (0 = never)")
@@ -241,6 +246,7 @@ def main():
     ap.add_argument("--mock", action="store_true", help="fake LLM answers, no Ollama, CPU allowed")
     ap.add_argument("--cpu", action="store_true", help="allow LightGCN on the CPU")
     args = ap.parse_args()
+    args.reasoning = args.reasoning or ("low" if args.model.startswith("gpt-oss") else "none")
     if args.smoke:
         args.users, args.train_users = "1", "3"
         args.lgcn_minutes = args.lgcn_minutes or 2
@@ -276,10 +282,10 @@ def main():
     for s in stages:
         if s not in todo:
             say(f"personas ({s[0]}): skipped, {s[3]} exists")
-    reviews = args.input / "item_reviews.jsonl.gz"
-    want_profiles = args.item_profiles != "skip" and reviews.exists()
-    if args.item_profiles != "skip" and not reviews.exists():
-        say(f"item profiles: skipped, {reviews} is missing (run prep_items.py and push it)")
+    from prep_items import review_files
+    want_profiles = args.item_profiles != "skip" and bool(review_files(args.input))
+    if args.item_profiles != "skip" and not want_profiles:
+        say(f"item profiles: skipped, {args.input / 'item_reviews.jsonl.gz'} is missing (run prep_items.py and push it)")
     if todo or want_profiles:
         server, flags, base_url = None, [], "http://127.0.0.1:1/v1"
         if not args.mock:
@@ -303,7 +309,9 @@ def main():
         if want_profiles:                                 # 4b. item profiles, for the items in this run's lists
             say(f"item profiles ({'every item' if args.item_profiles == 'all' else 'the items in this run'})")
             cmd = [sys.executable, "-u", HERE / "item_profiles.py", "--input", args.input,
-                   "--out", HERE / "data" / "item_profiles", "--cache", args.cache, "--base-url", base_url,
+                   "--out", (HERE / "data" / "item_profiles" if args.input.resolve().name == "rr_input"
+                             else HERE / "data" / "item_profiles" / args.input.resolve().name),
+                   "--cache", args.cache, "--base-url", base_url,
                    "--model", args.model, "--reasoning-effort", args.reasoning, "--threads", args.threads,
                    "--items", args.item_profiles, "--run", out] + flags
             if args.hours:

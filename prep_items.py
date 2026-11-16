@@ -2,6 +2,7 @@
 
   python prep_items.py                                  # -> data/rr_input/item_reviews.jsonl.gz
   python prep_items.py --per-side 3 --max-words 80 --min-words 15
+  python prep_items.py --input data/rr_input_v2 --part-mb 45          # the larger set, in parts
 
 Per item of items.json: up to --per-side lowest-rated and --per-side highest-rated reviews written before the
 cutoff (config.json), the longest first among equal ratings, with at least --min-words words (fewer only when
@@ -11,9 +12,12 @@ the formulas; a quality baseline when one is wanted).
 
 Reviews written after the cutoff never enter: a test user's target review cannot leak into an item's profile.
 Output, one line per item: {"i", "asin", "title", "n", "mean", "low", "reviews": [{"rating", "title", "text"}]}.
+A large set (data/rr_input_v2, 135k movies) goes into parts item_reviews.00.jsonl.gz, .01, ... of at most --part-mb
+each (GitHub refuses files over 100 MB); review_files() and read_item_reviews() below read either form.
 """
 import argparse
 import gzip
+import io
 import json
 import sqlite3
 import time
@@ -25,6 +29,23 @@ from prep_data import POC_DATA, clean, first_words, log, ms
 HERE = Path(__file__).resolve().parent
 
 
+def review_files(inp):
+    """The item review file(s) of an input folder: item_reviews.jsonl.gz, or its parts item_reviews.NN.jsonl.gz;
+    [] when there are none."""
+    inp = Path(inp)
+    one = inp / "item_reviews.jsonl.gz"
+    return [one] if one.exists() else sorted(inp.glob("item_reviews.[0-9][0-9].jsonl.gz"))
+
+
+def read_item_reviews(inp):
+    """Every line of the item review file(s), in item order."""
+    for path in review_files(inp):
+        with gzip.open(path, "rt", encoding="utf-8") as f:
+            for line in f:
+                if line.strip():
+                    yield json.loads(line)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", default=str(HERE / "data" / "rr_input"))
@@ -33,6 +54,8 @@ def main():
     ap.add_argument("--per-side", type=int, default=3, help="lowest-rated and highest-rated reviews per item")
     ap.add_argument("--max-words", type=int, default=80, help="each review text is cut to this many words")
     ap.add_argument("--min-words", type=int, default=15, help="prefer reviews with at least this many words")
+    ap.add_argument("--part-mb", type=float, default=0,
+                    help="write parts item_reviews.NN.jsonl.gz of at most this many MB (0 = one file)")
     args = ap.parse_args()
     t0 = time.time()
     inp = Path(args.input)
@@ -76,14 +99,26 @@ def main():
     assert len(texts) == len(wanted), f"found {len(texts)} of {len(wanted)} review texts"
     log(f"review texts: {len(texts):,} found", t0)
 
-    out = inp / "item_reviews.jsonl.gz"
-    with gzip.open(out, "wt", encoding="utf-8") as f:
-        for it in items:
-            s = stats[it["i"]]
-            reviews = [{"rating": wanted[ln][1], "title": texts[ln][0], "text": texts[ln][1]} for ln in s["lines"]]
-            f.write(json.dumps({"i": it["i"], "asin": it["asin"], "title": it.get("title") or "", "n": s["n"],
-                                "mean": s["mean"], "low": s["low"], "reviews": reviews}, ensure_ascii=False) + "\n")
-    log(f"wrote {out} ({out.stat().st_size / 2**20:.1f} MB)", t0)
+    for old in review_files(inp):                      # a new set replaces the old file or parts
+        old.unlink()
+    part, f, raw, outs = 0, None, None, []
+    for it in items:
+        if f is None or (args.part_mb and raw.tell() > args.part_mb * 2**20):    # raw.tell(): compressed bytes
+            if f is not None:
+                f.close()
+                raw.close()
+            out = inp / (f"item_reviews.{part:02d}.jsonl.gz" if args.part_mb else "item_reviews.jsonl.gz")
+            raw = open(out, "wb")
+            f, part = io.TextIOWrapper(gzip.GzipFile(fileobj=raw, mode="wb"), encoding="utf-8"), part + 1
+            outs.append(out)
+        s = stats[it["i"]]
+        reviews = [{"rating": wanted[ln][1], "title": texts[ln][0], "text": texts[ln][1]} for ln in s["lines"]]
+        f.write(json.dumps({"i": it["i"], "asin": it["asin"], "title": it.get("title") or "", "n": s["n"],
+                            "mean": s["mean"], "low": s["low"], "reviews": reviews}, ensure_ascii=False) + "\n")
+    f.close()
+    raw.close()
+    for out in outs:
+        log(f"wrote {out} ({out.stat().st_size / 2**20:.1f} MB)", t0)
 
 
 if __name__ == "__main__":

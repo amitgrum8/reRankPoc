@@ -55,6 +55,13 @@ Without uv: `python -m venv .venv`, activate it, then
 
 ## Run
 
+Since 2026-11-16 the persona model is Llama 3.1 8B Instruct (`llama3.1:8b-instruct-fp16` through Ollama, no reasoning);
+`--model gpt-oss:20b` brings back the model of runs 1-4. The larger data set `data/rr_input_v2` (`prep_data.py --out
+data/rr_input_v2 --since 1990-01-01 --min-user 3 --min-item 3 --n-users 1000 --n-train-users 1200`): every review of a
+titled movie before 2018, 3-core = 3.2M interactions, 18.6% of the 17.16M Movies & TV reviews; 411k users, 135.7k movies,
+1,000 test and 854 training users; its item reviews come in three parts (`item_reviews.0N.jsonl.gz`). On the GPU
+machine: `git pull` then `uv run python run_v2.py`.
+
 ```powershell
 uv run python run.py --smoke     # 1 user, LightGCN 2 min: proves the setup end to end (10-15 min)
 uv run python run.py             # the real run: every test user, LightGCN up to 30 min
@@ -100,6 +107,8 @@ resumed run (`--out runs\<same folder>`) costs no LLM time. `uv run python run.p
 | `mix.py` | learned linear mixes R10–R12, R13_near (persona-closeness weighted refit) and the ablations A1–A6: logistic regression over LightGCN + sorted persona similarities → `mix.json` |
 | `evaluate.py` | metrics per reranker → `eval.md`, `ranks.jsonl.gz`, plus example users (`--show 2 --show-with R1_like`) |
 | `run_r13.py` | (GPU machine) R13, the ablations and the standard metrics on the three base rankers with Qwen-8B, then commit and push the results |
+| `imdb.py` | EXP3RT's own IMDB top-k test (Table 3): fetches the released data, reproduces the base rows, trains LightGCN / BPR-MF with the persona inside (ablation of every input), reranks EXP3RT's top-20 lists with our mixes -> `runs/imdb/eval_imdb.md` |
+| `run_v2.py` | (GPU machine) the IMDB stage, then the larger Movies & TV set (`data/rr_input_v2`) with Llama 3.1 8B personas, three base rankers and Qwen-8B; commits and pushes after each stage |
 
 Plumbing check without a GPU or an LLM (fake answers): `python run.py --mock --cpu --lgcn-minutes 0.5 --users 5 --train-users 20`.
 Re-evaluating a run on any machine (the first time downloads bge-small, 130 MB, and encodes the movies in the

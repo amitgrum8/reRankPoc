@@ -92,6 +92,17 @@ PROFILE_COLS = ("like_praised", "dis_crit", "like_crit", "dis_praised", "n_crit"
 PROFILES_PATH = HERE / "data" / "item_profiles" / "item_profiles.jsonl"
 
 
+def data_dirs(inp):
+    """Where an input folder's movie-indexed files live: (vector cache folder, LLM item profiles file). The vector
+    caches and the item profiles are keyed by movie index, which differs between input folders, so data/rr_input
+    keeps data/vectors/ and data/item_profiles/, and any other input (data/rr_input_v2) gets data/vectors/<name>/
+    and data/item_profiles/<name>/."""
+    name = Path(inp).resolve().name
+    if name == "rr_input":
+        return HERE / "data" / "vectors", PROFILES_PATH
+    return HERE / "data" / "vectors" / name, HERE / "data" / "item_profiles" / name / "item_profiles.jsonl"
+
+
 def item_text(item):
     title = (item.get("title") or "").strip()
     desc = re.sub(r"\s+", " ", item.get("description") or "").strip()
@@ -212,14 +223,16 @@ class Reviews:
     cached next to the item vectors (float16; an item is re-encoded when its sentences change)."""
 
     def __init__(self, enc, path, cache_dir=HERE / "data" / "vectors"):
+        """path: item_reviews.jsonl.gz, or a list of its parts (prep_items.review_files)."""
         self.enc, self.units, self.vec, self.hash = enc, {}, {}, {}
-        with gzip.open(path, "rt", encoding="utf-8") as f:
-            for line in f:
-                if line.strip():
-                    r = json.loads(line)
-                    self.units[int(r["i"])] = (
-                        [u for x in r["reviews"] if x["rating"] >= REVIEW_GOOD for u in review_units(x)],
-                        [u for x in r["reviews"] if x["rating"] <= REVIEW_BAD for u in review_units(x)])
+        for p in (path if isinstance(path, (list, tuple)) else [path]):
+            with gzip.open(p, "rt", encoding="utf-8") as f:
+                for line in f:
+                    if line.strip():
+                        r = json.loads(line)
+                        self.units[int(r["i"])] = (
+                            [u for x in r["reviews"] if x["rating"] >= REVIEW_GOOD for u in review_units(x)],
+                            [u for x in r["reviews"] if x["rating"] <= REVIEW_BAD for u in review_units(x)])
         self.path = Path(cache_dir) / (enc.slug + "__reviews.npz")
         if self.path.exists():
             z = np.load(self.path)

@@ -303,20 +303,23 @@ def main():
             print(f"persona reranker skipped ({e}); pip install sentence-transformers")
         else:
             R.PARAMS.update(alpha=args.alpha, beta=args.beta, gamma=args.gamma)
-            enc = R.Encoder(args.encoder)
-            ppath = Path(args.profiles) if args.profiles else R.PROFILES_PATH
+            vdir, default_profiles = R.data_dirs(inp)        # movie-indexed caches: one set per input folder
+            enc = R.Encoder(args.encoder, cache_dir=vdir)
+            ppath = Path(args.profiles) if args.profiles else default_profiles
             profiles = None
             if ppath.exists() and not args.no_profiles:
-                profiles = R.Profiles(enc, ppath)
+                profiles = R.Profiles(enc, ppath, cache_dir=vdir)
                 print(f"item profiles: {len(profiles.lines)} items in {ppath}")
             else:
                 print(f"no item profiles ({ppath} missing): R8-R9 skipped; run prep_items.py and item_profiles.py")
-            rpath, reviews = inp / "item_reviews.jsonl.gz", None
-            if rpath.exists() and not args.no_reviews:
-                reviews = R.Reviews(enc, rpath)
-                print(f"item reviews: {len(reviews.units)} items in {rpath}")
+            from prep_items import review_files
+            rpaths, reviews = review_files(inp), None
+            if rpaths and not args.no_reviews:
+                reviews = R.Reviews(enc, rpaths, cache_dir=vdir)
+                print(f"item reviews: {len(reviews.units)} items in {', '.join(p.name for p in rpaths)}")
             else:
-                print(f"no item reviews ({rpath} missing or --no-reviews): R12, R13 and the ablations skipped")
+                print(f"no item reviews ({inp / 'item_reviews.jsonl.gz'} missing or --no-reviews): R12, R13 and the "
+                      "ablations skipped")
             R.attach(users, items, enc, profiles, reviews)
             if args.write_features:
                 R.write_features(users, run / "features.jsonl")

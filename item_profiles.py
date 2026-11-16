@@ -56,8 +56,8 @@ def main():
     ap.add_argument("--input", required=True)
     ap.add_argument("--out", required=True)
     ap.add_argument("--base-url", default="http://127.0.0.1:11434/v1")
-    ap.add_argument("--model", default="gpt-oss:20b")
-    ap.add_argument("--reasoning-effort", default="low")
+    ap.add_argument("--model", default="llama3.1:8b-instruct-fp16")
+    ap.add_argument("--reasoning-effort", default="none", help="low / medium / high for gpt-oss; none: no reasoning")
     ap.add_argument("--max-tokens", type=int, default=12000)
     ap.add_argument("--no-json-mode", action="store_true")
     ap.add_argument("--items", default="all", choices=("all", "lists"), help="every item, or the items of --run's lists")
@@ -71,8 +71,8 @@ def main():
     t0 = time.time()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    with gzip.open(Path(args.input) / "item_reviews.jsonl.gz", "rt", encoding="utf-8") as f:
-        items = [json.loads(l) for l in f if l.strip()]
+    from prep_items import read_item_reviews
+    items = list(read_item_reviews(args.input))
     if args.items == "lists":
         if not args.run:
             sys.exit("--items lists needs --run <run folder>")

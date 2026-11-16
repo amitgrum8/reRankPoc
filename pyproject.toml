@@ -11,6 +11,8 @@ dependencies = [
     "transformers>=4.51",      # Qwen3-Embedding (rerank.py --encoder Qwen/Qwen3-Embedding-*)
     "lightgbm>=4.0",
     "scikit-learn>=1.3",       # LightGBM's LGBMRanker (train.py) needs it
+    "peft>=0.17",              # exp3rt.py: LoRA fine-tuning of the EXP3RT student (Llama 3.1 8B)
+    "accelerate>=1.0",         # exp3rt.py: transformers' Trainer needs it
 ]
 
 [tool.uv]

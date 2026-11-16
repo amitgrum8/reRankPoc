@@ -2,6 +2,9 @@
 
   python prep_data.py                       # defaults below
   python prep_data.py --n-users 30 --cutoff 2021-01-01
+  python prep_data.py --out data/rr_input_v2 --since 1990-01-01 --min-user 3 --min-item 3 --n-users 1000 --n-train-users 1200
+      # the larger set (2026-11-16): every review of a titled movie before the cutoff, 3-core = 3.2M interactions,
+      # 18.6% of the 17.16M reviews of Movies & TV 2023 (the default set holds 6.6%)
 
 Reads, read-only:
   E:\\thies\\poc\\data\\movies.db   table rd: the first review of every (user, item) pair, no text
@@ -10,7 +13,8 @@ Reads, read-only:
 Writes data/rr_input/:
   train.npz        LightGCN's training graph: arrays u, i, ts (ms) and the sizes
   test_users.json  the test users: history reviews with text (for the persona), the items they had
-                   seen before the cutoff (never recommended), and their targets after the cutoff
+                   seen before the cutoff (never recommended), their targets after the cutoff, and the count and
+                   mean rating of all their reviews before the cutoff (n_reviews_before, avg_rating)
   train_users.json the same for the reranker's training users (--n-train-users more of the eligible users)
   items.json       item index -> asin, title, short description (for the reranker and for reading)
   config.json      the settings and the sizes
@@ -226,7 +230,10 @@ def main():
                    "ts": t, "n_words": n_words}
             wanted[line_no] = rec
             history.append(rec)
+        # every review of the user before the cutoff (any item): their count and mean rating (EXP3RT's prompt)
+        n_before, avg = q("select count(*), avg(rating) from m.rd where user_id = ? and ts < ?", (uid, cutoff)).fetchone()
         return {"user_id": uid, "u": uidx[uid], "history": history, "seen_items": sorted(set(seen)),
+                "n_reviews_before": n_before, "avg_rating": round(avg, 3),
                 "targets": [{"i": iidx[a], "asin": a, "title": tt or "", "rating": r, "ts": t} for a, r, t, tt in tg]}
 
     test_users = [make_user(uid, hist) for uid, hist in chosen]
